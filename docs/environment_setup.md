@@ -149,3 +149,14 @@ conocidas, pero:
 El `overrides` no esta ahi por riesgo real, sino para que `npm audit` quede
 limpio y una vulnerabilidad futura de verdad no se pierda entre el ruido. Si
 algun dia Prisma actualiza su pin, se puede quitar.
+
+## `sslmode` en las cadenas de conexión
+
+Ambas cadenas deben terminar en **`?sslmode=verify-full`**, no en
+`sslmode=require`.
+
+El driver de PostgreSQL que usamos ya trata `require` como `verify-full` (es
+decir, verifica el certificado del servidor), pero avisa en cada arranque de
+que ese comportamiento difiere de libpq. Escribirlo de forma explícita deja la
+intención clara y silencia el aviso. Neon lo admite sin configuración
+adicional.

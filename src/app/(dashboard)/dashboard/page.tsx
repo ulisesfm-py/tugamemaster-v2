@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
       <dl className="mt-8 divide-y divide-slate-200 rounded-xl border border-slate-200 text-sm dark:divide-slate-800 dark:border-slate-800">
         {[
           ['Email', user.email],
-          ['Perfil público', `/gm/${user.slug}`],
+          ['Perfil público', `/u/${user.slug}`],
           ['Administrador', user.isAdmin ? 'Sí' : 'No'],
         ].map(([etiqueta, valor]) => (
           <div key={etiqueta} className="flex justify-between gap-4 px-4 py-3">
@@ -39,6 +40,21 @@ export default async function DashboardPage() {
           </div>
         ))}
       </dl>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href="/cuenta"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+        >
+          Editar mi perfil
+        </Link>
+        <Link
+          href={`/u/${user.slug}`}
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Ver mi perfil público
+        </Link>
+      </div>
 
       <form action={salirAction} className="mt-8">
         <button
