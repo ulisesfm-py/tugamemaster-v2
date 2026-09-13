@@ -1,0 +1,13 @@
+# Normaliza los finales de linea a LF en el repositorio y en el arbol de
+# trabajo. Sin esto, en Windows git entrega CRLF y `prettier --check` falla.
+* text=auto eol=lf
+
+# Binarios: nunca tocar.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
