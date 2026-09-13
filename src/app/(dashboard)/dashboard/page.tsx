@@ -49,6 +49,18 @@ export default async function DashboardPage() {
           Editar mi perfil
         </Link>
         <Link
+          href="/mis-reservas"
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Mis reservas
+        </Link>
+        <Link
+          href="/cuenta/partidas"
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Mis partidas (GM)
+        </Link>
+        <Link
           href={`/u/${user.slug}`}
           className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
         >

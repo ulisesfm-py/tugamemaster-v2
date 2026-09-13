@@ -16,11 +16,17 @@ export default async function Home() {
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href="/partidas"
+          className="rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition hover:bg-indigo-500"
+        >
+          Ver partidas
+        </Link>
         {session?.user ? (
           <>
             <Link
               href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition hover:bg-indigo-500"
+              className="rounded-lg border border-slate-300 px-4 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Ir a mi cuenta
             </Link>
@@ -32,7 +38,7 @@ export default async function Home() {
           <>
             <Link
               href="/registro"
-              className="rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition hover:bg-indigo-500"
+              className="rounded-lg border border-slate-300 px-4 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Crear cuenta
             </Link>
@@ -47,7 +53,7 @@ export default async function Home() {
       </div>
 
       <p className="mt-12 text-xs text-slate-400 dark:text-slate-600">
-        Fase 2 de 11 — autenticación. El portal de partidas llega en la fase 4.
+        Fase 4 de 11 — portal de partidas y reservas. Los pagos llegan en la fase 6.
       </p>
     </main>
   );

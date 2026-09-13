@@ -2,12 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 
+import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
 
 import { listaDesdeTexto } from './schema';
 import { actualizarPerfilJugador, guardarPerfilGm } from './service';
 
-export type EstadoPerfil = { error: string } | { ok: true } | null;
+export type EstadoPerfil = EstadoAccion;
 
 /**
  * Acciones de los formularios de perfil.

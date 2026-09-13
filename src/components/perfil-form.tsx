@@ -3,9 +3,9 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import type { EstadoPerfil } from '@/modules/profiles/actions';
+import type { EstadoAccion } from '@/lib/acciones';
 
-type Accion = (estado: EstadoPerfil, formData: FormData) => Promise<EstadoPerfil>;
+type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
 const campo =
   'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-indigo-900';
@@ -24,7 +24,7 @@ function Guardar() {
   );
 }
 
-function Aviso({ estado }: { estado: EstadoPerfil }) {
+function Aviso({ estado }: { estado: EstadoAccion }) {
   if (!estado) return null;
 
   if ('error' in estado) {
@@ -87,7 +87,7 @@ export function PerfilJugadorForm({
     preferredStyles: string[];
   };
 }) {
-  const [estado, formAction] = useActionState<EstadoPerfil, FormData>(accion, null);
+  const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -150,7 +150,7 @@ export function PerfilGmForm({
   accion: Accion;
   valores: { headline: string; about: string | null; languages: string[] } | null;
 }) {
-  const [estado, formAction] = useActionState<EstadoPerfil, FormData>(accion, null);
+  const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
   return (
     <form action={formAction} className="space-y-4">
