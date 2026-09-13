@@ -54,9 +54,15 @@ export default async function CuentaGmPage() {
           <p>Tu cuenta de cobro está verificada. Puedes publicar partidas.</p>
         ) : (
           <p>
-            Para <strong>publicar</strong> partidas tendrás que configurar antes la cuenta
-            donde recibir los pagos. Ese paso todavía no está disponible; llegará en la
-            fase de pagos. Mientras tanto puedes preparar tu perfil.
+            Para <strong>publicar</strong> partidas tienes que configurar antes dónde
+            recibir los pagos.{' '}
+            {gm ? (
+              <Link href="/cuenta/cobros" className="font-medium underline">
+                Configurar cobros
+              </Link>
+            ) : (
+              'Podrás hacerlo en cuanto guardes este perfil.'
+            )}
           </p>
         )}
       </section>

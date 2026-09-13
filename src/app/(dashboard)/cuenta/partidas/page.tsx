@@ -57,7 +57,10 @@ export default async function MisPartidasPage() {
       {!datos.gm.payoutsEnabled && (
         <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
           Puedes crear y preparar partidas, pero todavía no publicarlas: falta configurar
-          la cuenta donde recibir los pagos, que llegará con la integración de cobros.
+          la cuenta donde recibir los pagos.{' '}
+          <Link href="/cuenta/cobros" className="font-medium underline">
+            Configurarla ahora
+          </Link>
         </p>
       )}
 
