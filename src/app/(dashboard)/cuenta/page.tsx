@@ -2,10 +2,16 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { AvatarForm } from '@/components/avatar-form';
 import { PerfilJugadorForm } from '@/components/perfil-form';
 import { Avatar } from '@/components/ui';
 import { auth } from '@/lib/auth';
-import { guardarPerfilJugadorAction } from '@/modules/profiles/actions';
+import { blobEnabled } from '@/lib/env';
+import {
+  guardarPerfilJugadorAction,
+  quitarAvatarAction,
+  subirAvatarAction,
+} from '@/modules/profiles/actions';
 import { miPerfil } from '@/modules/profiles/queries';
 
 export const metadata: Metadata = { title: 'Mi perfil · TuGameMaster' };
@@ -29,15 +35,33 @@ export default async function CuentaPage() {
         </Link>
       </p>
 
-      <section className="mt-8 flex items-center gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-        <Avatar src={perfil.image} nombre={perfil.name} tamano={56} />
-        <div className="text-sm">
-          <p className="font-medium text-slate-900 dark:text-slate-100">Foto de perfil</p>
-          <p className="mt-0.5 text-slate-600 dark:text-slate-400">
-            {perfil.image
-              ? 'Se toma de tu cuenta de Discord.'
-              : 'Aún no tienes foto. La subida de imágenes llega cuando se configure el almacenamiento.'}
-          </p>
+      <section className="mt-8 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+        <div className="flex items-center gap-4">
+          <Avatar src={perfil.image} nombre={perfil.name} tamano={56} />
+          <div className="text-sm">
+            <p className="font-medium text-slate-900 dark:text-slate-100">
+              Foto de perfil
+            </p>
+            <p className="mt-0.5 text-slate-600 dark:text-slate-400">
+              {perfil.image
+                ? 'Puedes cambiarla o quitarla.'
+                : 'Sin foto se muestra tu inicial.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          {blobEnabled() ? (
+            <AvatarForm
+              accionSubir={subirAvatarAction}
+              accionQuitar={quitarAvatarAction}
+              tieneFoto={perfil.image !== null}
+            />
+          ) : (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              La subida de fotos no está configurada en este entorno.
+            </p>
+          )}
         </div>
       </section>
 

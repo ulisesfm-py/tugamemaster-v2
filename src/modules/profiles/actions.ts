@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
 
+import { quitarAvatar, subirAvatar } from './avatar';
 import { listaDesdeTexto } from './schema';
 import { actualizarPerfilJugador, guardarPerfilGm } from './service';
 
@@ -60,4 +61,41 @@ export async function guardarPerfilGmAction(
   revalidatePath(`/gm/${session.user.slug}`);
 
   return { ok: true };
+}
+
+export async function subirAvatarAction(
+  _previo: EstadoPerfil,
+  formData: FormData,
+): Promise<EstadoPerfil> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+
+  const file = formData.get('avatar');
+  if (!(file instanceof File)) return { error: 'No has elegido ninguna imagen' };
+
+  const resultado = await subirAvatar(session.user.id, file);
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  revalidatePath('/cuenta');
+  revalidatePath(`/u/${session.user.slug}`);
+  revalidatePath(`/gm/${session.user.slug}`);
+
+  return { ok: true, mensaje: 'Foto actualizada.' };
+}
+
+export async function quitarAvatarAction(
+  _previo: EstadoPerfil,
+  _formData: FormData,
+): Promise<EstadoPerfil> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+
+  const resultado = await quitarAvatar(session.user.id);
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  revalidatePath('/cuenta');
+  revalidatePath(`/u/${session.user.slug}`);
+  revalidatePath(`/gm/${session.user.slug}`);
+
+  return { ok: true, mensaje: 'Foto eliminada.' };
 }

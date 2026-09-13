@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.discordapp.com',
         pathname: '/avatars/**',
       },
+      {
+        // Avatares que suben los propios usuarios a nuestro Blob store.
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        pathname: '/avatares/**',
+      },
     ],
   },
 };

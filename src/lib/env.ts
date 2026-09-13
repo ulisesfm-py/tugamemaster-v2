@@ -22,6 +22,10 @@ const schema = z.object({
   // simplemente no se ofrece el boton de "entrar con Discord".
   AUTH_DISCORD_ID: z.string().min(1).optional(),
   AUTH_DISCORD_SECRET: z.string().min(1).optional(),
+
+  // Sin este token no se pueden subir fotos, pero la aplicacion funciona
+  // igual: quien no suba ninguna vera su inicial.
+  BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
 });
 
 type Env = z.infer<typeof schema>;
@@ -47,6 +51,11 @@ export function env(): Env {
 
   cached = parsed.data;
   return cached;
+}
+
+/** True si el almacenamiento esta configurado y se puede subir foto. */
+export function blobEnabled(): boolean {
+  return Boolean(process.env['BLOB_READ_WRITE_TOKEN']);
 }
 
 /** True si Discord esta configurado y se puede ofrecer como forma de entrar. */
