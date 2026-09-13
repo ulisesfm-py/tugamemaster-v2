@@ -38,6 +38,7 @@ export async function crearSesionDeCheckout(
       id: true,
       status: true,
       amountCents: true,
+      creditCents: true,
       currency: true,
       user: { select: { email: true } },
       game: {
@@ -52,6 +53,16 @@ export async function crearSesionDeCheckout(
     return { ok: false, mensaje: 'Esta reserva ya no esta pendiente de pago' };
   }
 
+  // Solo se cobra lo que el saldo no cubre.
+  const pendienteCents = reserva.amountCents - reserva.creditCents;
+
+  if (pendienteCents <= 0) {
+    return {
+      ok: false,
+      mensaje: 'Esta reserva no necesita pago: la cubre tu saldo',
+    };
+  }
+
   const base = urlBase();
 
   const sesion = await stripe().checkout.sessions.create(
@@ -63,10 +74,14 @@ export async function crearSesionDeCheckout(
           quantity: 1,
           price_data: {
             currency: reserva.currency.toLowerCase(),
-            unit_amount: reserva.amountCents,
+            unit_amount: pendienteCents,
             product_data: {
               name: reserva.game.title,
-              description: `${reserva.game.system} · ${reserva.game.startsAt.toLocaleDateString('es-ES', { dateStyle: 'long' })}`,
+              description:
+                `${reserva.game.system} · ${reserva.game.startsAt.toLocaleDateString('es-ES', { dateStyle: 'long' })}` +
+                (reserva.creditCents > 0
+                  ? ` · ${(reserva.creditCents / 100).toFixed(2)} EUR cubiertos con tu saldo`
+                  : ''),
             },
           },
         },

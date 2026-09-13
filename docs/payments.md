@@ -3,7 +3,7 @@
 Este documento describe cómo se mueve el dinero y por qué. Las reglas duras
 están en `CLAUDE.md`; aquí está el detalle.
 
-> Estado actual: **implementadas las fases 5 y 6**. El alta de los GMs, el
+> Estado actual: **implementadas las fases 5, 6 y 7a**. El alta de los GMs, el
 > cobro al jugador y la transferencia al GM funcionan y están verificados
 > contra Stripe en modo test. Lo marcado como _pendiente_ describe lo
 > acordado, no lo que ya existe.
@@ -165,6 +165,48 @@ Que una partida se pague una sola vez lo garantiza el `Payout` con `gameId`
 único: la consulta excluye las que ya están `PAID`. La clave es la segunda red,
 para que un reintento con el mismo importe devuelva la transferencia original
 en lugar de crear otra.
+
+## El monedero (fase 7a, implementado)
+
+Las devoluciones **no vuelven a la tarjeta: se abonan como saldo**. Esa
+decisión resuelve de raíz el problema de quién paga la comisión de Stripe en un
+reembolso — si el dinero nunca sale, no hay un segundo cobro. La comisión se
+pagó al cobrar y ahí se queda.
+
+| Escenario             | El jugador recibe | Efecto para la plataforma                                            |
+| --------------------- | ----------------- | -------------------------------------------------------------------- |
+| Cancela a más de 48 h | 90% en saldo      | Retiene el 10%, más que suficiente para cubrir lo ya pagado a Stripe |
+| El GM no se presenta  | 100% en saldo     | Asume los ~0,72 € de Stripe ya pagados                               |
+
+El saldo **no caduca**. Solo un administrador puede convertirlo en dinero real,
+como válvula de escape ante una reclamación.
+
+### El saldo es una suma, no un contador
+
+`WalletEntry` es un libro de apuntes: positivos abonan, negativos gastan. El
+saldo se calcula sumándolos. Un contador guardado acaba desviándose del
+historial en cuanto falla una escritura; una suma no puede mentir.
+
+### El orden de los bloqueos importa
+
+Gastar saldo exige bloquear al usuario, y ese bloqueo **se pide antes de
+insertar la reserva**. No es un detalle de estilo: insertar una reserva toma un
+lock de clave ajena sobre la fila del usuario, así que pedir el bloqueo después
+hace que dos reservas simultáneas del mismo usuario intenten ambas subir ese
+lock a exclusivo y se queden trabadas. **Es un deadlock real, comprobado.**
+
+### El GM cobra sobre el precio completo
+
+Si parte de la reserva se paga con saldo, el reparto se calcula sobre el
+**precio entero**, no sobre lo que entró por tarjeta. Ese dinero ya está en
+nuestro balance: procede de un cobro anterior que nunca se devolvió.
+
+Efecto secundario: en una reserva cubierta íntegramente con saldo no hay coste
+de Stripe, así que el GM se lleva algo más.
+
+Verificado con una reserva de 15 € pagada con 5 € de saldo y 10 € de tarjeta:
+comisión 0,75 € (5% de 15 €, no de 10 €), coste de Stripe 0,57 € (solo sobre
+los 10 € cobrados), 13,68 € transferidos al GM, y la suma cuadra con los 15 €.
 
 ## Reglas que no se negocian
 

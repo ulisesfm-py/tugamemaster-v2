@@ -64,6 +64,8 @@ model User {
   posts             Post[]
   comments          Comment[]
   postLikes         PostLike[]
+  walletEntries     WalletEntry[]  @relation("MonederoDe")
+  walletEntriesMade WalletEntry[]  @relation("MonederoCreadoPor")
 
   @@index([createdAt])
 }
@@ -264,9 +266,16 @@ model Booking {
   userId String
   status BookingStatus @default(PENDING)
 
-  /// Importe cobrado al jugador, en centimos. Se congela al cobrar.
+  /// Precio completo del asiento, en centimos. Se congela al cobrar.
+  ///
+  /// Es el precio total aunque parte se pague con saldo: el GM cobra sobre
+  /// este importe, no sobre lo que entro por tarjeta.
   amountCents Int
   currency    String @default("EUR")
+
+  /// Parte del precio cubierta con saldo del monedero. Lo que se cobra con
+  /// tarjeta es `amountCents - creditCents`.
+  creditCents Int @default(0)
 
   /// Comision de la plataforma (5%) en centimos, calculada en el cobro y
   /// persistida. Nunca se recalcula: si la politica cambia, las reservas
@@ -298,6 +307,7 @@ model Booking {
   incidents     Incident[]
   review        Review?
   payoutItem    PayoutItem?
+  walletEntries WalletEntry[]
 
   /// Un jugador no puede ocupar dos asientos en la misma partida. Es tambien
   /// la red de seguridad contra reservas duplicadas por doble clic.
@@ -405,6 +415,54 @@ model PayoutItem {
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
 
   @@index([payoutId])
+}
+
+// ---------------------------------------------------------------------------
+// Monedero
+// ---------------------------------------------------------------------------
+
+enum WalletEntryType {
+  /// Abono por una cancelacion o una incidencia resuelta a favor del jugador.
+  REFUND_CREDIT
+  /// Gasto: saldo aplicado al reservar.
+  BOOKING_PAYMENT
+  /// Ajuste manual de un administrador.
+  ADMIN_ADJUSTMENT
+  /// Saldo convertido en dinero real y devuelto a la tarjeta.
+  CASH_OUT
+}
+
+/// Libro de apuntes del monedero de un usuario.
+///
+/// El saldo es la **suma de los apuntes**, no un contador guardado. Un
+/// contador acaba desviandose del historial en cuanto falla una escritura;
+/// una suma no puede mentir. El saldo no caduca.
+model WalletEntry {
+  id     String @id @default(cuid())
+  userId String
+
+  /// Positivo abona, negativo gasta. En centimos, como todo el dinero.
+  amountCents Int
+  currency    String          @default("EUR")
+  type        WalletEntryType
+
+  /// Reserva que origino el abono, o que consumio el saldo.
+  bookingId String?
+
+  /// Explicacion visible para el usuario.
+  note String?
+
+  /// Administrador que lo creo, en los ajustes manuales.
+  createdById String?
+
+  createdAt DateTime @default(now())
+
+  user      User     @relation("MonederoDe", fields: [userId], references: [id], onDelete: Restrict)
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  createdBy User?    @relation("MonederoCreadoPor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([bookingId])
 }
 
 // ---------------------------------------------------------------------------

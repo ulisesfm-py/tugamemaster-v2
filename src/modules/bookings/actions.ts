@@ -9,6 +9,7 @@ import { unstable_rethrow } from 'next/navigation';
 import { redirect } from 'next/navigation';
 
 import { crearSesionDeCheckout } from '@/modules/payments/checkout';
+import { registrarCobroSinTarjeta } from '@/modules/payments/cobros';
 
 import { cancelarReserva, reservarAsiento } from './service';
 
@@ -32,10 +33,19 @@ export async function reservarAction(
   revalidatePath('/partidas');
   revalidatePath('/mis-reservas');
 
-  // Una partida gratuita no pasa por Stripe: crear un cobro de cero euros
-  // fallaria y no tendria ningun sentido.
+  // Sin nada que cobrar no se pasa por Stripe: o la partida es gratuita, o el
+  // saldo del jugador la cubre entera.
   if (resultado.gratuita) {
-    return { ok: true, mensaje: 'Plaza reservada. Esta partida es gratuita.' };
+    await registrarCobroSinTarjeta(resultado.bookingId);
+    revalidatePath('/cuenta/saldo');
+
+    return {
+      ok: true,
+      mensaje:
+        resultado.creditoAplicadoCents > 0
+          ? `Plaza confirmada. Se han usado ${(resultado.creditoAplicadoCents / 100).toFixed(2)} EUR de tu saldo.`
+          : 'Plaza confirmada. Esta partida es gratuita.',
+    };
   }
 
   let destino: string;

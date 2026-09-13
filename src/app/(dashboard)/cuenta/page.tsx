@@ -12,7 +12,9 @@ import {
   quitarAvatarAction,
   subirAvatarAction,
 } from '@/modules/profiles/actions';
+import { formatearImporte } from '@/modules/payments/dinero';
 import { miPerfil } from '@/modules/profiles/queries';
+import { saldoDe } from '@/modules/wallet/service';
 
 export const metadata: Metadata = { title: 'Mi perfil · TuGameMaster' };
 
@@ -22,6 +24,8 @@ export default async function CuentaPage() {
 
   const perfil = await miPerfil(session.user.id);
   if (!perfil) redirect('/login');
+
+  const saldo = await saldoDe(session.user.id);
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -35,7 +39,24 @@ export default async function CuentaPage() {
         </Link>
       </p>
 
-      <section className="mt-8 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+      <Link
+        href="/cuenta/saldo"
+        className="mt-8 flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+      >
+        <span className="text-sm">
+          <span className="block font-medium text-slate-900 dark:text-slate-100">
+            Mi saldo
+          </span>
+          <span className="block text-slate-600 dark:text-slate-400">
+            Se aplica solo al reservar
+          </span>
+        </span>
+        <span className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+          {formatearImporte(saldo)}
+        </span>
+      </Link>
+
+      <section className="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
         <div className="flex items-center gap-4">
           <Avatar src={perfil.image} nombre={perfil.name} tamano={56} />
           <div className="text-sm">

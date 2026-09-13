@@ -7,6 +7,8 @@ import { Avatar, Etiqueta, Fecha, Precio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
 import { detallePartida } from '@/modules/games/queries';
+import { formatearImporte } from '@/modules/payments/dinero';
+import { saldoDe } from '@/modules/wallet/service';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -32,6 +34,7 @@ export default async function PartidaPage({ params, searchParams }: Props) {
   const params_ = await searchParams;
   const session = await auth();
   const partida = await detallePartida(slug, session?.user.id);
+  const saldo = session?.user ? await saldoDe(session.user.id) : 0;
 
   if (!partida) notFound();
 
@@ -192,9 +195,18 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 campos={{ gameId: partida.id, slug: partida.slug }}
               />
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                {partida.priceCents === 0
-                  ? 'Esta partida es gratuita.'
-                  : 'Te llevaremos a la pantalla de pago de Stripe. Guardamos tu plaza 20 minutos mientras pagas.'}
+                {partida.priceCents === 0 ? (
+                  'Esta partida es gratuita.'
+                ) : saldo >= partida.priceCents ? (
+                  <>Se pagará con tu saldo. No hará falta tarjeta.</>
+                ) : saldo > 0 ? (
+                  <>
+                    Se usarán {formatearImporte(saldo)} de tu saldo y pagarás{' '}
+                    {formatearImporte(partida.priceCents - saldo)} con tarjeta.
+                  </>
+                ) : (
+                  'Te llevaremos a la pantalla de pago de Stripe. Guardamos tu plaza 20 minutos mientras pagas.'
+                )}
               </p>
             </>
           )}

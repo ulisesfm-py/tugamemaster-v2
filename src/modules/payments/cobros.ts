@@ -71,7 +71,13 @@ export async function registrarCobro(paymentIntent: Stripe.PaymentIntent): Promi
 
   const reserva = await db.booking.findUnique({
     where: { id: bookingId },
-    select: { id: true, status: true, amountCents: true, gameId: true },
+    select: {
+      id: true,
+      status: true,
+      amountCents: true,
+      creditCents: true,
+      gameId: true,
+    },
   });
 
   if (!reserva) {
@@ -90,7 +96,12 @@ export async function registrarCobro(paymentIntent: Stripe.PaymentIntent): Promi
   }
 
   const stripeFeeCents = await costeRealDeStripe(paymentIntent);
-  const reparto = calcularReparto(paymentIntent.amount_received, stripeFeeCents);
+
+  // El reparto se calcula sobre el **precio completo**, no sobre lo que entro
+  // por tarjeta: si parte se pago con saldo, el GM cobra igual su parte del
+  // precio entero. Ese dinero ya esta en nuestro balance, porque el saldo
+  // procede de un cobro anterior que nunca se devolvio.
+  const reparto = calcularReparto(reserva.amountCents, stripeFeeCents);
 
   if (repartoInsuficiente(reparto)) {
     // No impide el cobro, pero deja constancia: ese precio no cubre ni el
@@ -253,6 +264,59 @@ async function devolverPorPlazaPerdida(
         stripeId: reembolso.id,
         idempotencyKey: `refund-plaza-perdida:${bookingId}`,
         failureMessage: 'La plaza ya no estaba disponible al confirmarse el pago',
+      },
+    }),
+  ]);
+}
+
+/**
+ * Cierra una reserva que no necesita tarjeta.
+ *
+ * Ocurre con las partidas gratuitas y con las que el saldo cubre por completo.
+ * No hay cobro, luego no hay coste de Stripe: el GM se lleva el precio menos
+ * la comision, algo mas que en una reserva pagada con tarjeta.
+ */
+export async function registrarCobroSinTarjeta(bookingId: string): Promise<void> {
+  const reserva = await db.booking.findUnique({
+    where: { id: bookingId },
+    select: { id: true, status: true, amountCents: true, creditCents: true },
+  });
+
+  if (!reserva || reserva.status !== 'PENDING') return;
+
+  if (reserva.amountCents > reserva.creditCents) {
+    throw new Error(
+      `La reserva ${bookingId} todavia tiene ${reserva.amountCents - reserva.creditCents} ` +
+        'centimos pendientes: no puede cerrarse sin cobro',
+    );
+  }
+
+  const reparto = calcularReparto(reserva.amountCents, 0);
+
+  await db.$transaction([
+    db.booking.update({
+      where: { id: reserva.id },
+      data: {
+        status: 'PAID',
+        paidAt: new Date(),
+        commissionCents: reparto.commissionCents,
+        stripeFeeCents: 0,
+        payoutCents: reparto.payoutCents,
+      },
+    }),
+    db.paymentEvent.upsert({
+      where: { idempotencyKey: `charge:${reserva.id}` },
+      update: {},
+      create: {
+        bookingId: reserva.id,
+        type: 'CHARGE',
+        status: 'SUCCEEDED',
+        amountCents: reserva.amountCents,
+        idempotencyKey: `charge:${reserva.id}`,
+        failureMessage:
+          reserva.amountCents === 0
+            ? 'Partida gratuita'
+            : 'Cubierta integramente con saldo',
       },
     }),
   ]);

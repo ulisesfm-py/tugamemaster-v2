@@ -2,6 +2,7 @@ import 'server-only';
 
 import type { BookingStatus } from '@/generated/prisma/enums';
 import { db } from '@/lib/db';
+import { bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
 
 /**
  * Reserva de asientos.
@@ -48,7 +49,16 @@ export function filtroPlazaOcupada() {
 }
 
 export type ResultadoReserva =
-  | { ok: true; bookingId: string; gratuita: boolean }
+  | {
+      ok: true;
+      bookingId: string;
+      /** True si no queda nada que cobrar con tarjeta. */
+      gratuita: boolean;
+      /** Cuanto se ha cubierto con saldo del monedero. */
+      creditoAplicadoCents: number;
+      /** Lo que queda por pagar con tarjeta. */
+      pendienteCents: number;
+    }
   | {
       ok: false;
       error:
@@ -169,22 +179,30 @@ export async function reservarAsiento(
     }
 
     const precio = conCampana?.priceCents ?? 0;
-    const gratuita = precio === 0;
+
+    // El monedero se bloquea AQUI, antes de insertar nada.
+    //
+    // Insertar la reserva toma un lock de clave ajena sobre la fila del
+    // usuario. Si el bloqueo se pidiera despues, dos reservas simultaneas del
+    // mismo usuario tendrian ambas ese lock compartido y ambas intentarian
+    // subirlo a exclusivo: deadlock garantizado. Pidiendolo primero, una
+    // espera a la otra y no hay ciclo.
+    if (precio > 0) {
+      await bloquearMonedero(userId, tx);
+    }
 
     // Si hubo una reserva cancelada antes, se reutiliza la fila: la
     // restriccion unica (gameId, userId) impide crear otra.
-    //
-    // Una partida gratuita queda pagada en el acto: no hay nada que cobrar y
-    // dejarla en PENDING haria que caducase a los 20 minutos.
     const datos = {
-      status: gratuita ? ('PAID' as const) : ('PENDING' as const),
+      status: 'PENDING' as const,
       amountCents: precio,
       currency: conCampana?.currency ?? 'EUR',
+      creditCents: 0,
       cancelledAt: null,
-      paidAt: gratuita ? new Date() : null,
-      commissionCents: gratuita ? 0 : null,
-      stripeFeeCents: gratuita ? 0 : null,
-      payoutCents: gratuita ? 0 : null,
+      paidAt: null,
+      commissionCents: null,
+      stripeFeeCents: null,
+      payoutCents: null,
     };
 
     const booking = yaReservada
@@ -198,7 +216,32 @@ export async function reservarAsiento(
           select: { id: true },
         });
 
-    return { ok: true as const, bookingId: booking.id, gratuita };
+    // El saldo ya esta bloqueado: nadie mas puede gastarlo mientras se decide
+    // cuanto se aplica a esta reserva.
+    let creditoAplicadoCents = 0;
+
+    if (precio > 0) {
+      creditoAplicadoCents = await gastarHasta(userId, precio, booking.id, tx);
+
+      if (creditoAplicadoCents > 0) {
+        await tx.booking.update({
+          where: { id: booking.id },
+          data: { creditCents: creditoAplicadoCents },
+        });
+      }
+    }
+
+    const pendienteCents = precio - creditoAplicadoCents;
+
+    return {
+      ok: true as const,
+      bookingId: booking.id,
+      // Sin nada que cobrar: o la partida es gratuita, o el saldo lo cubre
+      // todo. En ambos casos no hay que pasar por Stripe.
+      gratuita: pendienteCents === 0,
+      creditoAplicadoCents,
+      pendienteCents,
+    };
   });
 }
 
