@@ -35,9 +35,12 @@ model User {
 
   name String
   /// Identificador publico en la URL del perfil.
-  slug      String  @unique
-  avatarUrl String?
-  bio       String?
+  slug String  @unique
+  bio  String?
+
+  /// Avatar. Se llama `image` y no `avatarUrl` porque es el nombre que exige
+  /// el adaptador de Prisma de Auth.js al dar de alta una cuenta de Discord.
+  image String?
 
   /// ID de Discord, guardado para las salas de partida del backlog.
   discordId String? @unique

@@ -1,11 +1,10 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 
-import { db } from '@/lib/db';
 import { loginSchema } from '@/modules/users/schema';
 import { verificarCredenciales } from '@/modules/users/service';
 
+import { crearAdaptador } from './adapter';
 import { authConfig } from './config';
 
 /**
@@ -20,7 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   // El adaptador da de alta al usuario y enlaza su cuenta de Discord. Con
   // sesiones JWT no se usa la tabla Session, pero si User y Account.
-  adapter: PrismaAdapter(db),
+  adapter: crearAdaptador(),
 
   providers: [
     ...authConfig.providers,
@@ -48,7 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: usuario.id,
           email: usuario.email,
           name: usuario.name,
-          image: usuario.avatarUrl,
+          image: usuario.image,
           slug: usuario.slug,
           isAdmin: usuario.isAdmin,
         };

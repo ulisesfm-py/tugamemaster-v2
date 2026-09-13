@@ -82,7 +82,7 @@ export type UsuarioAutenticado = {
   name: string;
   slug: string;
   isAdmin: boolean;
-  avatarUrl: string | null;
+  image: string | null;
 };
 
 /**
@@ -103,7 +103,7 @@ export async function verificarCredenciales(
       name: true,
       slug: true,
       isAdmin: true,
-      avatarUrl: true,
+      image: true,
       passwordHash: true,
     },
   });

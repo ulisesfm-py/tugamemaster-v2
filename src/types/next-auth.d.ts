@@ -32,3 +32,12 @@ declare module '@auth/core/jwt' {
     isAdmin: boolean;
   }
 }
+
+// El adaptador devuelve usuarios con nuestros campos propios; sin esto,
+// devolverlos desde createUser seria un error de tipos.
+declare module 'next-auth/adapters' {
+  interface AdapterUser {
+    slug: string;
+    isAdmin: boolean;
+  }
+}

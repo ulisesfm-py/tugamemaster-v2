@@ -134,3 +134,18 @@ funciona con normalidad.
 | Desarrollo | Rama de Neon o Postgres local | Claves de test  | Webhooks vía `stripe listen`.                      |
 | Preview    | Rama de Neon por PR           | Claves de test  | Nunca apuntar a la base de datos de producción.    |
 | Producción | Neon (rama principal)         | Claves **live** | `AUTH_SECRET` y `CRON_SECRET` propios y distintos. |
+
+## Nota sobre `npm audit` y `mysql2`
+
+`package.json` incluye un `overrides` que fuerza `mysql2` a una version
+parcheada. El CLI de Prisma lo fija a una version con vulnerabilidades
+conocidas, pero:
+
+- `prisma` es una `devDependency`: `mysql2` no llega al despliegue.
+- Usamos PostgreSQL, asi que ese driver no se carga nunca.
+- Las vulnerabilidades solo se explotan conectandose a un servidor MySQL
+  malicioso.
+
+El `overrides` no esta ahi por riesgo real, sino para que `npm audit` quede
+limpio y una vulnerabilidad futura de verdad no se pierda entre el ruido. Si
+algun dia Prisma actualiza su pin, se puede quitar.
