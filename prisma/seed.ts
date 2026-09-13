@@ -9,13 +9,15 @@
  * Es idempotente: se apoya en upsert sobre campos unicos, asi que puede
  * ejecutarse las veces que haga falta sin duplicar nada.
  *
- * NO crea contrasenas. El hash argon2 llega en la fase 2 (autenticacion);
- * hasta entonces estos usuarios existen solo como datos.
+ * Todos los usuarios comparten la misma contrasena de desarrollo, definida en
+ * PASSWORD_DEV. Solo sirve en local: la base de datos de produccion nunca se
+ * siembra.
  */
 
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from '../src/generated/prisma/client';
+import { hashPassword } from '../src/modules/users/password';
 
 const connectionString = process.env['DIRECT_URL'] ?? process.env['DATABASE_URL'];
 
@@ -31,6 +33,9 @@ const PRECIO_ASIENTO_CENTS = 1500;
 /** Comision de la plataforma. */
 const COMISION = 0.05;
 
+/** Contrasena compartida por todos los usuarios de prueba. */
+const PASSWORD_DEV = 'partida-secreta';
+
 /** Desplaza una fecha en dias respecto de ahora. */
 function dias(n: number): Date {
   return new Date(Date.now() + n * 24 * 60 * 60 * 1000);
@@ -44,15 +49,20 @@ function masHoras(fecha: Date, n: number): Date {
 async function main() {
   console.log('Sembrando datos de desarrollo...');
 
+  // Un unico hash reutilizado: calcular argon2 nueve veces solo alargaria la
+  // siembra sin aportar nada, porque la contrasena es la misma.
+  const passwordHash = await hashPassword(PASSWORD_DEV);
+
   // --- Usuarios -----------------------------------------------------------
 
   const admin = await db.user.upsert({
     where: { email: 'admin@tugamemaster.test' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'admin@tugamemaster.test',
       name: 'Admin',
       slug: 'admin',
+      passwordHash,
       isAdmin: true,
       emailVerified: new Date(),
     },
@@ -60,11 +70,12 @@ async function main() {
 
   const laura = await db.user.upsert({
     where: { email: 'laura@tugamemaster.test' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'laura@tugamemaster.test',
       name: 'Laura Vega',
       slug: 'laura-vega',
+      passwordHash,
       bio: 'Dirijo mesas de terror y misterio desde 2016.',
       emailVerified: new Date(),
       preferredSystems: ['Call of Cthulhu', 'Vaesen'],
@@ -74,11 +85,12 @@ async function main() {
 
   const marco = await db.user.upsert({
     where: { email: 'marco@tugamemaster.test' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'marco@tugamemaster.test',
       name: 'Marco Ruiz',
       slug: 'marco-ruiz',
+      passwordHash,
       bio: 'Mazmorras clasicas, combate tactico y mucho humor.',
       emailVerified: new Date(),
       preferredSystems: ['D&D 5e'],
@@ -95,8 +107,8 @@ async function main() {
     ].map((u) =>
       db.user.upsert({
         where: { email: u.email },
-        update: {},
-        create: { ...u, emailVerified: new Date() },
+        update: { passwordHash },
+        create: { ...u, passwordHash, emailVerified: new Date() },
       }),
     ),
   );
@@ -353,6 +365,7 @@ async function main() {
   };
 
   console.log('Listo:', conteos);
+  console.log(`Contrasena de todos los usuarios de prueba: ${PASSWORD_DEV}`);
 }
 
 main()

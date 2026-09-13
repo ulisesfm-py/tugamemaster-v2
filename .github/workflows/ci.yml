@@ -33,5 +33,12 @@ jobs:
       - name: Tipos
         run: npm run typecheck
 
+      - name: Tests
+        run: npm test
+
       - name: Build
         run: npm run build
+        env:
+          # Valor de relleno: el build no conecta a la base de datos ni firma
+          # sesiones, pero Auth.js exige que la variable exista.
+          AUTH_SECRET: build-only-placeholder

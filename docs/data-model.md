@@ -157,5 +157,6 @@ entrada de blog.
 Es idempotente: usa `upsert` sobre campos únicos y puede ejecutarse las veces
 que haga falta.
 
-Los usuarios sembrados **no tienen contraseña**. Los hashes argon2 llegan con
-la autenticación, en la fase 2.
+Todos los usuarios sembrados comparten la contraseña **`partida-secreta`**,
+guardada como hash argon2id. Solo sirve en local: la base de datos de
+producción nunca se siembra.
