@@ -68,6 +68,20 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {user.isAdmin && (
+        <div className="mt-8 rounded-xl border border-indigo-200 p-4 dark:border-indigo-900">
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            Administración
+          </p>
+          <Link
+            href="/admin/incidencias"
+            className="mt-2 inline-block text-sm text-indigo-600 hover:underline"
+          >
+            Revisar incidencias →
+          </Link>
+        </div>
+      )}
+
       <form action={salirAction} className="mt-8">
         <button
           type="submit"

@@ -28,17 +28,23 @@ export async function misReservas(userId: string) {
   });
 
   const ahora = Date.now();
+  const activa = (estado: string) => estado === 'PENDING' || estado === 'PAID';
+
+  // `reclamable` se decide aqui y no en la pagina: depende de la hora actual,
+  // y leer el reloj durante el render de un componente es impuro.
+  const conReclamable = reservas.map((r) => ({
+    ...r,
+    reclamable:
+      r.game.startsAt.getTime() <= ahora &&
+      (r.status === 'PAID' || r.status === 'COMPLETED'),
+  }));
 
   return {
-    proximas: reservas.filter(
-      (r) =>
-        r.game.startsAt.getTime() > ahora &&
-        (r.status === 'PENDING' || r.status === 'PAID'),
+    proximas: conReclamable.filter(
+      (r) => r.game.startsAt.getTime() > ahora && activa(r.status),
     ),
-    pasadas: reservas.filter(
-      (r) =>
-        r.game.startsAt.getTime() <= ahora ||
-        !(r.status === 'PENDING' || r.status === 'PAID'),
+    pasadas: conReclamable.filter(
+      (r) => r.game.startsAt.getTime() <= ahora || !activa(r.status),
     ),
   };
 }

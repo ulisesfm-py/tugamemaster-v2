@@ -2,7 +2,13 @@ import 'server-only';
 
 import type { BookingStatus } from '@/generated/prisma/enums';
 import { db } from '@/lib/db';
-import { bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
+import { abonar, bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
+
+import {
+  hayDerechoADevolucion,
+  importeDevolucionCents,
+  PORCENTAJE_DEVOLUCION,
+} from './politica';
 
 /**
  * Reserva de asientos.
@@ -245,14 +251,18 @@ export async function reservarAsiento(
   });
 }
 
-export type ResultadoCancelacion = { ok: true } | { ok: false; mensaje: string };
+export type ResultadoCancelacion =
+  { ok: true; devueltoCents: number } | { ok: false; mensaje: string };
 
 /**
  * El jugador libera su plaza.
  *
- * Sin dinero de por medio esto es trivial. Cuando existan cobros habra que
- * aplicar aqui la politica de cancelacion (gratis hasta 48h antes) y disparar
- * el reembolso.
+ * Con mas de 48 horas de antelacion se le devuelve el 90% en saldo. Dentro de
+ * ese plazo puede liberar la plaza igualmente, pero sin devolucion: el game
+ * master ya ha preparado la partida contando con el.
+ *
+ * La devolucion es saldo y no dinero a la tarjeta: asi no hay un segundo cobro
+ * de Stripe que nadie tenga que asumir.
  */
 export async function cancelarReserva(
   bookingId: string,
@@ -260,7 +270,12 @@ export async function cancelarReserva(
 ): Promise<ResultadoCancelacion> {
   const reserva = await db.booking.findUnique({
     where: { id: bookingId },
-    select: { userId: true, status: true, game: { select: { startsAt: true } } },
+    select: {
+      userId: true,
+      status: true,
+      amountCents: true,
+      game: { select: { startsAt: true, title: true } },
+    },
   });
 
   if (!reserva || reserva.userId !== userId) {
@@ -275,10 +290,34 @@ export async function cancelarReserva(
     return { ok: false, mensaje: 'La partida ya ha empezado' };
   }
 
-  await db.booking.update({
-    where: { id: bookingId },
-    data: { status: 'CANCELLED', cancelledAt: new Date() },
+  // Solo se devuelve lo que se llego a pagar. Una reserva PENDING nunca se
+  // cobro, asi que no hay nada que abonar.
+  const sePago = ESTADOS_PAGADOS.includes(reserva.status);
+  const conDevolucion = sePago && hayDerechoADevolucion(reserva.game.startsAt);
+
+  const devueltoCents = conDevolucion
+    ? importeDevolucionCents(reserva.amountCents, PORCENTAJE_DEVOLUCION)
+    : 0;
+
+  await db.$transaction(async (tx) => {
+    await tx.booking.update({
+      where: { id: bookingId },
+      data: { status: 'CANCELLED', cancelledAt: new Date() },
+    });
+
+    if (devueltoCents > 0) {
+      await abonar(
+        {
+          userId,
+          amountCents: devueltoCents,
+          type: 'REFUND_CREDIT',
+          bookingId,
+          note: `Cancelacion de ${reserva.game.title} (${PORCENTAJE_DEVOLUCION}%)`,
+        },
+        tx,
+      );
+    }
   });
 
-  return { ok: true };
+  return { ok: true, devueltoCents };
 }

@@ -3,7 +3,7 @@
 Este documento describe cómo se mueve el dinero y por qué. Las reglas duras
 están en `CLAUDE.md`; aquí está el detalle.
 
-> Estado actual: **implementadas las fases 5, 6 y 7a**. El alta de los GMs, el
+> Estado actual: **implementadas las fases 5, 6 y 7 completa**. El alta de los GMs, el
 > cobro al jugador y la transferencia al GM funcionan y están verificados
 > contra Stripe en modo test. Lo marcado como _pendiente_ describe lo
 > acordado, no lo que ya existe.
@@ -207,6 +207,51 @@ de Stripe, así que el GM se lleva algo más.
 Verificado con una reserva de 15 € pagada con 5 € de saldo y 10 € de tarjeta:
 comisión 0,75 € (5% de 15 €, no de 10 €), coste de Stripe 0,57 € (solo sobre
 los 10 € cobrados), 13,68 € transferidos al GM, y la suma cuadra con los 15 €.
+
+## Cancelaciones e incidencias (fase 7b, implementado)
+
+| Situación                        | Resultado                                    |
+| -------------------------------- | -------------------------------------------- |
+| Cancela a más de 48 h            | **90% en saldo**, plaza liberada             |
+| Cancela dentro de las 48 h       | Sin devolución, plaza liberada               |
+| Incidencia aprobada por un admin | **100% en saldo**, reserva `REFUNDED`        |
+| Incidencia desestimada           | Sin devolución, el pago al GM sigue su curso |
+
+Las reglas viven en `modules/bookings/politica.ts`, que es **lógica pura**: son
+lo que se anuncia al jugador antes de reservar, así que tienen que poder
+comprobarse sin montar nada. El texto de las condiciones sale de ahí también,
+para que la web y el código no puedan contradecirse.
+
+Una reserva `PENDING` que nunca llegó a cobrarse no genera devolución: no hay
+nada que devolver.
+
+### Una incidencia abierta detiene el dinero
+
+Es su función principal. Mientras está `OPEN`, el job diario marca el `Payout`
+de esa partida como `BLOCKED` y no transfiere. Al desestimarla, el bloqueo se
+levanta solo: la consulta del job recoge los `Payout` en `BLOCKED`.
+
+No se puede abrir una incidencia si el pago al GM **ya salió**. Ahí la vía
+automática se cierra y el caso se trata a mano, porque recuperar dinero ya
+transferido es otra conversación.
+
+### Aprobar es irreversible, y por eso se comprueba dos veces
+
+Aprobar abona el 100% y marca la reserva `REFUNDED`. Aprobar dos veces
+abonaría dos veces, así que se rechaza si la incidencia ya está resuelta. Y si
+el pago al GM salió entretanto, se avisa en lugar de abonar.
+
+Desestimar **exige una explicación**: el jugador tiene derecho a saber por qué.
+
+### Convertir saldo en dinero
+
+Un administrador puede devolver a la tarjeta lo que se cobró con tarjeta. Es la
+válvula de escape ante una reclamación de consumo.
+
+Dos condiciones: solo puede devolverse la parte que **realmente pasó por
+tarjeta** —lo que se pagó con saldo no tiene a dónde volver—, y el usuario debe
+conservar saldo suficiente. Si ya se lo gastó, devolverle además el dinero
+sería pagarle dos veces.
 
 ## Reglas que no se negocian
 

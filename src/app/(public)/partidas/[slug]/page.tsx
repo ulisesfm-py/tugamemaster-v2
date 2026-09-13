@@ -6,6 +6,7 @@ import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Etiqueta, Fecha, Precio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
+import { TEXTO_CONDICIONES } from '@/modules/bookings/politica';
 import { detallePartida } from '@/modules/games/queries';
 import { formatearImporte } from '@/modules/payments/dinero';
 import { saldoDe } from '@/modules/wallet/service';
@@ -194,7 +195,16 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 texto="Reservar plaza"
                 campos={{ gameId: partida.id, slug: partida.slug }}
               />
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              {partida.priceCents > 0 && (
+                <p className="mt-3 text-xs text-slate-600 dark:text-slate-400">
+                  {TEXTO_CONDICIONES.resumen}{' '}
+                  <Link href="/condiciones" className="underline">
+                    Ver condiciones
+                  </Link>
+                </p>
+              )}
+
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 {partida.priceCents === 0 ? (
                   'Esta partida es gratuita.'
                 ) : saldo >= partida.priceCents ? (

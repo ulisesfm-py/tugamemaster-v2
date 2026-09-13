@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { ReportarIncidencia } from '@/components/reportar-incidencia';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Fecha } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction } from '@/modules/bookings/actions';
 import { misReservas } from '@/modules/bookings/queries';
+import { reportarIncidenciaAction } from '@/modules/incidents/actions';
+import { misIncidencias } from '@/modules/incidents/queries';
 
 export const metadata: Metadata = { title: 'Mis reservas · TuGameMaster' };
 
@@ -23,7 +26,12 @@ export default async function MisReservasPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const { proximas, pasadas } = await misReservas(session.user.id);
+  const [{ proximas, pasadas }, incidencias] = await Promise.all([
+    misReservas(session.user.id),
+    misIncidencias(session.user.id),
+  ]);
+
+  const porReserva = new Map(incidencias.map((i) => [i.bookingId, i]));
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -100,6 +108,31 @@ export default async function MisReservasPage() {
                 <span className="ml-auto self-center text-xs text-slate-500 dark:text-slate-400">
                   {ESTADO[r.status]}
                 </span>
+
+                {/* Solo tiene sentido reclamar sobre una partida ya jugada y
+                    pagada, y mientras no haya otra incidencia en curso. */}
+                {r.reclamable && (
+                  <div className="w-full pt-2">
+                    {porReserva.has(r.id) ? (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Incidencia{' '}
+                        {porReserva.get(r.id)?.status === 'OPEN'
+                          ? 'en revisión'
+                          : porReserva.get(r.id)?.status === 'APPROVED'
+                            ? 'aprobada: se te abonó el importe en saldo'
+                            : 'desestimada'}
+                        {porReserva.get(r.id)?.resolutionNote && (
+                          <> · {porReserva.get(r.id)?.resolutionNote}</>
+                        )}
+                      </p>
+                    ) : (
+                      <ReportarIncidencia
+                        bookingId={r.id}
+                        accion={reportarIncidenciaAction}
+                      />
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
