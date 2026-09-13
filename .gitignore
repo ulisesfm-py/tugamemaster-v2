@@ -46,3 +46,14 @@ next-env.d.ts
 # testing
 /test-results
 /playwright-report
+
+/src/generated/prisma
+
+# cliente de Prisma generado (se regenera con `npm run db:generate`)
+/src/generated
+
+# skills que instala el CLI de Prisma, no son codigo del proyecto
+/.agents
+/.windsurf
+/.claude/skills
+/skills-lock.json

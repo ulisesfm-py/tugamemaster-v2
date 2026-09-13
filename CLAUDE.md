@@ -82,7 +82,7 @@ fidelidad a lo anterior.
 Decidido en la fase de planificación. No cambiar sin discutirlo.
 
 - **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4
-  + shadcn/ui
+  - shadcn/ui
 - **Backend**: el mismo Next.js (route handlers + server actions). Monolito
   modular, no hay servicio de API separado.
 - **Base de datos**: PostgreSQL en Neon + Prisma como ORM y sistema de

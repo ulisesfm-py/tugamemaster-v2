@@ -1,0 +1,555 @@
+// Modelo de datos de TuGameMaster.
+//
+// Reglas que este esquema hace cumplir (ver CLAUDE.md):
+//   - Todo el dinero se guarda como enteros en centimos + moneda. Nunca float.
+//   - El estado del dinero es explicito y auditable: PaymentEvent es un libro
+//     de eventos, no un JSON opaco.
+//   - La reputacion de un GM solo puede derivarse de reservas pagadas.
+//
+// Incluye entidades que aun no tienen interfaz (blog, incidencias, campanas).
+// Es deliberado: definir el modelo completo de una vez evita migraciones
+// destructivas mas adelante.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Usuarios y autenticacion
+// ---------------------------------------------------------------------------
+
+/// Un unico usuario puede ser jugador y game master a la vez. Ser GM se
+/// representa con la existencia de un GmProfile, no con un campo de rol.
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+
+  /// Nulo si el usuario solo entra con Discord. Hash argon2, nunca texto plano.
+  passwordHash String?
+
+  name String
+  /// Identificador publico en la URL del perfil.
+  slug      String  @unique
+  avatarUrl String?
+  bio       String?
+
+  /// ID de Discord, guardado para las salas de partida del backlog.
+  discordId String? @unique
+
+  /// Preferencias de rol mostradas en el perfil.
+  preferredSystems String[] @default([])
+  preferredStyles  String[] @default([])
+
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  gmProfile GmProfile?
+
+  bookings          Booking[]
+  reviewsWritten    Review[]   @relation("ReviewAuthor")
+  incidentsReported Incident[] @relation("IncidentReporter")
+  incidentsResolved Incident[] @relation("IncidentResolver")
+  posts             Post[]
+  comments          Comment[]
+  postLikes         PostLike[]
+
+  @@index([createdAt])
+}
+
+/// Cuentas OAuth externas (Discord). Estructura exigida por el adaptador de
+/// Prisma de Auth.js: no renombrar campos.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Game masters
+// ---------------------------------------------------------------------------
+
+/// Datos de cobro y presentacion publica de un GM. Sin onboarding de Stripe
+/// completado (payoutsEnabled) no se le permite publicar partidas.
+model GmProfile {
+  id       String  @id @default(cuid())
+  userId   String  @unique
+  headline String?
+  about    String?
+
+  /// Idiomas en los que dirige, en codigo ISO ("es", "en").
+  languages String[] @default([])
+
+  /// Cuenta conectada de Stripe (Express). Nulo hasta que inicia el alta.
+  stripeAccountId String?   @unique
+  chargesEnabled  Boolean   @default(false)
+  payoutsEnabled  Boolean   @default(false)
+  onboardedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  games     Game[]
+  campaigns Campaign[]
+  payouts   Payout[]
+  reviews   Review[]   @relation("ReviewTarget")
+
+  @@index([payoutsEnabled])
+}
+
+// ---------------------------------------------------------------------------
+// Campanas y partidas
+// ---------------------------------------------------------------------------
+
+/// Agrupa una serie ordenada de partidas. En una campana, solo quienes
+/// jugaron la sesion anterior pueden inscribirse en la siguiente.
+model Campaign {
+  id      String  @id @default(cuid())
+  gmId    String
+  title   String
+  slug    String  @unique
+  summary String?
+  isOpen  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gm    GmProfile @relation(fields: [gmId], references: [id], onDelete: Cascade)
+  games Game[]
+
+  @@index([gmId])
+}
+
+enum GameStatus {
+  /// Creada pero no visible en el portal.
+  DRAFT
+  /// Publicada y admitiendo reservas.
+  PUBLISHED
+  /// Cancelada por el GM o por un admin.
+  CANCELLED
+  /// Ya jugada. Habilita reviews y el pago al GM.
+  COMPLETED
+}
+
+/// Una partida concreta con fecha. Lo que el jugador reserva.
+model Game {
+  id          String @id @default(cuid())
+  gmId        String
+  campaignId  String?
+  title       String
+  slug        String @unique
+  description String
+
+  /// Sistema de juego ("D&D 5e", "Vampiro", ...).
+  system String
+
+  startsAt DateTime
+  endsAt   DateTime
+
+  seatsTotal Int
+
+  /// Precio por asiento, en centimos. Nunca un decimal.
+  priceCents Int
+  currency   String @default("EUR")
+
+  status GameStatus @default(DRAFT)
+
+  /// Posicion dentro de la campana. Nulo si es una partida suelta.
+  sessionNumber Int?
+
+  /// Sesion anterior de la campana. Define quien puede inscribirse.
+  previousGameId String? @unique
+  previousGame   Game?   @relation("GameContinuation", fields: [previousGameId], references: [id])
+  nextGame       Game?   @relation("GameContinuation")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gm          GmProfile    @relation(fields: [gmId], references: [id], onDelete: Restrict)
+  campaign    Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  bookings    Booking[]
+  reviews     Review[]
+  payout      Payout?
+  sessionNote SessionNote?
+
+  @@index([status, startsAt])
+  @@index([gmId])
+  @@index([campaignId])
+}
+
+/// Notas de cierre que escribe el GM al terminar una sesion de campana.
+/// Sirven de plantilla para crear la siguiente.
+model SessionNote {
+  id     String @id @default(cuid())
+  gameId String @unique
+
+  /// Texto libre: donde quedo la partida, niveles, vida, localizacion...
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Reservas y dinero
+// ---------------------------------------------------------------------------
+
+enum BookingStatus {
+  /// Creada, cobro aun no confirmado por Stripe.
+  PENDING
+  /// Cobrada. El asiento es suyo.
+  PAID
+  /// El cobro fallo definitivamente. El asiento queda libre.
+  FAILED
+  /// Cancelada por el jugador dentro de plazo, con reembolso.
+  CANCELLED
+  /// Reembolsada tras una incidencia aprobada por un admin.
+  REFUNDED
+  /// Partida jugada. Habilita dejar review y pagar al GM.
+  COMPLETED
+}
+
+/// El asiento de un jugador en una partida. Es la unidad de dinero: el cobro,
+/// la comision, el coste de Stripe y el pago al GM se calculan por reserva.
+model Booking {
+  id     String        @id @default(cuid())
+  gameId String
+  userId String
+  status BookingStatus @default(PENDING)
+
+  /// Importe cobrado al jugador, en centimos. Se congela al cobrar.
+  amountCents Int
+  currency    String @default("EUR")
+
+  /// Comision de la plataforma (5%) en centimos, calculada en el cobro y
+  /// persistida. Nunca se recalcula: si la politica cambia, las reservas
+  /// antiguas conservan la comision con la que se vendieron.
+  commissionCents Int?
+
+  /// Coste real que Stripe cobro por esta transaccion, leido de la
+  /// balance_transaction. Se descuenta del pago al GM: TuGameMaster no asume
+  /// los costes de Stripe.
+  stripeFeeCents Int?
+
+  /// amountCents - commissionCents - stripeFeeCents. Lo que recibe el GM.
+  payoutCents Int?
+
+  /// Reserva cubierta por la garantia de la plataforma. Preparado para el
+  /// reembolso automatico futuro; en la v1 la disputa la resuelve un admin.
+  isProtected Boolean @default(true)
+
+  paidAt      DateTime?
+  cancelledAt DateTime?
+  refundedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game          Game           @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  paymentEvents PaymentEvent[]
+  incidents     Incident[]
+  review        Review?
+  payoutItem    PayoutItem?
+
+  /// Un jugador no puede ocupar dos asientos en la misma partida. Es tambien
+  /// la red de seguridad contra reservas duplicadas por doble clic.
+  @@unique([gameId, userId])
+  @@index([status])
+  @@index([userId])
+}
+
+enum PaymentEventType {
+  CHARGE
+  REFUND
+  TRANSFER
+  TRANSFER_REVERSAL
+}
+
+enum PaymentEventStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+/// Libro de eventos del dinero. Cada movimiento es una fila con estado
+/// explicito. La v1 guardaba el PaymentIntent como JSON y derivaba el estado
+/// de el; eso hacia imposible auditar y es justo lo que este modelo evita.
+model PaymentEvent {
+  id        String             @id @default(cuid())
+  bookingId String
+  type      PaymentEventType
+  status    PaymentEventStatus @default(PENDING)
+
+  amountCents Int
+  currency    String @default("EUR")
+
+  /// ID del objeto en Stripe (pi_..., re_..., tr_...).
+  stripeId String? @unique
+
+  /// Clave de idempotencia enviada a Stripe. Unica: impide que un reintento
+  /// del job cobre o transfiera dos veces.
+  idempotencyKey String @unique
+
+  /// Codigo de error de Stripe cuando status = FAILED.
+  failureCode    String?
+  failureMessage String?
+
+  /// Copia del payload de Stripe. Solo para auditoria y depuracion: el estado
+  /// valido es el de las columnas de arriba, nunca este JSON.
+  rawPayload Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, type])
+  @@index([status])
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  FAILED
+  BLOCKED
+}
+
+/// Transferencia a un GM por una partida. Se ejecuta 48h o mas despues del
+/// final, y solo si ninguna reserva tiene incidencia abierta.
+model Payout {
+  id     String @id @default(cuid())
+  gmId   String
+  gameId String @unique
+
+  /// Suma de payoutCents de las reservas incluidas.
+  amountCents Int
+  currency    String @default("EUR")
+
+  status           PayoutStatus @default(PENDING)
+  stripeTransferId String?      @unique
+
+  /// Motivo por el que quedo bloqueada, si status = BLOCKED.
+  blockedReason String?
+
+  scheduledFor DateTime
+  paidAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gm    GmProfile    @relation(fields: [gmId], references: [id], onDelete: Restrict)
+  game  Game         @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  items PayoutItem[]
+
+  @@index([status, scheduledFor])
+}
+
+/// Que reservas componen un pago. Permite reconstruir cualquier transferencia
+/// hasta el asiento que la origino.
+model PayoutItem {
+  id        String @id @default(cuid())
+  payoutId  String
+  bookingId String @unique
+
+  amountCents Int
+
+  payout  Payout  @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([payoutId])
+}
+
+// ---------------------------------------------------------------------------
+// Incidencias
+// ---------------------------------------------------------------------------
+
+enum IncidentStatus {
+  OPEN
+  /// Admin dio la razon al jugador: se reembolsa y no se paga al GM.
+  APPROVED
+  /// Admin la desestimo: el pago al GM sigue su curso.
+  REJECTED
+}
+
+/// Solicitud de reembolso por incidencia (el GM no se presento, etc.).
+/// Mientras este OPEN bloquea el pago al GM de esa partida.
+model Incident {
+  id           String         @id @default(cuid())
+  bookingId    String
+  reportedById String
+  reason       String
+  status       IncidentStatus @default(OPEN)
+
+  resolvedById   String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  reportedBy User    @relation("IncidentReporter", fields: [reportedById], references: [id], onDelete: Restrict)
+  resolvedBy User?   @relation("IncidentResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([bookingId])
+}
+
+// ---------------------------------------------------------------------------
+// Reputacion
+// ---------------------------------------------------------------------------
+
+/// Valoracion de un GM por un jugador. Atada a una reserva concreta, que debe
+/// estar pagada y completada: asi la reputacion solo puede proceder de
+/// partidas gestionadas por la plataforma.
+model Review {
+  id        String @id @default(cuid())
+  bookingId String @unique
+  gameId    String
+  authorId  String
+  gmId      String
+
+  /// 1 a 5. El rango se valida tambien en la capa de dominio.
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  game    Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  author  User      @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  gm      GmProfile @relation("ReviewTarget", fields: [gmId], references: [id], onDelete: Cascade)
+
+  @@index([gmId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id       String     @id @default(cuid())
+  authorId String
+  title    String
+  slug     String     @unique
+  excerpt  String?
+  content  String
+  coverUrl String?
+  status   PostStatus @default(DRAFT)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   User       @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  comments Comment[]
+  likes    PostLike[]
+
+  @@index([status, publishedAt])
+}
+
+model Comment {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+  body   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+}
+
+model PostLike {
+  postId String
+  userId String
+
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Jobs programados
+// ---------------------------------------------------------------------------
+
+enum JobStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+/// Traza de cada ejecucion de una tarea de /api/cron/daily. El estado vive en
+/// la base de datos, no en un fichero en disco como el celerybeat de la v1.
+model ScheduledJob {
+  id String @id @default(cuid())
+
+  /// Nombre de la tarea ("payout-gms").
+  name String
+
+  status         JobStatus @default(RUNNING)
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  itemsProcessed Int       @default(0)
+  error          String?
+
+  @@index([name, startedAt])
+}
