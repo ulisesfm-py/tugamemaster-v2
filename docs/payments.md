@@ -3,9 +3,10 @@
 Este documento describe cómo se mueve el dinero y por qué. Las reglas duras
 están en `CLAUDE.md`; aquí está el detalle.
 
-> Estado actual: **implementada la fase 5** (alta de los GMs en Stripe
-> Connect). Los cobros y los pagos llegan en la fase 6. Las secciones marcadas
-> como _pendiente_ describen lo acordado, no lo que ya existe.
+> Estado actual: **implementadas las fases 5 y 6**. El alta de los GMs, el
+> cobro al jugador y la transferencia al GM funcionan y están verificados
+> contra Stripe en modo test. Lo marcado como _pendiente_ describe lo
+> acordado, no lo que ya existe.
 
 ## Modelo: separate charges and transfers
 
@@ -106,6 +107,65 @@ algo ya resuelto.
 - Un fallo nuestro al procesar **sí** devuelve 500, porque ahí el reintento de
   Stripe es justo lo que queremos.
 
+## Cobro (fase 6, implementado)
+
+El jugador reserva y se le lleva a **Stripe Checkout alojado**. Stripe se
+encarga del 3DS, de las carteras móviles, de los idiomas y de la
+accesibilidad: en el camino del dinero, cuanto menos código propio, mejor.
+
+La reserva nace en `PENDING` y **ocupa plaza durante 20 minutos**. Pasado ese
+plazo deja de contar en el aforo sin que intervenga ningún proceso: es una
+condición en la consulta, no un job de limpieza.
+
+### La plaza puede perderse mientras se paga
+
+La sesión de Checkout vive más que esos 20 minutos, así que alguien puede
+llegar a pagar cuando su asiento ya lo ocupó otro. Cobrarle sería venderle algo
+que no existe, de modo que `registrarCobro` **comprueba el aforo antes de dar
+la reserva por buena y reembolsa el importe íntegro** si la plaza ya no está.
+
+Se devuelve todo, incluida la parte que se lleva Stripe: el jugador no tiene
+ninguna culpa de haber llegado tarde.
+
+### La `balance_transaction` tarda en aparecer
+
+El coste real de Stripe se lee de la `balance_transaction` del cargo, pero
+Stripe la adjunta unos instantes **después** de confirmar el pago, y el webhook
+puede llegar antes. Se reintenta cuatro veces con pausas cortas; si aun así no
+está, el webhook devuelve 500 y Stripe lo reenvía más tarde, que es
+exactamente el comportamiento que queremos.
+
+### Partidas gratuitas
+
+Una partida de 0 € no pasa por Stripe: crear un cobro de cero euros fallaría y
+no tendría ningún sentido. La reserva queda pagada en el acto.
+
+## Pago al GM (fase 6, implementado)
+
+El endpoint `/api/cron/daily`, protegido con `CRON_SECRET`, ejecuta dos tareas
+en orden:
+
+1. **Cerrar partidas**: las publicadas cuya hora de fin ya pasó pasan a
+   `COMPLETED`, y sus reservas pagadas también. Esto arranca el reloj de las 48
+   horas y es lo que habilitará dejar reseña.
+2. **Pagar a los GMs**: partidas cerradas hace más de 48 h, sin incidencia
+   abierta y con el GM verificado.
+
+Un pago bloqueado **se puede reintentar**: una incidencia se resuelve y una
+cuenta sin verificar acaba verificándose, así que la consulta vuelve a recoger
+las partidas cuyo `Payout` quedó en `BLOCKED` o `FAILED`.
+
+### La clave de idempotencia lleva el importe
+
+`payout:<gameId>:<total>`. Si un intento falló y después cambia lo que hay que
+transferir, es una operación distinta y necesita clave nueva — Stripe rechaza
+reutilizar una clave con otros parámetros.
+
+Que una partida se pague una sola vez lo garantiza el `Payout` con `gameId`
+único: la consulta excluye las que ya están `PAID`. La clave es la segunda red,
+para que un reintento con el mismo importe devuelva la transferencia original
+en lugar de crear otra.
+
 ## Reglas que no se negocian
 
 - Importes como **enteros en céntimos** más código de moneda. Nunca float.
@@ -134,3 +194,18 @@ stripe trigger account.updated
 ```
 
 Las cuentas de prueba de Connect se verifican al instante en modo test.
+
+### Saldo para poder transferir
+
+En modo test, transferir exige que la plataforma tenga fondos disponibles. Se
+alimentan cobrando con la tarjeta **4000 0000 0000 0077**, que añade el importe
+directamente al saldo disponible.
+
+### Tarjetas útiles
+
+| Tarjeta             | Qué provoca                       |
+| ------------------- | --------------------------------- |
+| 4242 4242 4242 4242 | Pago correcto                     |
+| 4000 0025 0000 3155 | Exige autenticación 3DS           |
+| 4000 0000 0000 0002 | Rechazo del banco                 |
+| 4000 0000 0000 0077 | Correcto y añade saldo disponible |

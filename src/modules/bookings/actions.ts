@@ -5,6 +5,11 @@ import { revalidatePath } from 'next/cache';
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
 
+import { unstable_rethrow } from 'next/navigation';
+import { redirect } from 'next/navigation';
+
+import { crearSesionDeCheckout } from '@/modules/payments/checkout';
+
 import { cancelarReserva, reservarAsiento } from './service';
 
 export type EstadoReserva = EstadoAccion;
@@ -27,7 +32,30 @@ export async function reservarAction(
   revalidatePath('/partidas');
   revalidatePath('/mis-reservas');
 
-  return { ok: true, mensaje: 'Plaza reservada.' };
+  // Una partida gratuita no pasa por Stripe: crear un cobro de cero euros
+  // fallaria y no tendria ningun sentido.
+  if (resultado.gratuita) {
+    return { ok: true, mensaje: 'Plaza reservada. Esta partida es gratuita.' };
+  }
+
+  let destino: string;
+
+  try {
+    const pago = await crearSesionDeCheckout(resultado.bookingId);
+    if (!pago.ok) return { error: pago.mensaje };
+    destino = pago.url;
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error('No se pudo crear la sesion de pago:', error);
+    return {
+      error:
+        'Tu plaza esta guardada, pero no hemos podido abrir el pago. ' +
+        'Intentalo de nuevo desde Mis reservas.',
+    };
+  }
+
+  // La pantalla de pago esta en stripe.com.
+  redirect(destino);
 }
 
 export async function cancelarReservaAction(

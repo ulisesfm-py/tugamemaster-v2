@@ -12,14 +12,43 @@ import { db } from '@/lib/db';
  */
 
 /**
- * Estados que ocupan plaza. Una reserva fallida o cancelada la libera.
+ * Estados que ocupan plaza de forma definitiva. Una reserva fallida o
+ * cancelada la libera.
  *
  * Se declara mutable a proposito: Prisma no acepta arrays readonly en `in`.
  */
-export const ESTADOS_QUE_OCUPAN: BookingStatus[] = ['PENDING', 'PAID', 'COMPLETED'];
+export const ESTADOS_PAGADOS: BookingStatus[] = ['PAID', 'COMPLETED'];
+
+/**
+ * Cuanto tiempo se le guarda la plaza a quien esta pagando.
+ *
+ * Una reserva PENDING es alguien que esta en la pantalla de pago. Si abandona,
+ * su plaza no puede quedar bloqueada para siempre; pasado este plazo deja de
+ * contar en el aforo.
+ */
+export const MINUTOS_DE_GRACIA = 20;
+
+/**
+ * Condicion de "esta plaza esta ocupada", para usar en cualquier consulta.
+ *
+ * Se expresa como filtro y no como lista de estados porque las reservas
+ * PENDING caducan: no hace falta ningun proceso de limpieza, simplemente
+ * dejan de contar.
+ */
+export function filtroPlazaOcupada() {
+  return {
+    OR: [
+      { status: { in: ESTADOS_PAGADOS } },
+      {
+        status: 'PENDING' as const,
+        createdAt: { gte: new Date(Date.now() - MINUTOS_DE_GRACIA * 60_000) },
+      },
+    ],
+  };
+}
 
 export type ResultadoReserva =
-  | { ok: true; bookingId: string }
+  | { ok: true; bookingId: string; gratuita: boolean }
   | {
       ok: false;
       error:
@@ -119,7 +148,7 @@ export async function reservarAsiento(
       select: { id: true, status: true },
     });
 
-    if (yaReservada && ESTADOS_QUE_OCUPAN.includes(yaReservada.status)) {
+    if (yaReservada && ESTADOS_PAGADOS.includes(yaReservada.status)) {
       return {
         ok: false as const,
         error: 'YA_RESERVADA' as const,
@@ -128,7 +157,7 @@ export async function reservarAsiento(
     }
 
     const ocupadas = await tx.booking.count({
-      where: { gameId, status: { in: ESTADOS_QUE_OCUPAN } },
+      where: { gameId, ...filtroPlazaOcupada() },
     });
 
     if (ocupadas >= partida.seatsTotal) {
@@ -139,13 +168,23 @@ export async function reservarAsiento(
       };
     }
 
+    const precio = conCampana?.priceCents ?? 0;
+    const gratuita = precio === 0;
+
     // Si hubo una reserva cancelada antes, se reutiliza la fila: la
     // restriccion unica (gameId, userId) impide crear otra.
+    //
+    // Una partida gratuita queda pagada en el acto: no hay nada que cobrar y
+    // dejarla en PENDING haria que caducase a los 20 minutos.
     const datos = {
-      status: 'PENDING' as const,
-      amountCents: conCampana?.priceCents ?? 0,
+      status: gratuita ? ('PAID' as const) : ('PENDING' as const),
+      amountCents: precio,
       currency: conCampana?.currency ?? 'EUR',
       cancelledAt: null,
+      paidAt: gratuita ? new Date() : null,
+      commissionCents: gratuita ? 0 : null,
+      stripeFeeCents: gratuita ? 0 : null,
+      payoutCents: gratuita ? 0 : null,
     };
 
     const booking = yaReservada
@@ -159,7 +198,7 @@ export async function reservarAsiento(
           select: { id: true },
         });
 
-    return { ok: true as const, bookingId: booking.id };
+    return { ok: true as const, bookingId: booking.id, gratuita };
   });
 }
 
@@ -185,7 +224,7 @@ export async function cancelarReserva(
     return { ok: false, mensaje: 'Esa reserva no es tuya' };
   }
 
-  if (!ESTADOS_QUE_OCUPAN.includes(reserva.status)) {
+  if (!['PENDING', ...ESTADOS_PAGADOS].includes(reserva.status)) {
     return { ok: false, mensaje: 'Esa reserva ya no esta activa' };
   }
 

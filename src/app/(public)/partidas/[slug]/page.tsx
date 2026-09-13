@@ -8,9 +8,14 @@ import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
 import { detallePartida } from '@/modules/games/queries';
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Pick<Props, 'params'>): Promise<Metadata> {
   const { slug } = await params;
   const partida = await detallePartida(slug);
 
@@ -22,8 +27,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PartidaPage({ params }: Props) {
+export default async function PartidaPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const params_ = await searchParams;
   const session = await auth();
   const partida = await detallePartida(slug, session?.user.id);
 
@@ -40,6 +46,19 @@ export default async function PartidaPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
+      {params_['pago'] === 'ok' && (
+        <p className="mb-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          Pago recibido. Tu plaza está confirmada; la verás también en Mis reservas.
+        </p>
+      )}
+
+      {params_['pago'] === 'cancelado' && (
+        <p className="mb-6 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+          No has completado el pago. Tu plaza sigue guardada unos minutos por si quieres
+          intentarlo de nuevo.
+        </p>
+      )}
+
       {partida.status === 'DRAFT' && (
         <p className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
           Esta partida es un borrador. Solo tú puedes verla.
@@ -173,7 +192,9 @@ export default async function PartidaPage({ params }: Props) {
                 campos={{ gameId: partida.id, slug: partida.slug }}
               />
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                Todavía no se cobra nada: el pago se activará más adelante.
+                {partida.priceCents === 0
+                  ? 'Esta partida es gratuita.'
+                  : 'Te llevaremos a la pantalla de pago de Stripe. Guardamos tu plaza 20 minutos mientras pagas.'}
               </p>
             </>
           )}

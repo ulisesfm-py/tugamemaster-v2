@@ -1,6 +1,11 @@
 import type Stripe from 'stripe';
 
 import { stripe } from '@/lib/stripe';
+import {
+  registrarCheckoutCaducado,
+  registrarCobro,
+  registrarCobroFallido,
+} from '@/modules/payments/cobros';
 import { guardarEstado } from '@/modules/payments/connect';
 
 /**
@@ -52,6 +57,26 @@ export async function POST(request: Request): Promise<Response> {
       case 'account.updated': {
         const cuenta = evento.data.object;
         await guardarEstado(cuenta.id, cuenta);
+        break;
+      }
+
+      // Es aqui, y no al crear la sesion de pago, donde una reserva pasa a
+      // estar pagada: la respuesta de la API puede quedarse obsoleta, el
+      // webhook no.
+      case 'payment_intent.succeeded': {
+        await registrarCobro(evento.data.object);
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        await registrarCobroFallido(evento.data.object);
+        break;
+      }
+
+      // El jugador abrio la pantalla de pago y no termino. Su plaza ya se
+      // habia liberado sola al pasar los minutos de gracia.
+      case 'checkout.session.expired': {
+        await registrarCheckoutCaducado(evento.data.object);
         break;
       }
 

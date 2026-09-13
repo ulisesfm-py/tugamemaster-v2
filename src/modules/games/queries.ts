@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
-import { ESTADOS_QUE_OCUPAN } from '@/modules/bookings/service';
+import { filtroPlazaOcupada } from '@/modules/bookings/service';
 
 import type { Filtros } from './schema';
 
@@ -9,26 +9,35 @@ import type { Filtros } from './schema';
  * Consultas de lectura de partidas.
  */
 
-const seleccionTarjeta = {
-  id: true,
-  title: true,
-  slug: true,
-  system: true,
-  startsAt: true,
-  endsAt: true,
-  seatsTotal: true,
-  priceCents: true,
-  currency: true,
-  gm: {
-    select: {
-      id: true,
-      user: { select: { name: true, slug: true, image: true } },
+/**
+ * Campos comunes de una tarjeta de partida.
+ *
+ * Es una funcion y no una constante porque el filtro de plazas ocupadas
+ * depende de la hora actual: como constante, la fecha limite se calcularia una
+ * sola vez al cargar el modulo y se quedaria congelada.
+ */
+function seleccionTarjeta() {
+  return {
+    id: true,
+    title: true,
+    slug: true,
+    system: true,
+    startsAt: true,
+    endsAt: true,
+    seatsTotal: true,
+    priceCents: true,
+    currency: true,
+    gm: {
+      select: {
+        id: true,
+        user: { select: { name: true, slug: true, image: true } },
+      },
     },
-  },
-  _count: {
-    select: { bookings: { where: { status: { in: ESTADOS_QUE_OCUPAN } } } },
-  },
-};
+    _count: {
+      select: { bookings: { where: filtroPlazaOcupada() } },
+    },
+  } as const;
+}
 
 /** Listado publico: solo partidas publicadas que aun no han empezado. */
 export async function listarPartidas(filtros: Filtros) {
@@ -53,7 +62,7 @@ export async function listarPartidas(filtros: Filtros) {
     },
     orderBy: { startsAt: 'asc' },
     take: 60,
-    select: seleccionTarjeta,
+    select: seleccionTarjeta(),
   });
 
   // "Solo con plazas libres" se filtra en memoria: depende del recuento de
@@ -83,7 +92,7 @@ export async function detallePartida(slug: string, userId?: string) {
   const partida = await db.game.findUnique({
     where: { slug },
     select: {
-      ...seleccionTarjeta,
+      ...seleccionTarjeta(),
       description: true,
       status: true,
       sessionNumber: true,
@@ -147,7 +156,7 @@ export async function misPartidas(userId: string) {
   const partidas = await db.game.findMany({
     where: { gmId: gm.id },
     orderBy: { startsAt: 'desc' },
-    select: { ...seleccionTarjeta, status: true },
+    select: { ...seleccionTarjeta(), status: true },
   });
 
   return { gm, partidas };
