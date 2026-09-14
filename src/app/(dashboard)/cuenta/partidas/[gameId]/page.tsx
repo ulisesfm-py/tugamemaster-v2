@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { NotaSesion } from '@/components/nota-sesion';
 import { PartidaForm } from '@/components/partida-form';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Fecha } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { jugadoresDe } from '@/modules/bookings/queries';
+import { guardarNotaAction } from '@/modules/campaigns/actions';
+import { partidaTerminada } from '@/modules/campaigns/politica';
 import {
   actualizarPartidaAction,
   cancelarPartidaAction,
@@ -30,6 +33,12 @@ export default async function GestionarPartidaPage({ params }: Props) {
 
   const jugadores = (await jugadoresDe(gameId, session.user.id)) ?? [];
   const editable = partida.status === 'DRAFT' || partida.status === 'PUBLISHED';
+
+  // `partidaTerminada` acepta tambien una publicada cuya hora de fin ya paso:
+  // el GM puede anotar como acabo nada mas levantarse de la mesa, sin esperar
+  // a que el cron la cierre de madrugada.
+  const terminada = partidaTerminada(partida.status, partida.endsAt);
+  const pagadas = partida._count.bookings;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -75,14 +84,83 @@ export default async function GestionarPartidaPage({ params }: Props) {
         )}
 
         {editable && (
-          <ReservarBoton
-            accion={cancelarPartidaAction}
-            texto="Cancelar partida"
-            destructivo
-            campos={{ gameId: partida.id }}
-          />
+          <div>
+            <ReservarBoton
+              accion={cancelarPartidaAction}
+              texto="Cancelar partida"
+              destructivo
+              campos={{ gameId: partida.id }}
+            />
+            {pagadas > 0 && (
+              <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                Se devolverá el 100% en saldo a {pagadas}{' '}
+                {pagadas === 1 ? 'jugador' : 'jugadores'}. No se puede deshacer.
+              </p>
+            )}
+          </div>
         )}
       </section>
+
+      {partida.campaign && (
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+          Sesión {partida.sessionNumber} de la campaña{' '}
+          <Link
+            href={`/campanas/${partida.campaign.slug}`}
+            className="text-indigo-600 hover:underline"
+          >
+            {partida.campaign.title}
+          </Link>
+        </p>
+      )}
+
+      {terminada && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+            Cómo acabó la sesión
+          </h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Te servirá de plantilla para montar la siguiente, y a tus jugadores para
+            recordar dónde se quedaron.
+          </p>
+
+          <div className="mt-4">
+            <NotaSesion
+              gameId={partida.id}
+              accion={guardarNotaAction}
+              contenido={partida.sessionNote?.content ?? null}
+            />
+          </div>
+
+          <div className="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+            {partida.nextGame ? (
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Ya has creado la continuación:{' '}
+                <Link
+                  href={`/cuenta/partidas/${partida.nextGame.id}`}
+                  className="text-indigo-600 hover:underline"
+                >
+                  {partida.nextGame.title}
+                </Link>
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-slate-700 dark:text-slate-300">
+                  ¿Seguís la historia otro día?
+                </p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  La siguiente sesión solo la podrán reservar quienes jugaron esta.
+                </p>
+                <Link
+                  href={`/cuenta/partidas/${partida.id}/continuacion`}
+                  className="mt-3 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+                >
+                  Crear la siguiente sesión
+                </Link>
+              </>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">

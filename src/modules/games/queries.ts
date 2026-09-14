@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
-import { filtroPlazaOcupada } from '@/modules/bookings/service';
+import { ESTADOS_PAGADOS, filtroPlazaOcupada } from '@/modules/bookings/service';
 
 import type { Filtros } from './schema';
 
@@ -177,7 +177,15 @@ export async function miPartida(userId: string, gameId: string) {
       seatsTotal: true,
       priceCents: true,
       status: true,
+      sessionNumber: true,
       gm: { select: { userId: true } },
+      campaign: { select: { title: true, slug: true, summary: true } },
+      sessionNote: { select: { content: true } },
+      // Si ya existe, no se puede crear otra continuacion.
+      nextGame: { select: { id: true, title: true } },
+      _count: {
+        select: { bookings: { where: { status: { in: ESTADOS_PAGADOS } } } },
+      },
     },
   });
 

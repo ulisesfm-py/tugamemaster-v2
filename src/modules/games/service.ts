@@ -1,7 +1,9 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { ESTADOS_PAGADOS } from '@/modules/bookings/service';
 import { slugDisponible } from '@/modules/users/slug';
+import { abonar } from '@/modules/wallet/service';
 
 import { partidaSchema } from './schema';
 
@@ -206,11 +208,18 @@ export async function despublicarPartida(
 }
 
 /**
- * Cancela una partida.
+ * Cancela una partida y devuelve integramente a quien ya habia pagado.
  *
- * En esta fase no hay dinero de por medio, asi que basta con marcar la partida
- * y liberar las reservas. Cuando existan cobros, cancelar tendra que disparar
- * ademas los reembolsos.
+ * Cancela el GM, no el jugador: la politica de las 48 horas no pinta nada
+ * aqui. Quien pago recupera el **100%** en saldo, sin importar cuanto falte
+ * para la partida, porque no ha hecho nada mal.
+ *
+ * La devolucion es saldo y no dinero a la tarjeta, igual que en el resto de
+ * la plataforma: si el dinero no sale, no hay una segunda comision de Stripe
+ * que nadie tenga que asumir. Ver docs/payments.md.
+ *
+ * El GM no cobra: `pagarGms` solo recoge partidas en COMPLETED, y esta queda
+ * en CANCELLED.
  */
 export async function cancelarPartida(
   userId: string,
@@ -218,7 +227,15 @@ export async function cancelarPartida(
 ): Promise<ResultadoSimple> {
   const partida = await db.game.findUnique({
     where: { id: gameId },
-    select: { status: true, gm: { select: { userId: true } } },
+    select: {
+      status: true,
+      title: true,
+      gm: { select: { userId: true } },
+      bookings: {
+        where: { status: { in: ['PENDING', 'PAID', 'COMPLETED'] } },
+        select: { id: true, userId: true, status: true, amountCents: true },
+      },
+    },
   });
 
   if (!partida || partida.gm.userId !== userId) {
@@ -229,13 +246,44 @@ export async function cancelarPartida(
     return { ok: false, mensaje: 'Una partida ya jugada no se puede cancelar' };
   }
 
-  await db.$transaction([
-    db.game.update({ where: { id: gameId }, data: { status: 'CANCELLED' } }),
-    db.booking.updateMany({
-      where: { gameId, status: { in: ['PENDING', 'PAID'] } },
-      data: { status: 'CANCELLED', cancelledAt: new Date() },
-    }),
-  ]);
+  if (partida.status === 'CANCELLED') {
+    return { ok: false, mensaje: 'Esa partida ya estaba cancelada' };
+  }
+
+  // Una PENDING nunca llego a cobrarse: no hay nada que devolver.
+  const pagadas = partida.bookings.filter((b) => ESTADOS_PAGADOS.includes(b.status));
+  const sinPagar = partida.bookings.filter((b) => !ESTADOS_PAGADOS.includes(b.status));
+
+  await db.$transaction(async (tx) => {
+    await tx.game.update({ where: { id: gameId }, data: { status: 'CANCELLED' } });
+
+    if (sinPagar.length > 0) {
+      await tx.booking.updateMany({
+        where: { id: { in: sinPagar.map((b) => b.id) } },
+        data: { status: 'CANCELLED', cancelledAt: new Date() },
+      });
+    }
+
+    for (const reserva of pagadas) {
+      await tx.booking.update({
+        where: { id: reserva.id },
+        data: { status: 'REFUNDED', cancelledAt: new Date(), refundedAt: new Date() },
+      });
+
+      if (reserva.amountCents > 0) {
+        await abonar(
+          {
+            userId: reserva.userId,
+            amountCents: reserva.amountCents,
+            type: 'REFUND_CREDIT',
+            bookingId: reserva.id,
+            note: `El game master cancelo ${partida.title}`,
+          },
+          tx,
+        );
+      }
+    }
+  });
 
   return { ok: true };
 }

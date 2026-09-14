@@ -3,10 +3,11 @@
 Este documento describe cómo se mueve el dinero y por qué. Las reglas duras
 están en `CLAUDE.md`; aquí está el detalle.
 
-> Estado actual: **implementadas las fases 5, 6 y 7 completa**. El alta de los GMs, el
-> cobro al jugador y la transferencia al GM funcionan y están verificados
-> contra Stripe en modo test. Lo marcado como _pendiente_ describe lo
-> acordado, no lo que ya existe.
+> Estado actual: **implementadas las fases 5, 6 y 7 completa**, más la
+> devolución por cancelación del GM (fase 9). El alta de los GMs, el cobro al
+> jugador y la transferencia al GM funcionan y están verificados contra Stripe
+> en modo test. Lo marcado como _pendiente_ describe lo acordado, no lo que ya
+> existe.
 
 ## Modelo: separate charges and transfers
 
@@ -176,6 +177,7 @@ pagó al cobrar y ahí se queda.
 | --------------------- | ----------------- | -------------------------------------------------------------------- |
 | Cancela a más de 48 h | 90% en saldo      | Retiene el 10%, más que suficiente para cubrir lo ya pagado a Stripe |
 | El GM no se presenta  | 100% en saldo     | Asume los ~0,72 € de Stripe ya pagados                               |
+| El GM cancela la mesa | 100% en saldo     | Asume los ~0,72 € de Stripe ya pagados                               |
 
 El saldo **no caduca**. Solo un administrador puede convertirlo en dinero real,
 como válvula de escape ante una reclamación.
@@ -215,6 +217,17 @@ los 10 € cobrados), 13,68 € transferidos al GM, y la suma cuadra con los 15 
 | Cancela dentro de las 48 h       | Sin devolución, plaza liberada               |
 | Incidencia aprobada por un admin | **100% en saldo**, reserva `REFUNDED`        |
 | Incidencia desestimada           | Sin devolución, el pago al GM sigue su curso |
+| **El GM cancela la partida**     | **100% en saldo** a todos los que pagaron    |
+
+### Cuando cancela el game master, la política de 48 horas no pinta nada
+
+El plazo existe para proteger al GM de quien se descuelga a última hora. Si
+quien se descuelga es él, aplicarlo sería cobrarle al jugador por un plantón
+ajeno: se devuelve el **100%**, falte lo que falte para la partida.
+
+Las reservas pagadas pasan a `REFUNDED`; las `PENDING`, que nunca llegaron a
+cobrarse, simplemente se cancelan. El GM no cobra nada: el job solo recoge
+partidas en `COMPLETED` y esta queda en `CANCELLED`.
 
 Las reglas viven en `modules/bookings/politica.ts`, que es **lógica pura**: son
 lo que se anuncia al jugador antes de reservar, así que tienen que poder

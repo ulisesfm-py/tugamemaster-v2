@@ -57,6 +57,11 @@ fidelidad a lo anterior.
   en la primera sesión pueden inscribirse en la 2nda. Al hacer click en la campaña se
   muestra una breve descripción. Cada GM y cada jugador tienen en su perfil un historial
   las partidas en las que han participado.
+  Una campaña no se declara de antemano: **nace cuando el GM continúa una partida
+  ya jugada**, y la continuada pasa a ser su sesión 1. La nota de sesión la ven
+  solo el GM y quienes jugaron esa sesión — cuenta lo que hicieron sus personajes,
+  así que publicarla reventaría la campaña. Reglas en
+  `src/modules/campaigns/politica.ts`.
 - **Login con Discord**: además de email/contraseña, los usuarios pueden
   registrarse e iniciar sesión con su cuenta de Discord (OAuth2). Guardamos su
   ID de Discord para uso futuro (salas de partida). No pedir permisos de
@@ -126,6 +131,10 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   Los tres valores se persisten en la reserva. El 5% es el margen bruto de la
   plataforma y el coste de Stripe es un pass-through al GM.
 
+- **Si el game master cancela una partida, quien pagó recupera el 100% en
+  saldo**, sin que importe cuánto falte para jugarla. El plazo de 48 horas
+  protege al GM de quien se descuelga tarde; cuando el que se descuelga es él,
+  aplicarlo sería cobrarle al jugador un plantón ajeno.
 - **Las devoluciones se abonan como saldo, no vuelven a la tarjeta** (decidido
   en la fase 7). En un reembolso Stripe no devuelve la comisión del cobro
   original, así que devolver el dinero de verdad dejaría un coste que alguien

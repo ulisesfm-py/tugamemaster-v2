@@ -61,6 +61,7 @@ export function PartidaForm({
   accion,
   textoBoton,
   valores,
+  extra,
 }: {
   accion: Accion;
   textoBoton: string;
@@ -74,6 +75,8 @@ export function PartidaForm({
     seatsTotal: number;
     priceCents: number;
   };
+  /** Campos propios de quien usa el formulario, antes del boton de guardar. */
+  extra?: React.ReactNode;
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
@@ -174,6 +177,8 @@ export function PartidaForm({
           />
         </Campo>
       </div>
+
+      {extra}
 
       {estado && 'error' in estado && (
         <p

@@ -1,0 +1,61 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import type { EstadoAccion } from '@/lib/acciones';
+import { auth } from '@/lib/auth';
+
+import { crearContinuacion, guardarNota } from './service';
+
+export async function guardarNotaAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+
+  const gameId = String(formData.get('gameId') ?? '');
+
+  const resultado = await guardarNota(session.user.id, gameId, {
+    content: formData.get('content'),
+  });
+
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  revalidatePath(`/cuenta/partidas/${gameId}`);
+  revalidatePath('/mis-reservas');
+
+  return { ok: true, mensaje: 'Nota guardada. La veran quienes jugaron la sesion.' };
+}
+
+export async function crearContinuacionAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+
+  const resultado = await crearContinuacion(
+    session.user.id,
+    String(formData.get('gameId') ?? ''),
+    {
+      title: String(formData.get('title') ?? ''),
+      description: String(formData.get('description') ?? ''),
+      system: String(formData.get('system') ?? ''),
+      startsAt: String(formData.get('startsAt') ?? ''),
+      durationHours: String(formData.get('durationHours') ?? ''),
+      seatsTotal: String(formData.get('seatsTotal') ?? ''),
+      priceCents: String(formData.get('price') ?? ''),
+      campaignSummary: formData.get('campaignSummary'),
+    },
+  );
+
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  revalidatePath('/cuenta/partidas');
+
+  // La nueva sesion nace en borrador: se lleva al GM a su pagina para que la
+  // revise y la publique.
+  redirect(`/cuenta/partidas/${resultado.gameId}`);
+}

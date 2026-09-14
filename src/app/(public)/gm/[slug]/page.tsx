@@ -25,7 +25,7 @@ export default async function GmPage({ params }: Props) {
 
   if (!perfil) notFound();
 
-  const { user, gm, reputacion, resenas, proximasPartidas } = perfil;
+  const { user, gm, reputacion, resenas, proximasPartidas, historial } = perfil;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
@@ -120,6 +120,46 @@ export default async function GmPage({ params }: Props) {
           </ul>
         )}
       </section>
+
+      {historial.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+            Partidas dirigidas
+          </h2>
+
+          <ul className="mt-3 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            {historial.map((p) => (
+              <li key={p.id} className="flex flex-wrap gap-x-3 gap-y-1 px-4 py-3">
+                <div className="min-w-0">
+                  <Link
+                    href={`/partidas/${p.slug}`}
+                    className="text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
+                  >
+                    {p.title}
+                  </Link>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {p.system} · <Fecha valor={p.startsAt} />
+                    {p.campaign && (
+                      <>
+                        {' · '}
+                        <Link
+                          href={`/campanas/${p.campaign.slug}`}
+                          className="hover:underline"
+                        >
+                          {p.campaign.title}
+                        </Link>
+                      </>
+                    )}
+                  </p>
+                </div>
+                <span className="ml-auto self-center text-xs text-slate-500 dark:text-slate-400">
+                  {p._count.bookings} {p._count.bookings === 1 ? 'jugador' : 'jugadores'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">

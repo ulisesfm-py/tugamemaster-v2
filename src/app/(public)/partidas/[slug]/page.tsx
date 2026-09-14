@@ -6,6 +6,7 @@ import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Etiqueta, Fecha, Precio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
+import { notaVisible } from '@/modules/campaigns/queries';
 import { TEXTO_CONDICIONES } from '@/modules/bookings/politica';
 import { detallePartida } from '@/modules/games/queries';
 import { formatearImporte } from '@/modules/payments/dinero';
@@ -38,6 +39,9 @@ export default async function PartidaPage({ params, searchParams }: Props) {
   const saldo = session?.user ? await saldoDe(session.user.id) : 0;
 
   if (!partida) notFound();
+
+  // La nota de sesion la ven el GM y quienes jugaron; para el resto no existe.
+  const nota = await notaVisible(partida.id, session?.user.id);
 
   // Un borrador solo lo ve su autor: para el resto, no existe.
   if (partida.status !== 'PUBLISHED' && !partida.esMia) notFound();
@@ -77,7 +81,13 @@ export default async function PartidaPage({ params, searchParams }: Props) {
 
       {partida.campaign && (
         <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-          Campaña: {partida.campaign.title}
+          Campaña:{' '}
+          <Link
+            href={`/campanas/${partida.campaign.slug}`}
+            className="text-indigo-600 hover:underline dark:text-indigo-400"
+          >
+            {partida.campaign.title}
+          </Link>
           {partida.sessionNumber ? ` · Sesión ${partida.sessionNumber}` : ''}
         </p>
       )}
@@ -112,6 +122,20 @@ export default async function PartidaPage({ params, searchParams }: Props) {
           {partida.description}
         </p>
       </section>
+
+      {nota && (
+        <section className="mt-8 rounded-xl border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-900 dark:bg-indigo-950/40">
+          <h2 className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+            Dónde quedó la sesión
+          </h2>
+          <p className="mt-2 text-sm whitespace-pre-line text-indigo-900/90 dark:text-indigo-100/90">
+            {nota.content}
+          </p>
+          <p className="mt-3 text-xs text-indigo-800/70 dark:text-indigo-300/70">
+            Lo escribió el game master. Solo lo veis quienes jugasteis esta sesión.
+          </p>
+        </section>
+      )}
 
       {partida.gm.languages.length > 0 && (
         <div className="mt-6 flex flex-wrap items-center gap-2">

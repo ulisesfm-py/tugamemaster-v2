@@ -48,6 +48,67 @@ export async function reputacionGm(gmProfileId: string): Promise<ReputacionGm> {
   };
 }
 
+/**
+ * Historial de partidas dirigidas por un GM.
+ *
+ * Solo las jugadas y con alguien que pago: es la misma vara con la que se mide
+ * su reputacion. Una partida que se publico y nadie reservo no es experiencia
+ * dirigiendo.
+ */
+export async function partidasDirigidas(gmProfileId: string, limite = 20) {
+  return db.game.findMany({
+    where: {
+      gmId: gmProfileId,
+      status: 'COMPLETED',
+      bookings: { some: { status: { in: ['PAID', 'COMPLETED'] } } },
+    },
+    orderBy: { startsAt: 'desc' },
+    take: limite,
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      system: true,
+      startsAt: true,
+      sessionNumber: true,
+      campaign: { select: { title: true, slug: true } },
+      _count: {
+        select: { bookings: { where: { status: { in: ['PAID', 'COMPLETED'] } } } },
+      },
+    },
+  });
+}
+
+/**
+ * Historial de partidas jugadas por un usuario.
+ *
+ * Es publico, pero solo cuenta que jugo y con quien: ni precios, ni estados de
+ * pago, ni reservas canceladas. Lo que aparece aqui es la mesa, no la cuenta.
+ */
+export async function partidasJugadas(userId: string, limite = 20) {
+  const reservas = await db.booking.findMany({
+    where: { userId, status: 'COMPLETED' },
+    orderBy: { game: { startsAt: 'desc' } },
+    take: limite,
+    select: {
+      id: true,
+      game: {
+        select: {
+          title: true,
+          slug: true,
+          system: true,
+          startsAt: true,
+          sessionNumber: true,
+          campaign: { select: { title: true, slug: true } },
+          gm: { select: { user: { select: { name: true, slug: true } } } },
+        },
+      },
+    },
+  });
+
+  return reservas.map((r) => ({ id: r.id, ...r.game }));
+}
+
 /** Perfil publico de un game master, o null si ese slug no es de un GM. */
 export async function perfilPublicoGm(slug: string) {
   const user = await db.user.findUnique({
@@ -72,7 +133,7 @@ export async function perfilPublicoGm(slug: string) {
 
   if (!user?.gmProfile) return null;
 
-  const [reputacion, resenas, proximasPartidas] = await Promise.all([
+  const [reputacion, resenas, proximasPartidas, historial] = await Promise.all([
     reputacionGm(user.gmProfile.id),
     db.review.findMany({
       where: { gmId: user.gmProfile.id },
@@ -109,9 +170,10 @@ export async function perfilPublicoGm(slug: string) {
         },
       },
     }),
+    partidasDirigidas(user.gmProfile.id),
   ]);
 
-  return { user, gm: user.gmProfile, reputacion, resenas, proximasPartidas };
+  return { user, gm: user.gmProfile, reputacion, resenas, proximasPartidas, historial };
 }
 
 /** Perfil publico de cualquier usuario. */
@@ -134,11 +196,17 @@ export async function perfilPublicoUsuario(slug: string) {
   if (!user) return null;
 
   // Historial: solo partidas efectivamente pagadas y jugadas.
-  const partidasJugadas = await db.booking.count({
-    where: { userId: user.id, status: 'COMPLETED' },
-  });
+  const [totalJugadas, historial] = await Promise.all([
+    db.booking.count({ where: { userId: user.id, status: 'COMPLETED' } }),
+    partidasJugadas(user.id),
+  ]);
 
-  return { user, partidasJugadas, esGm: user.gmProfile !== null };
+  return {
+    user,
+    partidasJugadas: totalJugadas,
+    historial,
+    esGm: user.gmProfile !== null,
+  };
 }
 
 /** Datos del propio perfil para el formulario de edicion. */
