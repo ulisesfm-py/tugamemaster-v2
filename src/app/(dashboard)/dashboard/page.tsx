@@ -73,12 +73,17 @@ export default async function DashboardPage() {
           <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
             Administración
           </p>
-          <Link
-            href="/admin/incidencias"
-            className="mt-2 inline-block text-sm text-indigo-600 hover:underline"
-          >
-            Revisar incidencias →
-          </Link>
+          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+            <Link
+              href="/admin/incidencias"
+              className="text-sm text-indigo-600 hover:underline"
+            >
+              Revisar incidencias →
+            </Link>
+            <Link href="/admin/blog" className="text-sm text-indigo-600 hover:underline">
+              Escribir en el blog →
+            </Link>
+          </div>
         </div>
       )}
 

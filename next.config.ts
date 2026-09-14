@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
         pathname: '/avatares/**',
       },
+      {
+        // Portadas de los articulos del blog, en el mismo Blob store. Se
+        // enumera aparte y no con un comodin: cada carpeta que se abre hay
+        // que abrirla a proposito.
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        pathname: '/blog/**',
+      },
     ],
   },
 };

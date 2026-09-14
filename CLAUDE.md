@@ -42,6 +42,13 @@ fidelidad a lo anterior.
     abierta bloquea el pago al GM hasta que el admin la resuelva.
 - **Perfiles de usuario**: personalizables, con gustos y preferencias de rol.
 - **Blog**: los admins publican artículos; los usuarios comentan y dan like.
+  El cuerpo es **texto plano**: se respetan los saltos de línea y no se
+  interpreta ni HTML ni Markdown, para no tener que sanear la salida. Un
+  comentario lo puede retirar su autor o un admin, y nadie más. Un artículo
+  publicado se retira, no se borra: borrar solo se ofrece sobre borradores,
+  porque se lleva por delante los comentarios de otra gente. El `slug` se
+  genera del título la primera vez y ya no cambia, para no romper enlaces.
+  Reglas en `src/modules/blog/politica.ts`.
 - **Reviews**: los jugadores valoran a los GMs con estrellas + comentario opcional,
   visible en la página pública del GM. Solo valora quien reservó, pagó y jugó
   aquí, dentro de los 60 días siguientes al final de la partida, y con 14 días

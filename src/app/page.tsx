@@ -22,6 +22,12 @@ export default async function Home() {
         >
           Ver partidas
         </Link>
+        <Link
+          href="/blog"
+          className="rounded-lg border border-slate-300 px-4 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          Blog
+        </Link>
         {session?.user ? (
           <>
             <Link
@@ -53,7 +59,7 @@ export default async function Home() {
       </div>
 
       <p className="mt-12 text-xs text-slate-400 dark:text-slate-600">
-        Fase 4 de 11 — portal de partidas y reservas. Los pagos llegan en la fase 6.
+        Fase 10 de 11 — partidas, pagos, campañas y blog. Queda el pulido para producción.
       </p>
     </main>
   );
