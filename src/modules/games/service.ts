@@ -2,6 +2,7 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { ESTADOS_PAGADOS } from '@/modules/bookings/service';
+import { avisarPartidaCancelada } from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 import { abonar } from '@/modules/wallet/service';
 
@@ -284,6 +285,16 @@ export async function cancelarPartida(
       }
     }
   });
+
+  // Fuera de la transaccion: avisar es importante, pero no tanto como para
+  // arriesgarse a deshacer una devolucion ya hecha si falla el correo.
+  //
+  // Se avisa a todos los que tenian plaza, hubiera dinero de por medio o no:
+  // quien reservo una partida gratuita tambien se ha quedado sin mesa.
+  await avisarPartidaCancelada([
+    ...pagadas.map((b) => ({ bookingId: b.id, devueltoCents: b.amountCents })),
+    ...sinPagar.map((b) => ({ bookingId: b.id, devueltoCents: 0 })),
+  ]);
 
   return { ok: true };
 }

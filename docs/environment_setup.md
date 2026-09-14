@@ -99,16 +99,34 @@ Genera una cadena aleatoria larga (`openssl rand -hex 32`). El endpoint debe
 rechazar cualquier petición que no lo presente: sin él, un tercero podría
 disparar las transferencias a los GMs.
 
-### Email (Resend)
+### Email (Resend, opcional en desarrollo)
 
 | Variable         | Descripción                                                   |
 | ---------------- | ------------------------------------------------------------- |
 | `RESEND_API_KEY` | Clave de API para email transaccional.                        |
 | `EMAIL_FROM`     | Remitente de los correos, p. ej. `TuGameMaster <no-reply@…>`. |
 
-**Dónde se obtiene**: [Resend](https://resend.com) → _API Keys_. El dominio
-del remitente debe estar verificado (registros DNS) antes de poder enviar a
-direcciones reales.
+**Si se dejan vacías, la aplicación funciona igual**: cada correo se compone
+entero y se vuelca al registro de la consola en vez de enviarse. Se puede
+desarrollar y comprobar qué dice cada aviso, a quién va y cuándo sale sin tener
+cuenta de Resend.
+
+Hay tres etapas, y solo la última toca DNS:
+
+1. **Sin cuenta.** Variables vacías, correos al registro. Es el modo por
+   defecto en local.
+2. **Con cuenta, sin dominio.** [Resend](https://resend.com) → _API Keys_.
+   Poniendo `EMAIL_FROM=onboarding@resend.dev` se envía de verdad, pero **solo
+   a la dirección con la que se creó la cuenta**. Sirve para ver los correos en
+   un buzón real.
+3. **Con dominio propio.** Resend → _Domains_ → añadir `tugamemaster.com`, y
+   copiar en el proveedor de DNS los registros TXT que indique (SPF y DKIM;
+   conviene añadir DMARC). Ya se puede enviar a cualquiera desde
+   `no-reply@tugamemaster.com`.
+
+Enviar **no requiere buzón de correo**: un remitente `no-reply@` solo necesita
+esos registros DNS. El buzón hace falta para recibir respuestas, que es otra
+decisión.
 
 ### Almacenamiento de imágenes
 

@@ -5,6 +5,10 @@ import type Stripe from 'stripe';
 import { db } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
 import { filtroPlazaOcupada } from '@/modules/bookings/service';
+import {
+  avisarNuevaReserva,
+  avisarReservaConfirmada,
+} from '@/modules/notifications/service';
 
 import { calcularReparto, repartoInsuficiente } from './dinero';
 
@@ -140,6 +144,12 @@ export async function registrarCobro(paymentIntent: Stripe.PaymentIntent): Promi
       },
     }),
   ]);
+
+  // Despues de la transaccion y no dentro: los avisos no deben alargar la
+  // transaccion ni poder deshacerla. Y van despues de la salida temprana de
+  // arriba, asi que un reenvio del mismo evento de Stripe no duplica el correo.
+  await avisarReservaConfirmada(reserva.id);
+  await avisarNuevaReserva(reserva.id);
 }
 
 /**
@@ -320,4 +330,9 @@ export async function registrarCobroSinTarjeta(bookingId: string): Promise<void>
       },
     }),
   ]);
+
+  // La salida temprana de arriba (solo sigue si estaba PENDING) es lo que
+  // impide que una segunda llamada vuelva a avisar.
+  await avisarReservaConfirmada(reserva.id);
+  await avisarNuevaReserva(reserva.id);
 }

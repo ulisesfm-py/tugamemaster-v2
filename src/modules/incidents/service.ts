@@ -5,6 +5,7 @@ import {
   importeDevolucionCents,
   PORCENTAJE_DEVOLUCION_INCIDENCIA,
 } from '@/modules/bookings/politica';
+import { avisarIncidenciaResuelta } from '@/modules/notifications/service';
 import { abonar } from '@/modules/wallet/service';
 
 /**
@@ -178,6 +179,8 @@ export async function aprobarIncidencia(
     }
   });
 
+  await avisarIncidenciaResuelta(incidentId);
+
   return { ok: true };
 }
 
@@ -219,6 +222,10 @@ export async function rechazarIncidencia(
       resolutionNote: nota.trim(),
     },
   });
+
+  // Tambien se avisa al desestimar: quien reclama tiene derecho a enterarse de
+  // la decision sin volver a entrar en la web a mirar.
+  await avisarIncidenciaResuelta(incidentId);
 
   return { ok: true };
 }

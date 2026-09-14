@@ -1,0 +1,228 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  incidenciaResuelta,
+  nuevaReserva,
+  pagoEnviado,
+  partidaCancelada,
+  reservaConfirmada,
+} from '@/modules/notifications/plantillas';
+
+const INICIO = new Date('2026-07-04T18:00:00Z');
+
+const RESERVA = {
+  jugador: 'Ana Soto',
+  partida: 'El faro de Finisterre',
+  gm: 'Laura Vega',
+  inicio: INICIO,
+  precioCents: 1500,
+  saldoAplicadoCents: 0,
+  currency: 'EUR',
+  url: 'https://tugamemaster.com/partidas/el-faro',
+  condiciones: 'Cancelación gratuita hasta 48 horas antes.',
+};
+
+describe('todas las plantillas', () => {
+  const todas = [
+    reservaConfirmada(RESERVA),
+    nuevaReserva({
+      gm: 'Laura Vega',
+      jugador: 'Ana Soto',
+      partida: 'El faro de Finisterre',
+      inicio: INICIO,
+      plazasOcupadas: 2,
+      plazasTotales: 4,
+      url: 'https://tugamemaster.com/cuenta/partidas/1',
+    }),
+    partidaCancelada({
+      jugador: 'Ana Soto',
+      partida: 'El faro de Finisterre',
+      inicio: INICIO,
+      devueltoCents: 1500,
+      currency: 'EUR',
+      url: 'https://tugamemaster.com/partidas',
+    }),
+    incidenciaResuelta({
+      jugador: 'Ana Soto',
+      partida: 'El faro de Finisterre',
+      aprobada: true,
+      devueltoCents: 1500,
+      currency: 'EUR',
+      nota: null,
+      url: 'https://tugamemaster.com/cuenta/saldo',
+    }),
+    pagoEnviado({
+      gm: 'Laura Vega',
+      partida: 'El faro de Finisterre',
+      importeCents: 1368,
+      currency: 'EUR',
+      url: 'https://tugamemaster.com/cuenta/cobros',
+    }),
+  ];
+
+  it('traen asunto, texto y html', () => {
+    for (const plantilla of todas) {
+      expect(plantilla.asunto.length).toBeGreaterThan(0);
+      expect(plantilla.texto.length).toBeGreaterThan(0);
+      expect(plantilla.html).toContain('<html');
+    }
+  });
+
+  it('el asunto cabe en la bandeja de entrada', () => {
+    // Mas de 78 caracteres y los clientes lo cortan con puntos suspensivos.
+    for (const plantilla of todas) {
+      expect(plantilla.asunto.length).toBeLessThanOrEqual(78);
+    }
+  });
+
+  it('la version en texto no lleva etiquetas HTML', () => {
+    for (const plantilla of todas) {
+      expect(plantilla.texto).not.toMatch(/<[a-z]/i);
+    }
+  });
+
+  it('firman como TuGameMaster', () => {
+    for (const plantilla of todas) {
+      expect(plantilla.texto).toContain('TuGameMaster');
+    }
+  });
+});
+
+describe('reservaConfirmada', () => {
+  it('lleva la partida, el game master y el precio', () => {
+    const correo = reservaConfirmada(RESERVA);
+
+    expect(correo.asunto).toContain('El faro de Finisterre');
+    expect(correo.texto).toContain('Laura Vega');
+    expect(correo.texto).toContain('15,00');
+  });
+
+  it('detalla el reparto cuando se ha usado saldo', () => {
+    const correo = reservaConfirmada({ ...RESERVA, saldoAplicadoCents: 500 });
+
+    expect(correo.texto).toContain('Pagado con saldo');
+    expect(correo.texto).toContain('5,00');
+    // Lo que fue a la tarjeta: 15,00 - 5,00.
+    expect(correo.texto).toContain('10,00');
+  });
+
+  it('no habla de saldo cuando no se ha usado', () => {
+    expect(reservaConfirmada(RESERVA).texto).not.toContain('Pagado con saldo');
+  });
+
+  it('si el saldo lo cubrio todo, no aparece una linea de tarjeta a cero', () => {
+    const correo = reservaConfirmada({ ...RESERVA, saldoAplicadoCents: 1500 });
+
+    expect(correo.texto).toContain('Pagado con saldo');
+    expect(correo.texto).not.toContain('Pagado con tarjeta');
+  });
+
+  it('anuncia las condiciones de cancelacion', () => {
+    expect(reservaConfirmada(RESERVA).texto).toContain('48 horas');
+  });
+});
+
+describe('nuevaReserva', () => {
+  it('avisa de las plazas que quedan', () => {
+    const correo = nuevaReserva({
+      gm: 'Laura Vega',
+      jugador: 'Ana Soto',
+      partida: 'El faro',
+      inicio: INICIO,
+      plazasOcupadas: 2,
+      plazasTotales: 4,
+      url: 'https://x/1',
+    });
+
+    expect(correo.texto).toContain('Quedan 2 plazas libres');
+  });
+
+  it('dice que la mesa se llena con la ultima plaza', () => {
+    const correo = nuevaReserva({
+      gm: 'Laura Vega',
+      jugador: 'Ana Soto',
+      partida: 'El faro',
+      inicio: INICIO,
+      plazasOcupadas: 4,
+      plazasTotales: 4,
+      url: 'https://x/1',
+    });
+
+    expect(correo.texto).toContain('se llena la mesa');
+  });
+});
+
+describe('partidaCancelada', () => {
+  const base = {
+    jugador: 'Ana Soto',
+    partida: 'El faro',
+    inicio: INICIO,
+    currency: 'EUR',
+    url: 'https://x',
+  };
+
+  it('dice cuanto se ha devuelto', () => {
+    const correo = partidaCancelada({ ...base, devueltoCents: 1500 });
+
+    expect(correo.texto).toContain('100%');
+    expect(correo.texto).toContain('15,00');
+  });
+
+  it('sin cobro previo no promete ninguna devolucion', () => {
+    const correo = partidaCancelada({ ...base, devueltoCents: 0 });
+
+    expect(correo.texto).toContain('No se te ha cobrado nada');
+    expect(correo.texto).not.toContain('100%');
+  });
+});
+
+describe('incidenciaResuelta', () => {
+  const base = {
+    jugador: 'Ana Soto',
+    partida: 'El faro',
+    currency: 'EUR',
+    url: 'https://x',
+  };
+
+  it('aprobada: dice el importe abonado', () => {
+    const correo = incidenciaResuelta({
+      ...base,
+      aprobada: true,
+      devueltoCents: 1500,
+      nota: null,
+    });
+
+    expect(correo.texto).toContain('15,00');
+  });
+
+  it('desestimada: lo dice sin hablar de importes', () => {
+    const correo = incidenciaResuelta({
+      ...base,
+      aprobada: false,
+      devueltoCents: 0,
+      nota: 'El game master aporto capturas de la sesion.',
+    });
+
+    expect(correo.texto).toContain('no hemos considerado que proceda');
+    expect(correo.texto).toContain('El game master aporto capturas');
+  });
+});
+
+describe('escapado del HTML', () => {
+  it('un titulo con caracteres de HTML no rompe el correo', () => {
+    const correo = reservaConfirmada({
+      ...RESERVA,
+      partida: '<script>alert(1)</script> & "comillas"',
+    });
+
+    expect(correo.html).not.toContain('<script>');
+    expect(correo.html).toContain('&lt;script&gt;');
+    expect(correo.html).toContain('&amp;');
+  });
+
+  it('el texto plano se queda tal cual, que ahi no hay nada que escapar', () => {
+    const correo = reservaConfirmada({ ...RESERVA, partida: 'Tormenta & fuego' });
+
+    expect(correo.texto).toContain('Tormenta & fuego');
+  });
+});

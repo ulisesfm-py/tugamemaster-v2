@@ -2,6 +2,7 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
+import { avisarPagoEnviado } from '@/modules/notifications/service';
 
 /**
  * Cierre de partidas y pago a los game masters.
@@ -195,6 +196,8 @@ export async function pagarGms(ahora = new Date()): Promise<ResultadoTarea> {
           }),
         ),
       ]);
+
+      await avisarPagoEnviado(payout.id);
 
       procesadas++;
       detalles.push(`pagada: ${partida.title} (${total} centimos)`);

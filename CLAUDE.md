@@ -166,6 +166,20 @@ record; se usan _separate charges and transfers_, nunca destination charges.
 - La reputación de un GM (estrellas, número de partidas) se deriva
   exclusivamente de reservas pagadas y completadas en la plataforma.
 
+## Avisos por correo
+
+- **Un aviso que falla no rompe lo que lo provoca.** Si Resend está caído, el
+  jugador ha pagado igual y su plaza sigue siendo suya. Los envíos van siempre
+  **fuera** de la transacción y envueltos de forma que registren el fallo y
+  sigan; nunca deben tumbar un cobro ni dejar un webhook devolviendo 500.
+- El correo es **opcional**: sin `RESEND_API_KEY` la aplicación funciona y cada
+  aviso se vuelca al registro. Mismo criterio que Discord y Vercel Blob.
+- Las plantillas son **lógica pura** en `src/modules/notifications/plantillas.ts`:
+  reciben datos sueltos, no filas de Prisma, y se comprueban sin enviar nada.
+  Todo correo lleva versión en texto plano además de HTML.
+- Lo que se mete en el HTML va **escapado**: los títulos y las notas los
+  escriben personas.
+
 ## Jobs programados
 
 - Un único endpoint `/api/cron/daily` ejecuta todas las tareas diarias en
