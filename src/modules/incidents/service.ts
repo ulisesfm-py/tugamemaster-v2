@@ -157,6 +157,12 @@ export async function aprobarIncidencia(
       data: { status: 'REFUNDED', refundedAt: new Date() },
     });
 
+    // Una reserva reembolsada no puntua al GM. Si el jugador ya habia dejado
+    // resena antes de reclamar, se retira: de lo contrario la regla se
+    // esquivaria valorando primero y reclamando despues. `deleteMany` porque
+    // lo normal es que no haya ninguna.
+    await tx.review.deleteMany({ where: { bookingId: incidencia.booking.id } });
+
     if (devueltoCents > 0) {
       await abonar(
         {

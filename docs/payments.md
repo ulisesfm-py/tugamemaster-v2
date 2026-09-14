@@ -60,10 +60,9 @@ la historia contable.
 **Los costes de Stripe no los asume TuGameMaster**: se descuentan del pago al
 GM, usando el coste exacto que Stripe reporta, no una estimación.
 
-> **Decisión pendiente (bloquea la fase 7).** En un reembolso, Stripe no
-> devuelve la comisión del cobro original y no hay pago al GM del que
-> descontarla. Hay que fijar quién asume ese coste antes de implementar
-> cancelaciones y reembolsos.
+> En un reembolso Stripe no devuelve la comisión del cobro original, y no hay
+> pago al GM del que descontarla. La fase 7 zanjó ese problema no devolviendo
+> el dinero a la tarjeta: ver [El monedero](#el-monedero-fase-7a-implementado).
 
 ## Alta de los GMs (fase 5, implementada)
 

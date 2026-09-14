@@ -43,7 +43,12 @@ fidelidad a lo anterior.
 - **Perfiles de usuario**: personalizables, con gustos y preferencias de rol.
 - **Blog**: los admins publican artículos; los usuarios comentan y dan like.
 - **Reviews**: los jugadores valoran a los GMs con estrellas + comentario opcional,
-  visible en la página pública del GM.
+  visible en la página pública del GM. Solo valora quien reservó, pagó y jugó
+  aquí, dentro de los 60 días siguientes al final de la partida, y con 14 días
+  para corregir la reseña antes de que se congele. Una reserva reembolsada por
+  incidencia **no** valora: esa vía ya tiene su cauce. Una valoración baja no
+  retiene el pago al GM; para eso están las incidencias. Reglas en
+  `src/modules/reviews/politica.ts`.
 - **Historial de partidas**: se guarda un registro de las partidas creadas por GM y
   se permite la opción de crear una continuación a dicha partida otro día. En modo
   campaña, al terminar la partida el GM puede escribir información sobre dónde terminó
@@ -121,11 +126,13 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   Los tres valores se persisten en la reserva. El 5% es el margen bruto de la
   plataforma y el coste de Stripe es un pass-through al GM.
 
-- **Pendiente de decidir en la fase 7**: en un reembolso, Stripe no devuelve
-  la comisión del cobro original y no hay pago al GM del que descontarla. Hay
-  que fijar quién asume ese coste (retenerlo como gastos de gestión no
-  reembolsables, o cargarlo al GM en caso de incidencia) antes de implementar
-  las cancelaciones. No implementar reembolsos sin esa decisión tomada.
+- **Las devoluciones se abonan como saldo, no vuelven a la tarjeta** (decidido
+  en la fase 7). En un reembolso Stripe no devuelve la comisión del cobro
+  original, así que devolver el dinero de verdad dejaría un coste que alguien
+  tendría que asumir. Si el dinero no sale de la plataforma, ese problema no
+  existe: se abona en el monedero del jugador. Cancelación dentro de plazo,
+  90%; incidencia aprobada por un admin, 100%. Solo un administrador puede
+  convertir saldo en dinero real, y solo la parte que entró por tarjeta.
 - Cada transición de dinero es una **fila con estado explícito** en
   `PaymentEvent`, con `stripeId` e `idempotencyKey` únicos. Prohibido guardar
   el objeto de Stripe como JSON opaco y derivar el estado de él (error de la

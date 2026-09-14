@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { puedeValorar } from '@/modules/reviews/politica';
 
 /** Reservas de un jugador, separadas en proximas e historial. */
 export async function misReservas(userId: string) {
@@ -20,6 +21,7 @@ export async function misReservas(userId: string) {
           slug: true,
           system: true,
           startsAt: true,
+          endsAt: true,
           status: true,
           gm: { select: { user: { select: { name: true, slug: true } } } },
         },
@@ -28,15 +30,18 @@ export async function misReservas(userId: string) {
   });
 
   const ahora = Date.now();
+  const fecha = new Date(ahora);
   const activa = (estado: string) => estado === 'PENDING' || estado === 'PAID';
 
-  // `reclamable` se decide aqui y no en la pagina: depende de la hora actual,
-  // y leer el reloj durante el render de un componente es impuro.
+  // `reclamable` y `valorable` se deciden aqui y no en la pagina: dependen de
+  // la hora actual, y leer el reloj durante el render de un componente es
+  // impuro.
   const conReclamable = reservas.map((r) => ({
     ...r,
     reclamable:
       r.game.startsAt.getTime() <= ahora &&
       (r.status === 'PAID' || r.status === 'COMPLETED'),
+    valorable: puedeValorar({ estado: r.status, finPartida: r.game.endsAt }, fecha).ok,
   }));
 
   return {
