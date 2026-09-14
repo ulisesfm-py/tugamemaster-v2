@@ -25,6 +25,39 @@ export function emailEnabled(): boolean {
   return Boolean(process.env['RESEND_API_KEY'] && process.env['EMAIL_FROM']);
 }
 
+/**
+ * Direccion a la que desviar **todo** el correo, si esta configurada.
+ *
+ * Para desarrollo. Los usuarios de prueba tienen direcciones inventadas
+ * (`ana@tugamemaster.test`): enviarles de verdad genera rebotes duros, que es
+ * lo que mas castiga la reputacion de un remitente. Con el desvio puesto, los
+ * correos llegan a un buzon real y el asunto dice a quien iban.
+ */
+function desvio(): string | undefined {
+  return process.env['EMAIL_REDIRECT_TO'] || undefined;
+}
+
+/**
+ * Aplica el desvio, si lo hay.
+ *
+ * En produccion se respeta igualmente —los despliegues de vista previa son un
+ * uso legitimo— pero se avisa por registro, porque tener esto puesto sin
+ * querer significa que ningun usuario recibe su correo.
+ */
+function destino(correo: Correo): Correo {
+  const a = desvio();
+  if (!a) return correo;
+
+  if (process.env.NODE_ENV === 'production') {
+    console.warn(
+      `EMAIL_REDIRECT_TO esta configurado en produccion: el correo para ` +
+        `${correo.para} se envia a ${a} y su destinatario no lo recibira.`,
+    );
+  }
+
+  return { ...correo, para: a, asunto: `[para: ${correo.para}] ${correo.asunto}` };
+}
+
 let cliente: Resend | undefined;
 
 function resend(): Resend {
@@ -58,23 +91,25 @@ export async function enviarCorreo(correo: Correo): Promise<boolean> {
     return false;
   }
 
+  const salida = destino(correo);
+
   try {
     const respuesta = await resend().emails.send({
       from: process.env['EMAIL_FROM'] as string,
-      to: correo.para,
-      subject: correo.asunto,
-      text: correo.texto,
-      html: correo.html,
+      to: salida.para,
+      subject: salida.asunto,
+      text: salida.texto,
+      html: salida.html,
     });
 
     if (respuesta.error) {
-      console.error(`Resend rechazo el correo a ${correo.para}:`, respuesta.error);
+      console.error(`Resend rechazo el correo a ${salida.para}:`, respuesta.error);
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error(`Fallo al enviar el correo a ${correo.para}:`, error);
+    console.error(`Fallo al enviar el correo a ${salida.para}:`, error);
     return false;
   }
 }

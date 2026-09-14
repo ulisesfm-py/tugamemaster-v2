@@ -101,10 +101,11 @@ disparar las transferencias a los GMs.
 
 ### Email (Resend, opcional en desarrollo)
 
-| Variable         | Descripción                                                   |
-| ---------------- | ------------------------------------------------------------- |
-| `RESEND_API_KEY` | Clave de API para email transaccional.                        |
-| `EMAIL_FROM`     | Remitente de los correos, p. ej. `TuGameMaster <no-reply@…>`. |
+| Variable            | Descripción                                                   |
+| ------------------- | ------------------------------------------------------------- |
+| `RESEND_API_KEY`    | Clave de API para email transaccional.                        |
+| `EMAIL_FROM`        | Remitente de los correos, p. ej. `TuGameMaster <no-reply@…>`. |
+| `EMAIL_REDIRECT_TO` | Solo desarrollo: desvía **todo** el correo a esta dirección.  |
 
 **Si se dejan vacías, la aplicación funciona igual**: cada correo se compone
 entero y se vuelca al registro de la consola en vez de enviarse. Se puede
@@ -127,6 +128,27 @@ Hay tres etapas, y solo la última toca DNS:
 Enviar **no requiere buzón de correo**: un remitente `no-reply@` solo necesita
 esos registros DNS. El buzón hace falta para recibir respuestas, que es otra
 decisión.
+
+#### El desvío de desarrollo
+
+Los usuarios del seed tienen direcciones inventadas (`ana@tugamemaster.test`) y
+`.test` es un TLD reservado que no resuelve en ningún sitio. Enviarles de verdad
+genera **rebotes duros**, que es lo que más castiga la reputación de un
+remitente — y un dominio recién verificado no tiene ningún colchón.
+
+Por eso, en cuanto haya clave de API conviene poner también:
+
+```
+EMAIL_REDIRECT_TO=tu-correo@ejemplo.com
+```
+
+Con eso, todos los correos llegan a ese buzón sea quien sea el destinatario, y
+el asunto dice a quién iban de verdad: `[para: ana@tugamemaster.test] Tu plaza
+está confirmada`. En producción se deja **vacía**; si se configura por error,
+queda un aviso en el registro porque significa que ningún usuario recibe lo suyo.
+
+Recuerda que los enlaces de los correos salen de `AUTH_URL`: en local apuntan a
+`localhost`, así que sirven para leer el correo, no para pulsarlos desde el móvil.
 
 ### Almacenamiento de imágenes
 
