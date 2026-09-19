@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Avatar, Fecha, Precio } from '@/components/ui';
+import { cn } from '@/lib/utils';
 
 /**
  * La tarjeta de partida.
@@ -45,12 +46,19 @@ function plazas(libres: number, total: number) {
   return { texto: `${libres} de ${total} plazas libres`, urgente: false };
 }
 
-export function PartidaCard({ partida }: { partida: Partida }) {
+export function PartidaCard({
+  partida,
+  className,
+}: {
+  partida: Partida;
+  /** Se aplica al <li>: quien la coloca decide cuanto ocupa. */
+  className?: string;
+}) {
   const libres = partida.seatsTotal - partida._count.bookings;
   const aforo = plazas(libres, partida.seatsTotal);
 
   return (
-    <li className="h-full">
+    <li className={cn('h-full', className)}>
       <Link
         href={`/partidas/${partida.slug}`}
         className="group border-border bg-card hover:border-primary hover:shadow-primary/55 focus-visible:ring-ring focus-visible:ring-offset-background flex h-full flex-col overflow-hidden rounded-sm border transition hover:-translate-y-0.5 hover:shadow-[0_6px_26px_-10px] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
