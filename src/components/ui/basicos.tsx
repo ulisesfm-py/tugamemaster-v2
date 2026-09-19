@@ -31,7 +31,7 @@ export function Avatar({
     <div
       aria-hidden
       style={{ width: tamano, height: tamano, fontSize: tamano * 0.4 }}
-      className="flex items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+      className="bg-accent/20 font-heading text-accent flex items-center justify-center rounded-full font-bold"
     >
       {nombre.charAt(0).toUpperCase()}
     </div>
@@ -46,22 +46,18 @@ export function Avatar({
  */
 export function Estrellas({ valor, total }: { valor: number | null; total: number }) {
   if (valor === null) {
-    return (
-      <span className="text-sm text-slate-500 dark:text-slate-400">Sin valoraciones</span>
-    );
+    return <span className="text-muted-foreground text-sm">Sin valoraciones</span>;
   }
 
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span aria-hidden className="text-amber-500">
+      <span aria-hidden className="text-accent">
         {'★'.repeat(Math.round(valor))}
-        <span className="text-slate-300 dark:text-slate-700">
-          {'★'.repeat(5 - Math.round(valor))}
-        </span>
+        <span className="text-border">{'★'.repeat(5 - Math.round(valor))}</span>
       </span>
-      <span className="text-sm text-slate-600 dark:text-slate-400">
+      <span className="text-foreground text-sm">
         {valor.toFixed(1)}{' '}
-        <span className="text-slate-500 dark:text-slate-500">
+        <span className="text-muted-foreground">
           ({total} {total === 1 ? 'reseña' : 'reseñas'})
         </span>
       </span>
@@ -71,7 +67,7 @@ export function Estrellas({ valor, total }: { valor: number | null; total: numbe
 
 export function Etiqueta({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+    <span className="bg-secondary text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
       {children}
     </span>
   );

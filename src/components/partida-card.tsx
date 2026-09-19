@@ -2,65 +2,124 @@ import Link from 'next/link';
 
 import { Avatar, Fecha, Precio } from '@/components/ui';
 
-/** Tarjeta de partida del listado publico y del perfil de GM. */
-export function PartidaCard({
-  partida,
-}: {
-  partida: {
-    title: string;
-    slug: string;
-    system: string;
-    startsAt: Date;
-    seatsTotal: number;
-    priceCents: number;
-    currency: string;
-    gm: { user: { name: string; slug: string; image: string | null } };
-    _count: { bookings: number };
+/**
+ * La tarjeta de partida.
+ *
+ * Es la pieza que mas se repite en toda la web —portada, listado, perfil de
+ * GM— asi que las decisiones de aqui se ven en todas partes.
+ *
+ * Tres cosas que cambian respecto a la anterior:
+ *
+ * 1. **Las plazas se cuentan como urgencia, no como inventario.** «Queda 1
+ *    plaza» y «2 de 6 ocupadas» dicen el mismo dato; el primero mueve a
+ *    alguien y el segundo no.
+ * 2. **La nota del game master va en la tarjeta.** Es lo que mas ayuda a
+ *    elegir entre dos partidas parecidas, y antes habia que entrar para verla.
+ * 3. **Hay lamina siempre.** Cuando el GM no sube imagen —que sera lo normal
+ *    al principio— se compone una con el sistema de juego en grande, en vez de
+ *    dejar un hueco gris.
+ */
+
+type Partida = {
+  title: string;
+  slug: string;
+  system: string;
+  startsAt: Date;
+  seatsTotal: number;
+  priceCents: number;
+  currency: string;
+  gm: {
+    user: { name: string; slug: string; image: string | null };
   };
-}) {
+  _count: { bookings: number };
+  /** Reputacion del GM, si quien llama la ha consultado. */
+  reputacion?: { valoracionMedia: number | null; totalResenas: number };
+};
+
+/** Lo que se dice de las plazas, y con cuanta insistencia. */
+function plazas(libres: number, total: number) {
+  if (libres <= 0) return { texto: 'Completa', urgente: false };
+  if (libres === 1) return { texto: 'Queda 1 plaza', urgente: true };
+  if (libres === 2) return { texto: 'Quedan 2 plazas', urgente: true };
+
+  return { texto: `${libres} de ${total} plazas libres`, urgente: false };
+}
+
+export function PartidaCard({ partida }: { partida: Partida }) {
   const libres = partida.seatsTotal - partida._count.bookings;
+  const aforo = plazas(libres, partida.seatsTotal);
 
   return (
-    <li className="rounded-xl border border-slate-200 transition hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700">
-      <Link href={`/partidas/${partida.slug}`} className="block p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-              {partida.title}
-            </h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              {partida.system} · <Fecha valor={partida.startsAt} />
-            </p>
-          </div>
-
-          <p className="shrink-0 font-semibold text-slate-900 dark:text-slate-100">
-            <Precio cents={partida.priceCents} currency={partida.currency} />
-          </p>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-2">
-            <Avatar
-              src={partida.gm.user.image}
-              nombre={partida.gm.user.name}
-              tamano={24}
-            />
-            <span className="text-sm text-slate-600 dark:text-slate-400">
-              {partida.gm.user.name}
-            </span>
+    <li className="h-full">
+      <Link
+        href={`/partidas/${partida.slug}`}
+        className="group border-border bg-card hover:border-primary hover:shadow-primary/55 focus-visible:ring-ring focus-visible:ring-offset-background flex h-full flex-col overflow-hidden rounded-sm border transition hover:-translate-y-0.5 hover:shadow-[0_6px_26px_-10px] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <div className="from-accent/20 to-background relative grid aspect-[16/9] place-items-center overflow-hidden bg-gradient-to-br">
+          {/* Sin imagen propia todavia: el sistema de juego hace de portada.
+              Ver docs/diseno.md — `Game` no tiene campo de imagen. */}
+          <span className="font-heading text-foreground/55 px-4 text-center text-xl font-extrabold">
+            {partida.system}
           </span>
 
           <span
-            className={`ml-auto rounded-full px-2.5 py-1 text-xs font-medium ${
-              libres > 0
-                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+            className={`absolute top-2 left-2 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase ${
+              aforo.urgente
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background/70 text-foreground backdrop-blur-sm'
             }`}
           >
-            {libres > 0
-              ? `${libres} ${libres === 1 ? 'plaza libre' : 'plazas libres'}`
-              : 'Completa'}
+            {aforo.texto}
           </span>
+        </div>
+
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <span className="text-muted-foreground text-[11px] font-semibold tracking-widest uppercase">
+            {partida.system}
+          </span>
+
+          <h3 className="font-heading text-foreground text-base leading-snug font-bold text-balance">
+            {partida.title}
+          </h3>
+
+          <p className="text-muted-foreground text-sm">
+            <Fecha valor={partida.startsAt} />
+          </p>
+
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+            <Avatar
+              src={partida.gm.user.image}
+              nombre={partida.gm.user.name}
+              tamano={20}
+            />
+            {partida.gm.user.name}
+            {partida.reputacion?.valoracionMedia !== null &&
+              partida.reputacion !== undefined && (
+                <span className="flex items-center gap-1">
+                  <span aria-hidden className="text-accent">
+                    ★
+                  </span>
+                  <span className="text-foreground font-semibold tabular-nums">
+                    {partida.reputacion.valoracionMedia?.toFixed(1)}
+                  </span>
+                  <span className="sr-only">
+                    de 5, con {partida.reputacion.totalResenas} reseñas
+                  </span>
+                </span>
+              )}
+          </div>
+
+          <div className="border-border mt-auto flex items-baseline justify-between gap-2 border-t pt-3">
+            <span className="font-heading text-foreground text-lg font-bold tabular-nums">
+              <Precio cents={partida.priceCents} currency={partida.currency} />
+              <span className="text-muted-foreground ml-1 text-xs font-medium">
+                /plaza
+              </span>
+            </span>
+            <span className="text-primary text-sm font-semibold group-hover:underline">
+              Ver mesa
+            </span>
+          </div>
         </div>
       </Link>
     </li>

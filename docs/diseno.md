@@ -658,3 +658,68 @@ una**, sin necesidad de rehacerlas todas de golpe.
 Dos páginas que el pie querría enlazar y todavía no existen: `/como-funciona` y
 `/para-game-masters`. Su contenido es estático y ya está decidido, pero merece
 la pasada de diseño de D5 en vez de una versión apresurada ahora.
+
+---
+
+# D4 · Las piezas
+
+Todo vive en `src/components/ui` y se ve junto en **`/estilo`**, una página que
+no sale en el menú ni se enlaza desde ningún sitio. Existe para comprobar de
+una pasada que dos cosas que deberían parecerse se parecen — mucho más rápido
+que ir abriendo pantallas sueltas.
+
+## Botón
+
+Cinco variantes: `solido`, `perfil`, `fantasma`, `peligro` y `enlace`.
+
+**Solo el sólido lleva relieve**, y por eso se reserva a la acción principal de
+cada pantalla. Si hubiera tres botones con relieve, ninguno destacaría.
+
+Está reescrito sobre el que genera shadcn: se conserva la forma (primitiva de
+Base UI + cva) para que lo que se añada después encaje, pero las variantes son
+las nuestras.
+
+## Estados
+
+Una sola tabla con los estados de partida, reserva, incidencia y pago, cada uno
+con su texto y su tono. **El mismo significado tiene siempre el mismo color.**
+Antes cada pantalla los traducía a su manera y no siempre coincidían.
+
+Los tonos son semánticos y **no comparten color con el acento**: el ascua es
+«pulsa aquí», nunca «esto va bien».
+
+## Avisos
+
+Cuatro tonos: éxito, error, atención y dato. El `role` no es decorativo — un
+acierto se anuncia con `status` y un fallo con `alert`, que es lo que hace que
+un lector de pantalla los lea sin que haya que ir a buscarlos.
+
+## Formulario y estado vacío
+
+`Campo` pone etiqueta, control, ayuda y error siempre en el mismo orden, con el
+error enlazado al control por `aria-describedby`.
+
+`Vacio` admite una acción: un hueco sin contenido casi siempre tiene algo que
+la persona puede hacer, así que no se queda en «no hay nada».
+
+## La tarjeta de partida
+
+Es la pieza que más se repite, así que sus decisiones se ven en toda la web.
+
+1. **Las plazas se cuentan como urgencia, no como inventario.** «Queda 1 plaza»
+   y «2 de 6 ocupadas» dicen el mismo dato; el primero mueve a alguien.
+2. **La nota del game master va en la tarjeta.** Es lo que más ayuda a elegir
+   entre dos partidas parecidas, y antes había que entrar para verla.
+3. **Hay lámina siempre.** Sin imagen propia —que será lo normal al principio—
+   la compone el sistema de juego en grande, en vez de dejar un hueco gris.
+
+Lo que no se puede hacer todavía: **«faltan 2 para empezar»**. Requiere un
+mínimo de jugadores para arrancar, y el modelo no lo tiene. Queda anotado junto
+al resto de campos pendientes.
+
+## Un error que salió al mirarlo
+
+`Avatar` pinta un `<div>` cuando no hay foto, y estaba metido dentro de un
+`<p>`. Es HTML inválido y **rompía la hidratación** en el listado de partidas y
+en el propio muestrario. Es justo el tipo de cosa que no se ve leyendo el
+código y salta a la primera al abrir la consola.
