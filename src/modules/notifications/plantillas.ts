@@ -289,3 +289,62 @@ export function pagoEnviado(datos: {
     }),
   };
 }
+
+/**
+ * Al jugador, la vispera de la partida.
+ *
+ * `conDevolucion` no se deduce aqui: lo decide la politica de cancelacion en
+ * el momento del envio. El recordatorio sale entre 24 y 48 horas antes segun
+ * cuando corra el cron, asi que unas veces el plazo sigue abierto y otras no,
+ * y prometer lo que no es seria peor que no decir nada.
+ */
+export function recordatorioPartida(datos: {
+  jugador: string;
+  partida: string;
+  gm: string;
+  inicio: Date;
+  conDevolucion: boolean;
+  url: string;
+}): Plantilla {
+  return {
+    asunto: `Recordatorio: ${datos.partida}`,
+    ...maquetar({
+      titulo: 'Tu partida está al caer',
+      parrafos: [
+        `Hola ${datos.jugador}, te escribimos para recordarte que tienes mesa con ${datos.gm}.`,
+        datos.conDevolucion
+          ? 'Si al final no puedes venir, avisa cuanto antes: mientras falten más de 48 horas, liberar la plaza te devuelve el 90% en saldo.'
+          : 'Si no puedes venir, libera la plaza para que pueda ocuparla otra persona. A estas alturas ya no hay devolución, pero el game master y el resto de la mesa lo agradecerán.',
+      ],
+      datos: [
+        ['Partida', datos.partida],
+        ['Cuándo', fechaLarga(datos.inicio)],
+        ['Game master', datos.gm],
+      ],
+      boton: { texto: 'Ver la partida', url: datos.url },
+    }),
+  };
+}
+
+/** Al jugador, cuando ya ha jugado y aun no ha valorado. */
+export function pideResena(datos: {
+  jugador: string;
+  partida: string;
+  gm: string;
+  diasDePlazo: number;
+  url: string;
+}): Plantilla {
+  return {
+    asunto: `¿Qué tal estuvo ${datos.partida}?`,
+    ...maquetar({
+      titulo: '¿Cómo fue la partida?',
+      parrafos: [
+        `Hola ${datos.jugador}, esperamos que disfrutaras de la mesa de ${datos.gm}.`,
+        'Tu valoración es lo único que distingue a un buen game master de uno que dice serlo: solo puede valorar quien reservó, pagó y jugó aquí.',
+        `Te llevará menos de un minuto, y tienes ${datos.diasDePlazo} días para hacerlo.`,
+      ],
+      boton: { texto: 'Valorar la partida', url: datos.url },
+      pie: 'Si algo fue mal de verdad, no lo cuentes aquí: abre una incidencia desde Mis reservas y lo revisa una persona.',
+    }),
+  };
+}

@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { pedirResenas, recordarPartidas } from '@/modules/notifications/tareas';
 import { cerrarPartidas, pagarGms } from '@/modules/payments/payouts';
 
 /**
@@ -13,10 +14,19 @@ import { cerrarPartidas, pagarGms } from '@/modules/payments/payouts';
  * no en un fichero en disco como el celerybeat de la v1.
  */
 
-/** Tareas a ejecutar, en orden. Cerrar partidas antes de pagarlas. */
+/**
+ * Tareas a ejecutar, en orden.
+ *
+ * Cerrar partidas va primero porque las demas dependen de ello: pagar al GM
+ * exige la partida cerrada, y pedir resena exige la reserva en COMPLETED, que
+ * es lo que pone el cierre. Pedir resena el mismo dia que se cierra la partida
+ * es justo cuando el recuerdo esta fresco.
+ */
 const TAREAS = [
   { nombre: 'cerrar-partidas', ejecutar: cerrarPartidas },
   { nombre: 'pagar-gms', ejecutar: pagarGms },
+  { nombre: 'recordar-partidas', ejecutar: recordarPartidas },
+  { nombre: 'pedir-resenas', ejecutar: pedirResenas },
 ] as const;
 
 async function ejecutarTareas(): Promise<Response> {

@@ -298,6 +298,15 @@ model Booking {
   cancelledAt DateTime?
   refundedAt  DateTime?
 
+  /// Cuando se envio el recordatorio previo a la partida. Nulo si aun no.
+  ///
+  /// Es lo que impide que el cron diario lo reenvie cada madrugada: la marca
+  /// vive en la reserva, no en el hecho de que el job se ejecute una sola vez.
+  reminderSentAt DateTime?
+
+  /// Cuando se pidio la resena, ya jugada la partida. Nulo si aun no.
+  reviewRequestSentAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

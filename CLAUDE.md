@@ -184,6 +184,15 @@ record; se usan _separate charges and transfers_, nunca destination charges.
 
 - Un único endpoint `/api/cron/daily` ejecuta todas las tareas diarias en
   secuencia. Cada tarea es idempotente y deja traza en `ScheduledJob`.
+- **Un aviso que sale del cron lleva su marca en la fila**, no en el hecho de
+  que el job corra una vez (`reminderSentAt`, `reviewRequestSentAt`). La marca
+  se escribe se haya enviado o no: reintentar cada noche contra una dirección
+  que rebota arruina la reputación del remitente, y un recordatorio reintentado
+  al día siguiente llega cuando la partida ya se ha jugado.
+- El **recordatorio se envía con 72 h de ventana**, no 24. El aviso sirve para
+  que quien no pueda venir libere la plaza, y eso solo es útil mientras el
+  plazo de cancelación siga abierto (48 h). Avisar más tarde es avisar cuando
+  ya no se puede hacer nada.
 - El cron se ejecuta a las **04:00 Europe/Madrid**. Ninguna lógica de negocio
   puede depender del minuto exacto de ejecución: el pago al GM se define como
   "48h o más después del final", no como "exactamente a las 48h".

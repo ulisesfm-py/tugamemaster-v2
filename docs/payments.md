@@ -142,14 +142,20 @@ no tendría ningún sentido. La reserva queda pagada en el acto.
 
 ## Pago al GM (fase 6, implementado)
 
-El endpoint `/api/cron/daily`, protegido con `CRON_SECRET`, ejecuta dos tareas
-en orden:
+El endpoint `/api/cron/daily`, protegido con `CRON_SECRET`, ejecuta cuatro
+tareas en orden:
 
 1. **Cerrar partidas**: las publicadas cuya hora de fin ya pasó pasan a
    `COMPLETED`, y sus reservas pagadas también. Esto arranca el reloj de las 48
-   horas y es lo que habilitará dejar reseña.
+   horas y es lo que habilita dejar reseña.
 2. **Pagar a los GMs**: partidas cerradas hace más de 48 h, sin incidencia
    abierta y con el GM verificado.
+3. **Recordar partidas**: a quien juega dentro de las próximas 72 h y aún no ha
+   recibido su aviso.
+4. **Pedir reseñas**: a quien ya jugó, no ha valorado y sigue en plazo.
+
+Cerrar va primero porque las demás dependen de ello: pagar exige la partida
+cerrada, y pedir reseña exige la reserva en `COMPLETED`.
 
 Un pago bloqueado **se puede reintentar**: una incidencia se resuelve y una
 cuenta sin verificar acaba verificándose, así que la consulta vuelve a recoger

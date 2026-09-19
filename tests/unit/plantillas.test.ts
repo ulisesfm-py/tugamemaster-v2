@@ -5,6 +5,8 @@ import {
   nuevaReserva,
   pagoEnviado,
   partidaCancelada,
+  pideResena,
+  recordatorioPartida,
   reservaConfirmada,
 } from '@/modules/notifications/plantillas';
 
@@ -57,6 +59,21 @@ describe('todas las plantillas', () => {
       importeCents: 1368,
       currency: 'EUR',
       url: 'https://tugamemaster.com/cuenta/cobros',
+    }),
+    recordatorioPartida({
+      jugador: 'Ana Soto',
+      partida: 'El faro de Finisterre',
+      gm: 'Laura Vega',
+      inicio: INICIO,
+      conDevolucion: false,
+      url: 'https://tugamemaster.com/partidas/el-faro',
+    }),
+    pideResena({
+      jugador: 'Ana Soto',
+      partida: 'El faro de Finisterre',
+      gm: 'Laura Vega',
+      diasDePlazo: 60,
+      url: 'https://tugamemaster.com/mis-reservas',
     }),
   ];
 
@@ -224,5 +241,65 @@ describe('escapado del HTML', () => {
     const correo = reservaConfirmada({ ...RESERVA, partida: 'Tormenta & fuego' });
 
     expect(correo.texto).toContain('Tormenta & fuego');
+  });
+});
+
+describe('recordatorioPartida', () => {
+  const base = {
+    jugador: 'Ana Soto',
+    partida: 'El faro de Finisterre',
+    gm: 'Laura Vega',
+    inicio: INICIO,
+    url: 'https://tugamemaster.com/partidas/el-faro',
+  };
+
+  it('dice cuando es y quien dirige', () => {
+    const correo = recordatorioPartida({ ...base, conDevolucion: false });
+
+    expect(correo.asunto).toContain('El faro de Finisterre');
+    expect(correo.texto).toContain('Laura Vega');
+  });
+
+  it('con el plazo abierto, ofrece cancelar con devolucion', () => {
+    const correo = recordatorioPartida({ ...base, conDevolucion: true });
+
+    expect(correo.texto).toContain('90%');
+    expect(correo.texto).not.toContain('ya no hay devolución');
+  });
+
+  it('con el plazo cerrado, no promete una devolucion que no toca', () => {
+    const correo = recordatorioPartida({ ...base, conDevolucion: false });
+
+    expect(correo.texto).toContain('ya no hay devolución');
+    expect(correo.texto).not.toContain('90%');
+  });
+
+  it('pide igualmente que libere la plaza aunque no cobre nada', () => {
+    const correo = recordatorioPartida({ ...base, conDevolucion: false });
+
+    expect(correo.texto).toContain('libera la plaza');
+  });
+});
+
+describe('pideResena', () => {
+  const correo = pideResena({
+    jugador: 'Ana Soto',
+    partida: 'El faro de Finisterre',
+    gm: 'Laura Vega',
+    diasDePlazo: 60,
+    url: 'https://tugamemaster.com/mis-reservas',
+  });
+
+  it('pregunta por la partida concreta', () => {
+    expect(correo.asunto).toContain('El faro de Finisterre');
+    expect(correo.texto).toContain('Laura Vega');
+  });
+
+  it('dice el plazo que queda', () => {
+    expect(correo.texto).toContain('60 días');
+  });
+
+  it('manda las quejas serias a la via de las incidencias, no a la resena', () => {
+    expect(correo.texto).toContain('incidencia');
   });
 });
