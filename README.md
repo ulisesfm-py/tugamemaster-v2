@@ -38,6 +38,21 @@ Qué significa cada variable y dónde se obtiene:
 | `npm run typecheck`    | Comprobación de tipos sin emitir                |
 | `npm run format`       | Formatea con Prettier                           |
 | `npm run format:check` | Verifica el formato (lo que corre en CI)        |
+| `npm test`             | Pruebas de dominio (Vitest)                     |
+| `npm run e2e`          | Pruebas de extremo a extremo (Playwright)       |
+| `npm run e2e:ui`       | Las mismas, con el visor interactivo            |
+
+## Pruebas
+
+`npm test` no necesita nada: es lógica pura.
+
+`npm run e2e` levanta la aplicación y la conduce con un navegador de verdad
+contra la base de datos de desarrollo, así que necesita `.env.local` y el seed
+puesto (`npm run db:seed`). Cada prueba se fabrica sus propios datos y los
+borra al terminar; el envío de correo queda apagado mientras corren.
+
+No están en CI todavía: harían falta una base de datos y unos secretos en el
+runner, y esa es una decisión de infraestructura aparte.
 
 ## Secretos
 

@@ -278,7 +278,7 @@ export async function cancelarPartida(
             amountCents: reserva.amountCents,
             type: 'REFUND_CREDIT',
             bookingId: reserva.id,
-            note: `El game master cancelo ${partida.title}`,
+            note: `El game master canceló ${partida.title}`,
           },
           tx,
         );

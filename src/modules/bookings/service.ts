@@ -312,7 +312,7 @@ export async function cancelarReserva(
           amountCents: devueltoCents,
           type: 'REFUND_CREDIT',
           bookingId,
-          note: `Cancelacion de ${reserva.game.title} (${PORCENTAJE_DEVOLUCION}%)`,
+          note: `Cancelación de ${reserva.game.title} (${PORCENTAJE_DEVOLUCION}%)`,
         },
         tx,
       );

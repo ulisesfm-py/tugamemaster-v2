@@ -218,7 +218,17 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   `(gameId, userId)`.
 - **Testing**: Vitest para la lógica de dominio (obligatorio en pagos,
   reservas y reputación); Playwright para el camino crítico reservar -> cobrar
-  -> jugar -> pagar al GM. Las pruebas de pagos usan Stripe Test Clocks.
+  -> jugar -> pagar al GM.
+  Los E2E cubren hoy el camino completo **salvo el tramo de la tarjeta**:
+  reservar, aforo, liberar plaza, valorar y la devolución cuando cancela el GM.
+  Se usan partidas gratuitas, que recorren el mismo código sin pasar por Stripe
+  Checkout. El tramo de la tarjeta exige la CLI de Stripe reenviando webhooks y
+  va aparte.
+  Las pruebas se fabrican sus datos con SQL directo (`tests/e2e/apoyo`), no con
+  el cliente de Prisma: aquel lleva `server-only` y el cargador de Playwright no
+  sabe ejecutarlo. **Cada prueba borra lo que crea**, incluidos los apuntes de
+  monedero, que sobreviven al borrado de su reserva porque la clave ajena los
+  deja huérfanos en vez de borrarlos en cascada.
 - **Linting**: ESLint + Prettier, ejecutados en CI. No se commitea código que
   no pase lint ni tests.
 
