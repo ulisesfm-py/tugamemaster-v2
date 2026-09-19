@@ -321,3 +321,149 @@ el resto.
 | «Te toca hacer» del jugador       | Reservas jugadas sin reseña, incidencias    |
 | «Necesita tu atención» del GM     | Incidencias abiertas, `Payout` bloqueado    |
 | Ingresos del GM                   | `Booking.payoutCents` y estado del `Payout` |
+
+---
+
+# D1c · Referencia: StartPlaying
+
+Estudio de la web de referencia para entender **qué información maneja** y qué
+nos falta a nosotros. No se copia ni su estructura visual ni sus textos: lo que
+interesa es el inventario de datos y los caminos de navegación.
+
+## La diferencia de modelo, que lo condiciona todo
+
+Antes de comparar pantallas hay que ver que **no vendemos lo mismo**.
+
+|                 | StartPlaying                                    | TuGameMaster                                   |
+| --------------- | ----------------------------------------------- | ---------------------------------------------- |
+| Unidad de venta | La **campaña**: te apuntas a una mesa que sigue | La **partida**: reservas una fecha concreta    |
+| Cobro           | Por sesión, al empezar cada una                 | Una vez, al reservar                           |
+| Compromiso      | Alto. Hay campañas por la sesión 84             | Bajo. Pruebas una tarde y ya verás             |
+| Continuidad     | Es el producto                                  | Opcional: el GM crea la continuación si quiere |
+| Dónde se juega  | Solo en línea                                   | Sin definir                                    |
+
+Su modelo retiene mejor; el nuestro tiene menos fricción para entrar. **El
+nuestro es más fácil de probar**, y eso importa en un mercado sin costumbre de
+pagar por dirigir. Conviene apoyarse en ello en vez de disimularlo: «reserva una
+tarde, sin suscribirte a nada» es un argumento, no una carencia.
+
+## Lo que ellos muestran y nosotros no
+
+### En la ficha de una partida
+
+Su página de partida lleva una **ficha técnica** que responde a «¿es esta mesa
+para mí?» antes de leer la descripción:
+
+| Dato                     | Lo tenemos | Comentario                                                  |
+| ------------------------ | ---------- | ----------------------------------------------------------- |
+| Tipo: one-shot o campaña | No         | En nuestro modelo se deduce, pero no se anuncia             |
+| Sistema                  | Sí         | Ellos admiten varios a la vez                               |
+| Nivel de personajes      | No         | Solo aplica a algunos sistemas                              |
+| Idioma de la mesa        | En el GM   | Debería estar en la partida: un GM bilingüe dirige en ambos |
+| Experiencia requerida    | **No**     | «Abierta a todos» / «se presupone soltura»                  |
+| Edad mínima              | **No**     | Relevante y hoy invisible                                   |
+| Duración de la sesión    | Sí         | La calculamos pero no la enseñamos                          |
+| Etiquetas de estilo      | **No**     | Combate, exploración, interpretación…                       |
+| Etiquetas de tema        | **No**     | Terror, fantasía oscura, humor…                             |
+
+**Esta es la mayor laguna de contenido que tenemos.** Hoy alguien que entra en
+una partida nuestra sabe qué sistema es, cuándo y cuánto cuesta, pero no si le
+va a encajar. Y es justo lo que decide si se apunta.
+
+### En la tarjeta del listado
+
+Su tarjeta dice, además de lo que decimos nosotros:
+
+- **Estado en forma de urgencia**: «faltan 3 para empezar», «queda 1 plaza».
+  Nosotros decimos «2 de 6 plazas ocupadas», que es el mismo dato contado de la
+  forma menos motivadora.
+- **Nota del GM y número de reseñas**, ahí mismo. Nosotros no lo llevamos a la
+  tarjeta, y es lo que más ayuda a elegir entre dos.
+- **Distintivo de GM destacado**.
+
+### En el perfil del game master
+
+Señales de confianza que ellos muestran y nosotros no:
+
+- **Antigüedad** en la plataforma y **partidas dirigidas** (esto sí lo tenemos).
+- **Tasa de respuesta y tiempo medio de respuesta.** Solo tiene sentido si hay
+  mensajería, que nosotros no tenemos.
+- **«Destaca por…»**, etiquetas derivadas de lo que dicen sus reseñas.
+- **Distintivos**: escribe para tal editorial, pódcast, mesa LGTBQ+, sin IA
+  generativa. Es identidad declarada, no verificada.
+- **Pronombres** junto al nombre.
+
+Lo que nosotros vamos a tener y ellos no: **jugadores distintos y repetidores**,
+y **partidas canceladas**. Son más difíciles de falsear que cualquier
+distintivo, porque salen de reservas pagadas.
+
+### En la navegación
+
+Su menú tiene cuatro cosas: buscar partidas, **buscar game masters**, entrar y
+registrarse. Nosotros no tenemos menú, y tampoco **directorio de GMs**: hay
+perfiles, pero no hay forma de recorrerlos.
+
+Y en el buscador usan **fichas de descubrimiento** —juega hoy, quedan pocas
+plazas, para principiantes, campañas nuevas— que son atajos curados por encima
+de los filtros. Son baratas de hacer y quitan el problema de la página en blanco.
+
+### Garantía
+
+La suya aparece **en la propia página de la partida**, junto al precio, no
+escondida en un enlace legal. Nosotros tenemos la nuestra —90%, 100% si el GM
+no aparece, saldo que no caduca— y la enseñamos solo en `/condiciones` y en una
+línea pequeña bajo el botón.
+
+## En qué nos podemos diferenciar
+
+1. **España, en serio.** Todo en español, horarios en hora peninsular, precios
+   en euros y con el IVA claro. Ellos son una web en inglés donde el español es
+   una excepción.
+2. **Presencial.** StartPlaying es solo en línea. Aquí hay cultura de tienda, de
+   asociación y de jornadas. Permitir partidas presenciales —con su sitio y su
+   aforo— es el hueco más grande que dejan libres. **Es una decisión de producto
+   que hay que tomar**, porque afecta al modelo de datos (lugar, dirección,
+   cómo se muestra) y al de confianza.
+3. **Compromiso bajo.** Reservar una tarde suelta en vez de entrar en una
+   campaña de meses.
+4. **Continuidad sin suscripción.** Nuestras notas de sesión y las
+   continuaciones reservadas a quienes jugaron son un modelo propio: la campaña
+   nace sola si la mesa funciona, sin que nadie firme nada.
+
+## Estructura propuesta para nuestra web
+
+### Públicas
+
+| Ruta                    | Estado    | Qué es                                                           |
+| ----------------------- | --------- | ---------------------------------------------------------------- |
+| `/`                     | Rehacer   | Escaparate: banner, partidas abiertas, cómo funciona, garantía   |
+| `/partidas`             | Mejorar   | Buscador con filtros **y fichas de descubrimiento**              |
+| `/partidas/[slug]`      | Mejorar   | Ficha técnica completa + garantía junto al precio                |
+| `/gm`                   | **Nueva** | Directorio de game masters, con filtros                          |
+| `/gm/[slug]`            | Mejorar   | Verificado arriba, declarado abajo                               |
+| `/campanas/[slug]`      | Mejorar   | Igual, con imagen y estado de cada sesión                        |
+| `/u/[slug]`             | Retocar   | Perfil de jugador                                                |
+| `/como-funciona`        | **Nueva** | Para el jugador con dudas: pago, garantía, qué pasa si falla     |
+| `/para-game-masters`    | **Nueva** | Captación: comisión, cuándo se cobra, cómo se empieza            |
+| `/sistemas/[nombre]`    | **Nueva** | Una página por sistema. Es la puerta de entrada desde buscadores |
+| `/blog`, `/blog/[slug]` | Retocar   | Ya está bien                                                     |
+| `/condiciones`          | Retocar   | Enlazada desde el pie y desde cada partida                       |
+
+### Cuenta
+
+`/dashboard` adaptativo (jugador siempre, GM si lo es), `/mis-reservas`,
+`/cuenta`, `/cuenta/gm`, `/cuenta/saldo`, `/cuenta/cobros` **con ingresos**,
+`/cuenta/partidas` y sus hijas.
+
+### Administración
+
+Lo que hay, más un índice y una página de salud del cron.
+
+## Lo que NO copiamos
+
+- **Mensajería directa.** Ellos la tienen y de ahí salen la tasa y el tiempo de
+  respuesta. Abre moderación, acoso y responsabilidad. Al backlog.
+- **Cobro por sesión.** Es otro modelo de negocio, no una mejora del nuestro.
+- **Distintivos de identidad** (LGTBQ+, sin IA…). Tiene valor, pero abre una
+  discusión de moderación que ahora mismo no toca.
+- **Seguir una partida.** Útil, pero secundario frente a lo demás.
