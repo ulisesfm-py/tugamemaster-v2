@@ -109,6 +109,41 @@ export async function partidasJugadas(userId: string, limite = 20) {
   return reservas.map((r) => ({ id: r.id, ...r.game }));
 }
 
+/**
+ * Directorio de game masters.
+ *
+ * Solo los que pueden cobrar: un perfil de GM sin cuenta de cobro verificada
+ * no puede publicar partidas, asi que listarlo seria mandar a la gente a una
+ * puerta cerrada.
+ *
+ * Se ordena por partidas dirigidas, que es lo unico que no se puede fingir.
+ */
+export async function directorioDeGms(limite = 40) {
+  const gms = await db.gmProfile.findMany({
+    where: { payoutsEnabled: true },
+    take: limite,
+    select: {
+      id: true,
+      headline: true,
+      languages: true,
+      user: { select: { name: true, slug: true, image: true } },
+      _count: {
+        select: {
+          games: { where: { status: 'PUBLISHED', startsAt: { gte: new Date() } } },
+        },
+      },
+    },
+  });
+
+  const conReputacion = await Promise.all(
+    gms.map(async (gm) => ({ ...gm, reputacion: await reputacionGm(gm.id) })),
+  );
+
+  return conReputacion.sort(
+    (a, b) => b.reputacion.partidasDirigidas - a.reputacion.partidasDirigidas,
+  );
+}
+
 /** Perfil publico de un game master, o null si ese slug no es de un GM. */
 export async function perfilPublicoGm(slug: string) {
   const user = await db.user.findUnique({

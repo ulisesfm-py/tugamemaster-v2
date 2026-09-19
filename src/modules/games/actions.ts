@@ -88,6 +88,11 @@ async function accionSobrePartida(
   revalidatePath(`/cuenta/partidas/${gameId}`);
   revalidatePath('/partidas');
 
+  // Y la pagina publica de la partida, que es donde se anuncia que ha quedado
+  // cancelada o retirada. Sin esto se seguia sirviendo la version anterior.
+  const slug = String(formData.get('slug') ?? '');
+  if (slug) revalidatePath(`/partidas/${slug}`);
+
   return { ok: true };
 }
 

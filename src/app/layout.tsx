@@ -1,15 +1,26 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Barlow, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+/**
+ * Brasa usa dos familias y solo dos.
+ *
+ * Bricolage Grotesque para titulos: tiene caracter y aguanta el tamano
+ * grande. Barlow para todo lo demas: ligeramente estrecha, asi que cabe mas
+ * en una tarjeta sin apretar.
+ */
+const barlow = Barlow({
+  variable: '--font-barlow',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const bricolage = Bricolage_Grotesque({
+  variable: '--font-bricolage',
   subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -23,11 +34,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
+    // `dark` va fijo: el tema es unico y oscuro (ver docs/diseno.md). Ademas
+    // hace que las clases `dark:` que quedan de antes resuelvan por el lado
+    // correcto mientras se migran pagina a pagina a los tokens de Brasa.
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${barlow.variable} ${bricolage.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="bg-background text-foreground flex min-h-full flex-col">
+        {children}
+      </body>
     </html>
   );
 }

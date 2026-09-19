@@ -569,3 +569,92 @@ salir peor que el problema.
 La defensa es que volver a la web compense: la garantía, el historial y la
 reputación. Es un argumento más para que la garantía se vea bien y para que el
 historial del GM valga algo.
+
+---
+
+# D2 · Dirección elegida: Brasa
+
+Naranja de ascua sobre madera quemada. **Tema único y oscuro**: no hay variante
+clara, así que los tokens de `:root` son los definitivos y no los de un modo
+entre dos.
+
+| Token                     | Valor                 | Para qué                                               |
+| ------------------------- | --------------------- | ------------------------------------------------------ |
+| `--background`            | `#17120e`             | El fondo de todo                                       |
+| `--card` / `--popover`    | `#201a15`             | Lo que se levanta sobre el fondo                       |
+| `--secondary` / `--muted` | `#2a221b` / `#241d17` | Superficies intermedias                                |
+| `--foreground`            | `#f5ece2`             | Tinta                                                  |
+| `--muted-foreground`      | `#ab9b8a`             | Tinta secundaria                                       |
+| `--primary`               | `#e2622a`             | **El ascua.** Un solo acento, y se gasta donde importa |
+| `--accent`                | `#c9973f`             | Latón: reputación y detalles cálidos                   |
+| `--destructive`           | `#c2383f`             | Peligro                                                |
+| `--success` / `--warning` | `#6f9f5b` / `#d99b2b` | Estados                                                |
+| `--radius`                | `0.25rem`             | Brasa es de esquinas cortas: el cartel, no la pegatina |
+
+**Los estados no comparten tono con el acento.** Si «peligro» y «reservar» se
+parecen, uno de los dos miente.
+
+**Tipografía**: Bricolage Grotesque para títulos (tiene carácter y aguanta el
+tamaño grande) y Barlow para todo lo demás (ligeramente estrecha, así que cabe
+más en una tarjeta sin apretar). Dos familias y solo dos.
+
+**Taberna queda descartada como tema alternativo**, de momento. El coste no es
+construirla sino mantenerla: cada componente nuevo habría que mirarlo dos
+veces, y no son solo colores — el botón de Brasa es relleno con relieve y el de
+Taberna era de perfil. Como todos los colores viven en tokens, añadirla más
+adelante es definir doce valores y repasar las pantallas una vez, en vez de
+repasarlas dos veces mientras se construyen.
+
+# D3 · El esqueleto
+
+## Lo que se ha construido
+
+- **Cabecera** fija con marca, menú (Partidas · Game masters · Blog), campanita
+  de avisos y acceso a la cuenta. Antes no había ninguna.
+- **Pie** con tres columnas: jugar, dirigir y la casa.
+- **Layouts** para `(public)`, `(dashboard)` y `admin`, los tres sobre un mismo
+  `Cascaron`. Las páginas de entrar y registrarse se quedan sin él a propósito:
+  allí el único trabajo es el formulario, y un menú solo invita a irse.
+- **shadcn/ui** instalado, con su paleta por defecto sustituida por Brasa.
+- **`/gm`**, el directorio de game masters, que la cabecera necesitaba. Solo
+  lista a quienes pueden cobrar: un GM sin cuenta verificada no puede publicar,
+  así que listarlo sería mandar a la gente a una puerta cerrada.
+
+## El centro de avisos
+
+La campanita ya es real, no un adorno: `modules/notifications/avisos.ts`
+calcula lo que le espera a cada usuario. **Casi nada se guarda, se deriva** —
+«tienes una partida sin valorar» deja de ser cierto en cuanto valoras. Los
+pocos avisos que sí son sucesos, como una incidencia resuelta, se acotan por
+ventana de tiempo para que caduquen solos.
+
+Con esto se tapan dos de los huecos graves de la auditoría: **el game master ya
+se entera de que hay una incidencia en su partida y de que su pago está
+retenido.** Antes solo se enteraba de que no le habían pagado.
+
+La misma lista alimentará los bloques «te toca hacer» y «necesita tu atención»
+de los paneles.
+
+## La migración de las páginas
+
+`<html class="dark">` va fijo. Además de fijar el tema, hace que las clases
+`dark:` que quedan del estilo anterior resuelvan por el lado correcto: las
+páginas siguen viéndose bien mientras se migran a los tokens de Brasa **una a
+una**, sin necesidad de rehacerlas todas de golpe.
+
+## Dos errores que salieron al montarlo
+
+- **Cancelar una partida no revalidaba su página pública.** La acción
+  revalidaba el panel del GM y el listado, pero nunca `/partidas/[slug]`, así
+  que la página seguía anunciando una partida ya cancelada. Corregido.
+- **Una prueba E2E pasaba por suerte.** Comprobaba que el botón de cancelar
+  desapareciera, pero eso también es cierto _mientras la acción corre_: su
+  texto pasa a «Un momento...» y deja de coincidir. La prueba se iba a la
+  siguiente página antes de que el servidor terminara. Ahora espera a una señal
+  que solo aparece al terminar.
+
+## Lo que queda pendiente de D3
+
+Dos páginas que el pie querría enlazar y todavía no existen: `/como-funciona` y
+`/para-game-masters`. Su contenido es estático y ya está decidido, pero merece
+la pasada de diseño de D5 en vez de una versión apresurada ahora.

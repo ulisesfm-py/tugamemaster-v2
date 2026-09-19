@@ -70,7 +70,7 @@ export default async function GestionarPartidaPage({ params }: Props) {
           <ReservarBoton
             accion={publicarPartidaAction}
             texto="Publicar"
-            campos={{ gameId: partida.id }}
+            campos={{ gameId: partida.id, slug: partida.slug }}
           />
         )}
 
@@ -79,7 +79,7 @@ export default async function GestionarPartidaPage({ params }: Props) {
             accion={despublicarPartidaAction}
             texto="Retirar del portal"
             destructivo
-            campos={{ gameId: partida.id }}
+            campos={{ gameId: partida.id, slug: partida.slug }}
           />
         )}
 
@@ -89,7 +89,7 @@ export default async function GestionarPartidaPage({ params }: Props) {
               accion={cancelarPartidaAction}
               texto="Cancelar partida"
               destructivo
-              campos={{ gameId: partida.id }}
+              campos={{ gameId: partida.id, slug: partida.slug }}
             />
             {pagadas > 0 && (
               <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">

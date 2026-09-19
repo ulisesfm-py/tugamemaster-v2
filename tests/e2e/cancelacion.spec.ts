@@ -40,9 +40,11 @@ test('cancelar una partida devuelve el 100% en saldo a quien pago', async ({ pag
 
   await page.getByRole('button', { name: 'Cancelar partida' }).click();
 
-  // La pagina del GM no anuncia el nuevo estado (ver los hallazgos de esta
-  // fase); lo que si desaparece es la posibilidad de volver a cancelarla.
-  await expect(page.getByRole('button', { name: 'Cancelar partida' })).toHaveCount(0);
+  // Se espera a que la seccion de edicion desaparezca, que es lo que solo
+  // ocurre cuando la accion ha TERMINADO. Mirar si sigue el boton de cancelar
+  // no vale: mientras la accion corre, su texto pasa a "Un momento..." y deja
+  // de coincidir, asi que la comprobacion se cumpliria a mitad de faena.
+  await expect(page.getByRole('heading', { name: 'Editar' })).toHaveCount(0);
 
   // Donde si se ve es en la pagina publica de la partida.
   await page.goto(`/partidas/${partida.slug}`);
@@ -63,7 +65,7 @@ test('la jugadora ve el abono en su saldo y la partida como reembolsada', async 
   await entrarComo(page, USUARIOS.gm);
   await page.goto(`/cuenta/partidas/${partida.id}`);
   await page.getByRole('button', { name: 'Cancelar partida' }).click();
-  await expect(page.getByRole('button', { name: 'Cancelar partida' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Editar' })).toHaveCount(0);
 
   await entrarComo(page, USUARIOS.ana);
 
