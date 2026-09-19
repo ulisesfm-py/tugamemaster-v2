@@ -467,3 +467,105 @@ Lo que hay, más un índice y una página de salud del cron.
 - **Distintivos de identidad** (LGTBQ+, sin IA…). Tiene valor, pero abre una
   discusión de moderación que ahora mismo no toca.
 - **Seguir una partida.** Útil, pero secundario frente a lo demás.
+
+---
+
+# D1d · Hilo de mesa y centro de avisos
+
+Dos piezas que se decidieron juntas porque son la misma: un hilo de conversación
+por partida, y una campanita que avisa de lo que pasa en ella **y de todo lo
+demás que hoy no se entera nadie**.
+
+Se especifican ahora para que el diseño las contemple. **Se construyen después
+del diseño**, como fase propia.
+
+## El hilo de mesa
+
+Un hilo **asíncrono** por partida, no un chat en tiempo real. Por fuera se
+parece; por dentro no mantiene conexiones abiertas, que en Vercel son incómodas
+y se pagan. Y el uso real es asíncrono: la duda llega tres días antes y el
+recordatorio la víspera.
+
+| Regla        | Decisión                                                                  |
+| ------------ | ------------------------------------------------------------------------- |
+| Ámbito       | Uno por partida. Sin herencia entre sesiones de una campaña               |
+| Quién entra  | El GM y quien tenga reserva pagada                                        |
+| Quién sale   | Quien libera su plaza. Sus mensajes se quedan; deja de leer y de escribir |
+| Cuándo muere | Lo borra el GM, o la limpieza diaria pasados N días del fin de la partida |
+| Correo       | **Ninguno.** Los avisos van por la campanita                              |
+| Expulsar     | El GM **no** puede. Denuncia, y decide un administrador                   |
+
+**Por qué el GM no expulsa.** Sacar del hilo a alguien que ha pagado es
+quitarle algo que compró. Si hay que apartar a una persona, va con devolución
+por delante y lo decide quien puede devolver el dinero.
+
+**Moderación**: denunciar un mensaje lleva el caso al panel de administración,
+con el mismo patrón que las incidencias.
+
+## El centro de avisos
+
+Una campanita en la cabecera. Al abrirla, la lista de lo que te espera; al
+pulsar un aviso, te lleva al sitio.
+
+**La clave del diseño: casi todo son estados, no sucesos.** «Tienes una partida
+sin valorar» no es algo que ocurrió, es algo que es cierto ahora y deja de
+serlo al valorar. Por eso **se calcula, no se guarda**: sin tabla de
+notificaciones que mantener y sin avisos fantasma.
+
+### Lo que enseña
+
+| Aviso                             | A quién | De dónde sale                      |
+| --------------------------------- | ------- | ---------------------------------- |
+| Mensajes nuevos en una partida    | Ambos   | Marca de lectura del hilo          |
+| Puedes valorar una partida jugada | Jugador | Reserva `COMPLETED` sin reseña     |
+| Tu incidencia se ha resuelto      | Jugador | `Incident` resuelta                |
+| El game master canceló la partida | Jugador | Reserva `REFUNDED` por cancelación |
+| Tienes saldo sin usar             | Jugador | `WalletEntry` con suma positiva    |
+| Alguien se ha apuntado            | GM      | Reservas recientes                 |
+| Hay una incidencia en tu partida  | GM      | `Incident` abierta                 |
+| Tu pago está bloqueado            | GM      | `Payout` en `BLOCKED`              |
+| Te hemos pagado                   | GM      | `Payout` en `PAID`                 |
+| Sesión sin nota                   | GM      | Partida jugada sin `SessionNote`   |
+| No puedes publicar sin cobros     | GM      | `payoutsEnabled` en falso          |
+
+Es la misma lista que alimenta los bloques **«te toca hacer»** y **«necesita tu
+atención»** de los paneles. Una pieza, dos sitios donde se asoma.
+
+### Lo único que hay que guardar
+
+Hasta dónde ha leído cada uno cada hilo. Eso no se deduce de nada: usuario,
+partida y fecha de última lectura. Con eso salen los mensajes sin leer.
+
+Para los avisos de estado no hace falta marca: dejan de aparecer cuando dejan
+de ser ciertos.
+
+### Cómo se actualiza
+
+Al navegar, no con sondeos ni conexiones abiertas. Para algo asíncrono es de
+sobra, y no cuesta nada mantenerlo.
+
+## Datos nuevos que hacen falta
+
+| Dato                | Dónde        | Para qué                         |
+| ------------------- | ------------ | -------------------------------- |
+| Mensajes del hilo   | Tabla nueva  | El hilo en sí                    |
+| Marca de lectura    | Tabla nueva  | Saber qué es nuevo para cada uno |
+| Denuncia de mensaje | Reutilizable | Mismo patrón que las incidencias |
+
+## Páginas que toca
+
+- **Cabecera** (nueva, D3): la campanita y su panel desplegable.
+- **`/partidas/[slug]`**: el hilo, visible solo para la mesa. Junto a la nota de
+  sesión, que tiene el mismo criterio de acceso.
+- **Paneles**: los bloques de pendientes, alimentados por lo mismo.
+
+## Riesgo de negocio: la desintermediación
+
+Dar un canal de comunicación facilita que el GM y sus jugadores se pasen el
+contacto y jueguen la siguiente por fuera, sin comisión. Le pasa a todas las
+plataformas de este tipo y **no tiene solución técnica**; perseguirlo suele
+salir peor que el problema.
+
+La defensa es que volver a la web compense: la garantía, el historial y la
+reputación. Es un argumento más para que la garantía se vea bien y para que el
+historial del GM valga algo.
