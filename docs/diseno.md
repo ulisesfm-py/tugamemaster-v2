@@ -179,3 +179,145 @@ Tampoco hay forma de ver la salud del cron ni las cuentas de los GMs.
 Los huecos de datos (imagen de partida, ingresos del GM, incidencias del GM)
 son trabajo funcional, no visual. Conviene resolverlos **antes** de rediseñar
 las páginas donde aparecen, para no tener que rehacerlas dos veces.
+
+---
+
+# D1b · Contenido de las páginas
+
+Definir qué va en cada pantalla **antes** de decidir qué datos añadir. Así los
+campos nuevos salen de una necesidad real y no de una suposición.
+
+Notación: los datos marcados **(falta)** no existen hoy y habría que añadirlos;
+los marcados **(derivable)** se pueden calcular con lo que ya hay.
+
+## Portada `/`
+
+**Trabajo de esta página:** que alguien que no conoce la web entienda en diez
+segundos qué es, vea mesas a las que apuntarse y se fíe lo suficiente para
+pulsar una.
+
+| Bloque                   | Contenido                                                                       | Datos                             |
+| ------------------------ | ------------------------------------------------------------------------------- | --------------------------------- |
+| 1. Cabecera y banner     | Nombre, una frase de qué es esto, imagen de fondo                               | Estático                          |
+| 2. **Partidas abiertas** | Fila horizontal de tarjetas: imagen, título, sistema, fecha, GM, precio, plazas | `Game` + **imagen (falta)**       |
+| 3. Cómo funciona         | Tres pasos: eliges mesa, pagas tu plaza, juegas                                 | Estático                          |
+| 4. La garantía           | Qué pasa si el GM no aparece, cómo se cancela, qué es el saldo                  | Estático, sacado de `politica.ts` |
+| 5. Game masters          | Tres o cuatro perfiles con estrellas y partidas dirigidas                       | `reputacionGm` (ya existe)        |
+| 6. ¿Diriges tú?          | Captación de GMs: cómo se cobra, qué comisión, cómo se empieza                  | Estático                          |
+| 7. Del blog              | Dos o tres artículos recientes                                                  | `listarPosts` (ya existe)         |
+
+**Sobre el carrusel.** Te propongo una variante y te explico por qué. Un
+carrusel clásico —el que rota solo y enseña una cosa cada vez— esconde el
+catálogo: la mayoría de la gente solo ve la primera tarjeta. Como las partidas
+son el producto, conviene que se vean varias a la vez.
+
+Lo que propongo es una **fila deslizable** tipo Netflix: se ven tres o cuatro
+tarjetas completas, se arrastra para ver más y hay un enlace claro a «ver
+todas». Se siente como un carrusel, pero no esconde el catálogo ni se mueve
+solo.
+
+**Qué partidas salen ahí:** las publicadas, con plazas libres, ordenadas por
+fecha de inicio. Sin campo de «destacada» por ahora: eso es una decisión
+comercial que no toca tomar todavía.
+
+## Perfil del game master `/gm/[slug]`
+
+**Trabajo de esta página:** que alguien decida darle 15 € a un desconocido. Es
+la página de confianza de la web.
+
+La regla que la ordena: **separar con una línea clara lo que certifica la
+plataforma de lo que cuenta el GM de sí mismo.** Lo primero no se puede
+falsear y es lo que vale; lo segundo es presentación.
+
+| Bloque               | Contenido                                                                               | Datos                                   |
+| -------------------- | --------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1. Identidad         | Avatar, nombre, titular, idiomas, «en TuGameMaster desde…»                              | `User`, `GmProfile`, `createdAt`        |
+| 2. **Verificado**    | Estrellas y nº de reseñas, partidas dirigidas, jugadores distintos, partidas canceladas | `reputacionGm` + **(derivable)**        |
+| 3. Cómo dirige       | Texto libre del GM: estilo de mesa, qué esperar, tono                                   | `GmProfile.about`                       |
+| 4. Lo que cuenta él  | Años de experiencia, sistemas que domina                                                | **(falta)**                             |
+| 5. Próximas partidas | Tarjetas con plazas libres y precio                                                     | Ya existe                               |
+| 6. Campañas          | Las que dirige, con su estado                                                           | `Campaign` (existe, no se muestra aquí) |
+| 7. Reseñas           | Estrellas, comentario, autor, partida                                                   | Ya existe                               |
+| 8. Historial         | Partidas dirigidas ya jugadas                                                           | Ya existe                               |
+
+**Sobre los años de experiencia.** Lo pediste y tiene sentido, pero es un dato
+que el GM se pone a sí mismo: nadie puede comprobarlo. Va en el bloque 4, con
+los demás datos declarados, y visualmente distinto del bloque verificado. Si se
+mezclan, la palabra «verificado» deja de significar nada.
+
+**Dos datos verificados que no estamos usando y valen mucho:**
+
+- **Jugadores distintos** que han pasado por sus mesas, y cuántos **repiten**.
+  Que alguien vuelva a jugar con el mismo GM es la señal más honesta que hay.
+- **Partidas canceladas** por él. Es el riesgo real que corre quien reserva, y
+  hoy no se ve en ninguna parte. Un GM que no cancela nunca merece que se sepa.
+
+Los dos son **derivables** de lo que ya está guardado. Ninguno necesita campo
+nuevo.
+
+## Panel del jugador `/dashboard`
+
+**Trabajo de esta página:** decirte qué tienes pendiente y llevarte a ello. Hoy
+es un andamio con datos de depuración.
+
+| Bloque               | Contenido                                                          | Datos                          |
+| -------------------- | ------------------------------------------------------------------ | ------------------------------ |
+| 1. Próxima partida   | La más cercana: imagen, cuándo, GM, enlace, cuenta atrás           | `misReservas` (ya existe)      |
+| 2. **Te toca hacer** | Valorar una partida jugada, incidencia resuelta, reserva sin pagar | **(derivable)**                |
+| 3. Saldo             | Disponible y enlace a movimientos                                  | `saldoDe` (ya existe)          |
+| 4. Tus próximas      | Las demás reservas confirmadas                                     | Ya existe                      |
+| 5. Descubrir         | Enlace a partidas, filtrado por sus sistemas preferidos            | `preferredSystems` (ya existe) |
+
+El bloque 2 es el que más valor aporta y no existe: hoy, si una partida tuya
+terminó y puedes valorarla, no te enteras salvo que entres a Mis reservas.
+
+## Panel del game master
+
+**Trabajo de esta página:** decirle si puede cobrar, qué mesas tiene, quién
+viene y cuánto va a ganar.
+
+| Bloque                      | Contenido                                                                          | Datos                                 |
+| --------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------- |
+| 1. Aviso de cobros          | Si no está verificado, esto manda sobre todo lo demás                              | `payoutsEnabled` (ya existe)          |
+| 2. **Necesita tu atención** | Incidencia abierta, pago bloqueado, sesión sin nota, partida que puede continuarse | **(derivable)**                       |
+| 3. Próxima que diriges      | Cuándo, quién viene, plazas por llenar                                             | Ya existe                             |
+| 4. **Ingresos**             | Cobrado, pendiente de pago, ya pagado                                              | **(derivable)** de `Booking`/`Payout` |
+| 5. Tus partidas             | Listado con estado, ocupación e ingreso previsto                                   | Ya existe + desglose                  |
+| 6. Crear partida            | Acceso destacado                                                                   | —                                     |
+
+### ¿Uno o dos paneles?
+
+Un usuario puede ser jugador y GM a la vez, y hoy conviven `/dashboard` y
+`/cuenta/partidas` sin relación clara.
+
+**Mi recomendación: un solo panel que se adapta.** Siempre enseña la parte de
+jugador; si tienes perfil de GM, aparece además la de game master. Razones:
+casi todos los GMs juegan también, dos paneles obligan a elegir «con qué
+sombrero entro», y la lista de «te toca hacer» es más útil junta que repartida.
+
+La alternativa —dos espacios separados con un conmutador— tiene sentido si
+esperas GMs profesionales con muchas mesas, para los que la parte de jugador
+sería ruido. Es una decisión tuya sobre a quién esperas.
+
+## Lo que hace falta añadir, hasta ahora
+
+De definir estas cuatro páginas salen estos datos. La lista crecerá al definir
+el resto.
+
+**Campos nuevos en el modelo:**
+
+| Dato                | Dónde       | Para qué                                 |
+| ------------------- | ----------- | ---------------------------------------- |
+| Imagen de partida   | `Game`      | Tarjetas de la portada y del listado     |
+| Años de experiencia | `GmProfile` | Bloque «lo que cuenta él» del perfil     |
+| Sistemas que domina | `GmProfile` | Ídem, y para filtrar por GM más adelante |
+
+**Consultas nuevas, sin tocar el modelo:**
+
+| Dato                              | Se deriva de                                |
+| --------------------------------- | ------------------------------------------- |
+| Jugadores distintos y repetidores | `Booking` agrupado por usuario              |
+| Partidas canceladas por el GM     | `Game.status = CANCELLED`                   |
+| «Te toca hacer» del jugador       | Reservas jugadas sin reseña, incidencias    |
+| «Necesita tu atención» del GM     | Incidencias abiertas, `Payout` bloqueado    |
+| Ingresos del GM                   | `Booking.payoutCents` y estado del `Payout` |
