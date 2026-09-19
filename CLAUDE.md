@@ -180,6 +180,17 @@ record; se usan _separate charges and transfers_, nunca destination charges.
 - Lo que se mete en el HTML va **escapado**: los títulos y las notas los
   escriben personas.
 
+## Observabilidad
+
+- Sentry es **opcional**: sin `SENTRY_DSN` no se inicializa nada y la
+  aplicación funciona igual. Mismo criterio que Resend, Discord y Blob.
+- **No se envían datos personales** (`sendDefaultPii: false`), no se graba la
+  sesión del usuario y no se muestrea el rendimiento. El asistente de Sentry
+  deja lo contrario: si alguien lo ejecuta, hay pruebas que fallan.
+- Los ajustes viven en `src/lib/observabilidad.ts`, compartidos por el arranque
+  del servidor (`instrumentation.ts`) y el del navegador
+  (`instrumentation-client.ts`).
+
 ## Jobs programados
 
 - Un único endpoint `/api/cron/daily` ejecuta todas las tareas diarias en

@@ -158,14 +158,41 @@ Recuerda que los enlaces de los correos salen de `AUTH_URL`: en local apuntan a
 
 **Dónde se obtiene**: panel de Vercel → _Storage_ → _Blob_ → _Connect_.
 
-### Observabilidad (opcional en desarrollo)
+### Observabilidad (Sentry, opcional)
 
-| Variable     | Descripción                 |
-| ------------ | --------------------------- |
-| `SENTRY_DSN` | DSN del proyecto en Sentry. |
+| Variable                 | Descripción                                         |
+| ------------------------ | --------------------------------------------------- |
+| `SENTRY_DSN`             | DSN del proyecto. Errores del servidor.             |
+| `NEXT_PUBLIC_SENTRY_DSN` | DSN para el navegador. Errores del cliente.         |
+| `SENTRY_ORG`             | Organización, solo para subir los mapas de fuentes. |
+| `SENTRY_PROJECT`         | Proyecto, ídem.                                     |
+| `SENTRY_AUTH_TOKEN`      | Token de subida, ídem. **Este sí es un secreto.**   |
 
-Si se deja vacío, el registro de errores queda desactivado y la aplicación
-funciona con normalidad.
+**Si se dejan vacías, la aplicación funciona con normalidad** y no se
+inicializa nada. Es el mismo criterio que con Resend.
+
+**Dónde se obtiene**: [Sentry](https://sentry.io) → crear proyecto de tipo
+_Next.js_ → _Settings_ → _Client Keys (DSN)_. El mismo valor sirve para las dos
+primeras variables.
+
+Un DSN **no es un secreto**: está pensado para viajar en el código que se
+descarga el navegador y solo permite enviar eventos al proyecto, no leer nada.
+El que sí hay que proteger es `SENTRY_AUTH_TOKEN`.
+
+#### Qué se envía y qué no
+
+- **No se envían datos personales.** `sendDefaultPii` está en `false` a
+  propósito: el asistente de Sentry lo deja en `true`, y con eso se adjuntan la
+  IP, las cabeceras y los datos del usuario a cada error. Aquí se manejan
+  correos, reservas y pagos.
+- **No se graba la sesión.** Session Replay queda desactivado: registra lo que
+  el usuario ve y escribe, y hay formularios de pago de por medio.
+- **No se muestrea el rendimiento** (`tracesSampleRate: 0`). Lo que se quiere
+  son los errores; las trazas son las que consumen la cuota y activarlas es una
+  decisión aparte.
+
+Los ajustes viven en `src/lib/observabilidad.ts` y hay pruebas que fallan si
+alguien los cambia sin querer.
 
 ## Entornos
 
