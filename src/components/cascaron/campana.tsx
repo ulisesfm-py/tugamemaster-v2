@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
 
 import type { Aviso } from '@/modules/notifications/avisos';
+
+import { CLASE_PANEL, useDesplegable } from './use-desplegable';
 
 /**
  * La campanita y su panel.
@@ -20,29 +21,7 @@ const TONO = {
 } as const;
 
 export function Campana({ avisos }: { avisos: Aviso[] }) {
-  const [abierta, setAbierta] = useState(false);
-  const caja = useRef<HTMLDivElement>(null);
-
-  // Cerrar al pulsar fuera o con Escape: lo que espera cualquiera de un panel
-  // desplegable, y lo que un `details` no da gratis.
-  useEffect(() => {
-    if (!abierta) return;
-
-    function fuera(e: MouseEvent) {
-      if (!caja.current?.contains(e.target as Node)) setAbierta(false);
-    }
-    function escape(e: KeyboardEvent) {
-      if (e.key === 'Escape') setAbierta(false);
-    }
-
-    document.addEventListener('mousedown', fuera);
-    document.addEventListener('keydown', escape);
-
-    return () => {
-      document.removeEventListener('mousedown', fuera);
-      document.removeEventListener('keydown', escape);
-    };
-  }, [abierta]);
+  const { abierta, setAbierta, caja } = useDesplegable();
 
   const cuenta = avisos.length;
 
@@ -83,10 +62,7 @@ export function Campana({ avisos }: { avisos: Aviso[] }) {
       </button>
 
       {abierta && (
-        <div
-          role="menu"
-          className="border-border bg-popover absolute right-0 z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-sm border shadow-xl shadow-black/40"
-        >
+        <div role="menu" className={`${CLASE_PANEL} w-[min(20rem,calc(100vw-2rem))]`}>
           <p className="border-border text-muted-foreground border-b px-3 py-2 text-xs font-semibold tracking-wider uppercase">
             Avisos
           </p>

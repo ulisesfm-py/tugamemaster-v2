@@ -41,7 +41,17 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="es"
       className={`dark ${barlow.variable} ${bricolage.variable} h-full antialiased`}
     >
-      <body className="bg-background text-foreground flex min-h-full flex-col">
+      {/* `suppressHydrationWarning` es por las extensiones del navegador, no
+          por nosotros: Grammarly y compania inyectan atributos en <body>
+          (`data-gr-ext-installed`, `data-new-gr-c-s-check-loaded`) antes de
+          que React hidrate, y eso levanta un aviso de discrepancia que no
+          tiene arreglo desde aqui. Solo silencia los atributos de esta
+          etiqueta, un nivel: cualquier discrepancia de verdad dentro de la
+          pagina sigue avisando. */}
+      <body
+        suppressHydrationWarning
+        className="bg-background text-foreground flex min-h-full flex-col"
+      >
         {children}
       </body>
     </html>

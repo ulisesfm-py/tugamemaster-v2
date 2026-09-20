@@ -1,11 +1,13 @@
 import Link from 'next/link';
 
-import { Avatar } from '@/components/ui';
 import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
 import { avisosDe } from '@/modules/notifications/avisos';
+import { salirAction } from '@/modules/users/actions';
 import { saldoDe } from '@/modules/wallet/service';
 
 import { Campana } from './campana';
+import { MenuUsuario } from './menu-usuario';
 import { Saldo } from './saldo';
 
 /**
@@ -28,9 +30,18 @@ export async function Cabecera() {
   const session = await auth();
   const usuario = session?.user;
 
-  const [avisos, saldo] = usuario
-    ? await Promise.all([avisosDe(usuario.id), saldoDe(usuario.id)])
-    : [[], 0];
+  const [avisos, saldo, perfilGm] = usuario
+    ? await Promise.all([
+        avisosDe(usuario.id),
+        saldoDe(usuario.id),
+        // Solo para saber que enlaces ensenar en el menu: la existencia de un
+        // perfil de GM es lo que convierte a alguien en game master.
+        db.gmProfile.findUnique({
+          where: { userId: usuario.id },
+          select: { id: true },
+        }),
+      ])
+    : [[], 0, null];
 
   return (
     <header className="border-border bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-40 border-b backdrop-blur">
@@ -61,17 +72,14 @@ export async function Cabecera() {
             <>
               <Saldo cents={saldo} />
               <Campana avisos={avisos} />
-              <Link
-                href="/dashboard"
-                className="hover:bg-secondary focus-visible:ring-ring flex items-center gap-2 rounded-sm p-1 transition focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <span className="sr-only">Mi cuenta</span>
-                <Avatar
-                  src={usuario.image ?? null}
-                  nombre={usuario.name ?? '?'}
-                  tamano={28}
-                />
-              </Link>
+              <MenuUsuario
+                nombre={usuario.name ?? '?'}
+                imagen={usuario.image ?? null}
+                slug={usuario.slug}
+                esGm={perfilGm !== null}
+                esAdmin={usuario.isAdmin === true}
+                salir={salirAction}
+              />
             </>
           ) : (
             <>

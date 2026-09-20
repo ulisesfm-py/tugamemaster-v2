@@ -1022,3 +1022,35 @@ jugada sin `Payout` todavía y un asiento devuelto que se enseña pero no suma.
 Las veintiuna cifras salen exactas, y el resumen ligero del panel coincide con
 el libro completo —comparten el cálculo justamente para que no puedan decir
 cosas distintas.
+
+## El avatar no era un menú
+
+Un avatar en la esquina superior derecha **promete un menú**. El nuestro era un
+enlace suelto al panel: quien lo pulsaba buscando cerrar sesión acababa en otra
+página sin entender qué había pasado. Y no había forma de salir desde la
+interfaz — solo desde el panel, al final del todo.
+
+Ahora hay menú de cuenta: panel, reservas, saldo, los atajos de game master si
+diriges, perfil público, editar perfil, administración si eres admin, y cerrar
+sesión. Comparte con la campanita el comportamiento de cerrarse al pulsar fuera
+y con Escape, que vive en un hook y no copiado en los dos: si se separaran, uno
+de los dos acabaría sin Escape.
+
+El hook se llama `useDesplegable`, con el `use` en inglés a pesar del resto del
+código. No es una excepción de estilo: es lo que React exige para reconocer un
+hook, y lo que hace que las reglas que comprueban su uso funcionen.
+
+Cubierto con dos pruebas de punta a punta, porque cerrar sesión no tenía
+ninguna y resultó que no se podía hacer. Es de esas cosas que no rompen nada y
+solo se descubren usando la web.
+
+## El aviso de hidratación no era nuestro
+
+`data-new-gr-c-s-check-loaded` y `data-gr-ext-installed` los inyecta
+**Grammarly** en `<body>` antes de que React hidrate. Es el último caso que
+menciona el propio mensaje de error de React —«una extensión del navegador que
+toca el HTML»— y no tiene arreglo desde el código de la página.
+
+Lleva `suppressHydrationWarning` en `<body>`, que silencia **solo los atributos
+de esa etiqueta, un nivel**: cualquier discrepancia de verdad dentro de la
+página sigue avisando.
