@@ -53,6 +53,8 @@ export async function guardarPerfilGmAction(
     headline: String(formData.get('headline') ?? ''),
     about: String(formData.get('about') ?? ''),
     languages: listaDesdeTexto(formData.get('languages')),
+    yearsExperience: String(formData.get('yearsExperience') ?? ''),
+    systems: listaDesdeTexto(formData.get('systems')),
   });
 
   if (!resultado.ok) return { error: resultado.mensaje };

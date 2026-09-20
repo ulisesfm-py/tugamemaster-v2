@@ -2,12 +2,7 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 
-import {
-  perfilGmSchema,
-  perfilJugadorSchema,
-  type PerfilGmInput,
-  type PerfilJugadorInput,
-} from './schema';
+import { perfilGmSchema, perfilJugadorSchema, type PerfilJugadorInput } from './schema';
 
 /**
  * Reglas de negocio de los perfiles.
@@ -47,9 +42,14 @@ export async function actualizarPerfilJugador(
  * partidas: para eso hace falta completar el alta de Stripe (fase 5), que es
  * lo que pone `payoutsEnabled` a true.
  */
+/**
+ * La entrada llega como `unknown` a proposito: el formulario manda cadenas y el
+ * esquema las convierte, asi que el tipo de entrada y el de salida no
+ * coinciden. Parsear aqui dentro evita castings en quien llama.
+ */
 export async function guardarPerfilGm(
   userId: string,
-  input: PerfilGmInput,
+  input: unknown,
 ): Promise<Resultado> {
   const parsed = perfilGmSchema.safeParse(input);
 
@@ -61,6 +61,8 @@ export async function guardarPerfilGm(
     headline: parsed.data.headline,
     about: parsed.data.about,
     languages: parsed.data.languages,
+    yearsExperience: parsed.data.yearsExperience,
+    systems: parsed.data.systems,
   };
 
   await db.gmProfile.upsert({

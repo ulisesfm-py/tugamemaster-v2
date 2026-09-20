@@ -148,7 +148,13 @@ export function PerfilGmForm({
   valores,
 }: {
   accion: Accion;
-  valores: { headline: string; about: string | null; languages: string[] } | null;
+  valores: {
+    headline: string;
+    about: string | null;
+    languages: string[];
+    yearsExperience: number | null;
+    systems: string[];
+  } | null;
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
@@ -195,6 +201,39 @@ export function PerfilGmForm({
           name="languages"
           defaultValue={valores?.languages.join(', ') ?? 'es'}
           required
+          className={campo}
+        />
+      </Campo>
+
+      {/* De aqui para abajo, lo que cuentas tu. La web lo ensena separado de
+          las estrellas y las partidas dirigidas, que salen de reservas
+          pagadas: si se mezclaran, «verificado» dejaria de significar nada. */}
+      <Campo
+        id="yearsExperience"
+        etiqueta="Años dirigiendo (opcional)"
+        ayuda="Se muestra como dato que cuentas tú, no como dato verificado."
+      >
+        <input
+          id="yearsExperience"
+          name="yearsExperience"
+          type="number"
+          min="0"
+          max="60"
+          step="1"
+          defaultValue={valores?.yearsExperience ?? ''}
+          className={`${campo} sm:w-32`}
+        />
+      </Campo>
+
+      <Campo
+        id="systems"
+        etiqueta="Sistemas que dominas (opcional)"
+        ayuda="Separados por comas: D&D 5e, Vaesen, Vampiro"
+      >
+        <input
+          id="systems"
+          name="systems"
+          defaultValue={valores?.systems.join(', ') ?? ''}
           className={campo}
         />
       </Campo>

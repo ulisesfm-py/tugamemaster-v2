@@ -126,6 +126,13 @@ model GmProfile {
   /// Idiomas en los que dirige, en codigo ISO ("es", "en").
   languages String[] @default([])
 
+  /// Anos dirigiendo. Lo declara el GM y nadie puede comprobarlo: se ensena
+  /// aparte de la reputacion verificada, nunca mezclado con ella.
+  yearsExperience Int?
+
+  /// Sistemas que dice dominar. Tambien declarado.
+  systems String[] @default([])
+
   /// Cuenta conectada de Stripe (Express). Nulo hasta que inicia el alta.
   stripeAccountId String?   @unique
   chargesEnabled  Boolean   @default(false)

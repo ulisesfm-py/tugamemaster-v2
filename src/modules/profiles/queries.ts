@@ -1,6 +1,8 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { ESTADOS_PAGADOS } from '@/modules/bookings/service';
+import { seleccionTarjeta } from '@/modules/games/queries';
 
 /**
  * Consultas de lectura de los perfiles publicos.
@@ -45,6 +47,58 @@ export async function reputacionGm(gmProfileId: string): Promise<ReputacionGm> {
         : null,
     totalResenas: agregado._count,
     partidasDirigidas,
+  };
+}
+
+export type EstadisticasGm = {
+  /** Personas distintas que se han sentado a una de sus mesas ya jugada. */
+  jugadoresDistintos: number;
+  /** Cuantas de ellas han vuelto a otra de sus mesas. */
+  repetidores: number;
+  /** Partidas que cancelo teniendo gente dentro. */
+  partidasCanceladas: number;
+};
+
+/**
+ * Lo que se puede afirmar de un GM sin creerle nada.
+ *
+ * Son tres numeros que salen de reservas pagadas, asi que no se pueden inflar:
+ *
+ * - **Repetidores.** Que alguien vuelva a sentarse con el mismo GM es la senal
+ *   mas honesta que hay, y mas dificil de fingir que cualquier distintivo.
+ * - **Partidas canceladas.** Es el riesgo real de quien reserva y hasta ahora
+ *   no se veia en ninguna parte. Solo cuentan las que tenian a alguien dentro:
+ *   retirar un borrador que nadie habia reservado no le hace dano a nadie.
+ */
+export async function estadisticasGm(gmProfileId: string): Promise<EstadisticasGm> {
+  const [porJugador, partidasCanceladas] = await Promise.all([
+    db.booking.groupBy({
+      by: ['userId'],
+      where: {
+        // Solo partidas ya jugadas, la misma vara que `partidasDirigidas`.
+        // Contar tambien las reservas de mesas futuras diria «tres jugadores»
+        // de un GM con uno solo sentado a la mesa, y ademas esas reservas
+        // todavia se pueden devolver.
+        game: { gmId: gmProfileId, status: 'COMPLETED' },
+        status: { in: ESTADOS_PAGADOS },
+      },
+      _count: { _all: true },
+    }),
+    db.game.count({
+      where: {
+        gmId: gmProfileId,
+        status: 'CANCELLED',
+        // Al cancelar, las reservas pasan a REFUNDED: por eso se cuenta ese
+        // estado y no solo los pagados.
+        bookings: { some: { status: { in: [...ESTADOS_PAGADOS, 'REFUNDED'] } } },
+      },
+    }),
+  ]);
+
+  return {
+    jugadoresDistintos: porJugador.length,
+    repetidores: porJugador.filter((j) => j._count._all > 1).length,
+    partidasCanceladas,
   };
 }
 
@@ -160,7 +214,10 @@ export async function perfilPublicoGm(slug: string) {
           headline: true,
           about: true,
           languages: true,
+          yearsExperience: true,
+          systems: true,
           payoutsEnabled: true,
+          createdAt: true,
         },
       },
     },
@@ -168,47 +225,59 @@ export async function perfilPublicoGm(slug: string) {
 
   if (!user?.gmProfile) return null;
 
-  const [reputacion, resenas, proximasPartidas, historial] = await Promise.all([
-    reputacionGm(user.gmProfile.id),
-    db.review.findMany({
-      where: { gmId: user.gmProfile.id },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      select: {
-        id: true,
-        rating: true,
-        comment: true,
-        createdAt: true,
-        author: { select: { name: true, slug: true, image: true } },
-        game: { select: { title: true } },
-      },
-    }),
-    db.game.findMany({
-      where: {
-        gmId: user.gmProfile.id,
-        status: 'PUBLISHED',
-        startsAt: { gte: new Date() },
-      },
-      orderBy: { startsAt: 'asc' },
-      take: 10,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        system: true,
-        startsAt: true,
-        seatsTotal: true,
-        priceCents: true,
-        currency: true,
-        _count: {
-          select: { bookings: { where: { status: { in: ['PAID', 'COMPLETED'] } } } },
+  const [reputacion, estadisticas, resenas, proximasPartidas, campanas, historial] =
+    await Promise.all([
+      reputacionGm(user.gmProfile.id),
+      estadisticasGm(user.gmProfile.id),
+      db.review.findMany({
+        where: { gmId: user.gmProfile.id },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          author: { select: { name: true, slug: true, image: true } },
+          game: { select: { title: true } },
         },
-      },
-    }),
-    partidasDirigidas(user.gmProfile.id),
-  ]);
+      }),
+      db.game.findMany({
+        where: {
+          gmId: user.gmProfile.id,
+          status: 'PUBLISHED',
+          startsAt: { gte: new Date() },
+        },
+        orderBy: { startsAt: 'asc' },
+        take: 6,
+        select: seleccionTarjeta(),
+      }),
+      db.campaign.findMany({
+        where: { gmId: user.gmProfile.id },
+        orderBy: { createdAt: 'desc' },
+        take: 6,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          summary: true,
+          isOpen: true,
+          _count: { select: { games: true } },
+        },
+      }),
+      partidasDirigidas(user.gmProfile.id),
+    ]);
 
-  return { user, gm: user.gmProfile, reputacion, resenas, proximasPartidas, historial };
+  return {
+    user,
+    gm: user.gmProfile,
+    reputacion,
+    estadisticas,
+    resenas,
+    proximasPartidas,
+    campanas,
+    historial,
+  };
 }
 
 /** Perfil publico de cualquier usuario. */
@@ -262,6 +331,8 @@ export async function miPerfil(userId: string) {
           headline: true,
           about: true,
           languages: true,
+          yearsExperience: true,
+          systems: true,
           payoutsEnabled: true,
           onboardedAt: true,
         },

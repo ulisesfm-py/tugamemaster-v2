@@ -859,3 +859,44 @@ mitad. Se vio al contar las partidas de la base, no en el propio guion.
 
 Es el mismo patrón otra vez: **una comprobación que no puede ver aquello de lo
 que debería avisar.**
+
+## Perfil del game master `/gm/[slug]`
+
+Es la página que decide si alguien le da 15 € a un desconocido, así que la
+ordena una sola regla: **una línea clara entre lo que certifica la plataforma y
+lo que el game master cuenta de sí mismo.**
+
+Arriba, **«Lo que certificamos»**: cuatro cifras enmarcadas, todas sacadas de
+reservas pagadas aquí. Abajo, **«Lo que cuenta Laura»**: sin marco, sin color, y
+con la advertencia a la vista —«lo escribe quien dirige, no lo comprobamos»—.
+Si los dos bloques pesaran igual, la palabra «certificamos» dejaría de
+significar algo.
+
+Dos de las cifras son nuevas y no necesitaban ningún campo:
+
+- **Jugadores distintos, y cuántos han repetido.** Que alguien vuelva a
+  sentarse con el mismo GM es la señal más honesta que hay, y más difícil de
+  fingir que cualquier distintivo.
+- **Partidas canceladas.** Es el riesgo real de quien reserva y no se veía en
+  ninguna parte. Solo cuentan las que tenían gente dentro: retirar un borrador
+  que nadie había reservado no le hace daño a nadie.
+
+Los dos datos declarados —**años dirigiendo** y **sistemas que domina**— sí son
+campos nuevos en `GmProfile`.
+
+### Un número que contaba de más
+
+La primera versión decía «3 jugadores» de una GM con dos personas sentadas a la
+mesa: contaba también a quien solo había **reservado una partida futura**. Esas
+reservas ni se han jugado ni son definitivas —se pueden devolver—, así que
+ahora se cuentan con la misma vara que las partidas dirigidas: solo las ya
+jugadas. Un número que infla es peor que no tenerlo, porque está justo debajo
+del rótulo «lo que certificamos».
+
+### Y una lista de definiciones que no lo era
+
+Las cuatro cifras estaban en un `<dl>` cuyos `<div>` no tenían ni `dt` ni `dd`:
+HTML válido de puertas afuera y sin significado de puertas adentro. Ahora la
+etiqueta va antes que la cifra en el código —que es como se lee en voz alta,
+«partidas dirigidas: una»— y `order` las cambia de sitio para que a la vista
+mande el número.

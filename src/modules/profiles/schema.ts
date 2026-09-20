@@ -53,6 +53,19 @@ export const perfilGmSchema = z.object({
     .min(1, 'Indica al menos un idioma')
     .max(8, 'Como mucho 8 idiomas')
     .transform((lista) => [...new Set(lista.map((l) => l.toLowerCase()))]),
+
+  // Datos declarados: nadie los comprueba. Se guardan igual, pero la web los
+  // ensena separados de la reputacion, que si sale de reservas pagadas.
+  yearsExperience: z.preprocess(
+    (v) => (v === '' || v === null || v === undefined ? null : v),
+    z.coerce
+      .number()
+      .int('Los anos de experiencia tienen que ser un numero entero')
+      .min(0, 'Los anos de experiencia no pueden ser negativos')
+      .max(60, 'Esa cifra parece un error')
+      .nullable(),
+  ),
+  systems: etiquetas(12, 'sistemas'),
 });
 
 export type PerfilJugadorInput = z.infer<typeof perfilJugadorSchema>;

@@ -123,12 +123,19 @@ async function main() {
   // Laura tiene el alta de Stripe completada: puede publicar.
   const gmLaura = await db.gmProfile.upsert({
     where: { userId: laura.id },
-    update: {},
+    // Los datos declarados se refrescan al reseedear, como la ficha de las
+    // partidas: son datos de muestra del modelo de hoy.
+    update: {
+      yearsExperience: 9,
+      systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
+    },
     create: {
       userId: laura.id,
       headline: 'Terror investigativo en los anos 20',
       about: 'Mesas pausadas, mucha ambientacion y decisiones que pesan.',
       languages: ['es', 'en'],
+      yearsExperience: 9,
+      systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
       stripeAccountId: 'acct_test_laura',
       chargesEnabled: true,
       payoutsEnabled: true,
@@ -139,12 +146,17 @@ async function main() {
   // Marco aun no ha terminado el alta: sus partidas no pueden publicarse.
   const gmMarco = await db.gmProfile.upsert({
     where: { userId: marco.id },
-    update: {},
+    update: {
+      yearsExperience: 3,
+      systems: ['D&D 5e', 'Shadowdark'],
+    },
     create: {
       userId: marco.id,
       headline: 'Mazmorras con mala idea',
       about: 'Combates tacticos y trampas injustas, pero divertidas.',
       languages: ['es'],
+      yearsExperience: 3,
+      systems: ['D&D 5e', 'Shadowdark'],
     },
   });
 

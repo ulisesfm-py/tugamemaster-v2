@@ -16,8 +16,12 @@ import type { Filtros } from './schema';
  * Es una funcion y no una constante porque el filtro de plazas ocupadas
  * depende de la hora actual: como constante, la fecha limite se calcularia una
  * sola vez al cargar el modulo y se quedaria congelada.
+ *
+ * Se exporta para que el perfil del GM pinte las mismas tarjetas que el resto
+ * de la web: si cada consulta eligiera sus campos, la tarjeta ensenaria una
+ * cosa distinta segun la pagina.
  */
-function seleccionTarjeta() {
+export function seleccionTarjeta() {
   return {
     id: true,
     title: true,

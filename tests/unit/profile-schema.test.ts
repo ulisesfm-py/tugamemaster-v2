@@ -62,6 +62,8 @@ describe('perfilGmSchema', () => {
     headline: 'Terror investigativo en los anos 20',
     about: '',
     languages: ['es'],
+    yearsExperience: '9',
+    systems: ['Call of Cthulhu 7e'],
   };
 
   it('acepta un perfil correcto', () => {
@@ -86,5 +88,50 @@ describe('perfilGmSchema', () => {
 
   it('exige un titular con sustancia', () => {
     expect(perfilGmSchema.safeParse({ ...base, headline: 'corto' }).success).toBe(false);
+  });
+});
+
+describe('perfilGmSchema: datos declarados', () => {
+  const base = {
+    headline: 'Terror investigativo en los anos 20',
+    about: '',
+    languages: ['es'],
+    yearsExperience: '',
+    systems: [],
+  };
+
+  it('entiende los anos vacios como «no lo dice», no como cero', () => {
+    expect(perfilGmSchema.parse(base).yearsExperience).toBeNull();
+  });
+
+  it('convierte los anos a numero', () => {
+    expect(perfilGmSchema.parse({ ...base, yearsExperience: '9' }).yearsExperience).toBe(
+      9,
+    );
+  });
+
+  it('rechaza unos anos negativos', () => {
+    expect(perfilGmSchema.safeParse({ ...base, yearsExperience: '-2' }).success).toBe(
+      false,
+    );
+  });
+
+  it('rechaza una cifra de anos absurda', () => {
+    expect(perfilGmSchema.safeParse({ ...base, yearsExperience: '99' }).success).toBe(
+      false,
+    );
+  });
+
+  it('quita sistemas duplicados sin mirar mayusculas', () => {
+    const parsed = perfilGmSchema.parse({
+      ...base,
+      systems: ['Vaesen', 'vaesen', 'D&D 5e'],
+    });
+
+    expect(parsed.systems).toEqual(['Vaesen', 'D&D 5e']);
+  });
+
+  it('admite un GM que no declara nada', () => {
+    expect(perfilGmSchema.safeParse(base).success).toBe(true);
   });
 });

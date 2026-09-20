@@ -72,7 +72,13 @@ export default async function CuentaGmPage() {
           accion={guardarPerfilGmAction}
           valores={
             gm
-              ? { headline: gm.headline ?? '', about: gm.about, languages: gm.languages }
+              ? {
+                  headline: gm.headline ?? '',
+                  about: gm.about,
+                  languages: gm.languages,
+                  yearsExperience: gm.yearsExperience,
+                  systems: gm.systems,
+                }
               : null
           }
         />
