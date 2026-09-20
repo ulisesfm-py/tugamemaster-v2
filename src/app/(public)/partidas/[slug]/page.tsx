@@ -15,8 +15,10 @@ import {
 import { notaVisible } from '@/modules/campaigns/queries';
 import {
   EXPERIENCIA,
+  estadoVisible,
   etiquetasPorGrupo,
   idiomasDeLaMesa,
+  PLAZAS_POCAS,
   textoDeDuracion,
   textoDeEdad,
   tipoDeMesa,
@@ -80,6 +82,10 @@ export default async function PartidaPage({ params, searchParams }: Props) {
     ['PENDING', 'PAID', 'COMPLETED'].includes(partida.miReserva.status)
       ? partida.miReserva
       : null;
+
+  // Lo que se ensena no es siempre lo guardado: el cron cierra las partidas de
+  // madrugada, y hasta que pasa una ya jugada sigue diciendo «publicada».
+  const visible = estadoVisible(partida.status, partida.startsAt);
 
   const tipo = tipoDeMesa(partida);
   const experiencia = EXPERIENCIA[partida.experience];
@@ -159,18 +165,27 @@ export default async function PartidaPage({ params, searchParams }: Props) {
               <p className="text-muted-foreground text-sm">por plaza</p>
             </div>
 
-            <p
-              className={`mt-1 text-sm font-semibold ${
-                partida.plazasLibres > 0 && partida.plazasLibres <= 2
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              {partida.plazasLibres > 0
-                ? `${partida.plazasLibres} de ${partida.seatsTotal} plazas libres`
-                : 'Sin plazas libres'}
-            </p>
+            {/* El aforo solo tiene sentido mientras se pueda reservar: junto a
+                «esta partida ya se ha jugado», «4 plazas libres» se contradice.
+                Su autor si lo ve siempre, que para eso la gestiona. */}
+            {(visible === 'PUBLISHED' || partida.esMia) && (
+              <p
+                className={`mt-1 text-sm font-semibold ${
+                  partida.plazasLibres > 0 && partida.plazasLibres <= PLAZAS_POCAS
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {partida.plazasLibres > 0
+                  ? `${partida.plazasLibres} de ${partida.seatsTotal} plazas libres`
+                  : 'Sin plazas libres'}
+              </p>
+            )}
 
+            {/* El orden de estas ramas importa. Lo que cierra la puerta va
+                antes que lo que invita a entrar: con el gate de fecha al
+                final, a quien no habia iniciado sesion se le seguia diciendo
+                «inicia sesion para reservar» en una mesa ya jugada. */}
             <div className="mt-5">
               {partida.esMia ? (
                 <EnlaceBoton
@@ -180,6 +195,14 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 >
                   Gestionar mi partida
                 </EnlaceBoton>
+              ) : visible !== 'PUBLISHED' ? (
+                <p className="text-muted-foreground text-sm">
+                  {visible === 'COMPLETED'
+                    ? reservaActiva
+                      ? 'Jugaste esta partida.'
+                      : 'Esta partida ya se ha jugado.'
+                    : 'Esta partida no admite reservas.'}
+                </p>
               ) : !session?.user ? (
                 <EnlaceBoton href="/login" tamano="lg" className="w-full">
                   Inicia sesión para reservar
@@ -215,10 +238,6 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 <p className="text-muted-foreground text-sm">
                   No quedan plazas. Si alguien libera la suya, aparecerá aquí.
                 </p>
-              ) : partida.status !== 'PUBLISHED' ? (
-                <p className="text-muted-foreground text-sm">
-                  Esta partida no admite reservas.
-                </p>
               ) : (
                 <>
                   <ReservarBoton
@@ -250,7 +269,7 @@ export default async function PartidaPage({ params, searchParams }: Props) {
               es justo donde aparece la duda de «¿y si sale mal?». Los numeros
               salen de politica.ts para que la web no pueda contradecir al
               codigo que mueve el dinero. */}
-          {partida.priceCents > 0 && !partida.esMia && (
+          {partida.priceCents > 0 && !partida.esMia && visible === 'PUBLISHED' && (
             <div className="border-border mt-4 rounded-sm border border-dashed p-4">
               <h2 className="text-foreground text-sm font-semibold">
                 Reservar aquí te protege

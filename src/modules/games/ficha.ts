@@ -144,6 +144,33 @@ export function idiomasDeLaMesa(
   return codigos.map(nombreDeIdioma);
 }
 
+/** Los cuatro estados que guarda `Game.status`. */
+export type EstadoDePartida = 'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED';
+
+/**
+ * El estado que se le ensena a quien mira, que no siempre es el guardado.
+ *
+ * El cron cierra las partidas de madrugada, asi que entre que una termina y
+ * el cron pasa hay unas horas en las que sigue diciendo «publicada». En ese
+ * hueco la web la ofrecia como abierta, con su precio y sus plazas libres, y
+ * quien picaba se llevaba un «esta partida ya ha empezado» al pulsar: el
+ * servicio de reservas si lo comprueba.
+ *
+ * Se deduce en vez de guardarse para que no haya dos verdades: la fila dice lo
+ * que el cron sabe, y esto dice lo que es verdad ahora mismo.
+ */
+export function estadoVisible(
+  status: EstadoDePartida,
+  startsAt: Date,
+  ahora = new Date(),
+): EstadoDePartida {
+  if (status === 'PUBLISHED' && startsAt.getTime() <= ahora.getTime()) {
+    return 'COMPLETED';
+  }
+
+  return status;
+}
+
 /** Duracion en horas, redondeada a la media hora. */
 export function duracionEnHoras(startsAt: Date, endsAt: Date): number {
   const horas = (endsAt.getTime() - startsAt.getTime()) / 3_600_000;

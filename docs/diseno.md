@@ -900,3 +900,39 @@ HTML válido de puertas afuera y sin significado de puertas adentro. Ahora la
 etiqueta va antes que la cifra en el código —que es como se lee en voz alta,
 «partidas dirigidas: una»— y `order` las cambia de sitio para que a la vista
 mande el número.
+
+## Campaña `/campanas/[slug]` y perfil de jugador `/u/[slug]`
+
+Las dos eran sobre todo trabajo de estilo, pero la campaña dejó a la vista un
+fallo de verdad.
+
+En la campaña, el estado de cada sesión pasa a salir de **la tabla única de
+estados** en vez de una traducción propia de la página: el mismo significado,
+el mismo color en toda la web. Y la regla que define una campaña —cada sesión
+está reservada a quienes jugaron la anterior— se explica donde alguien decide
+si se mete, no en un enlace legal.
+
+El perfil de jugador sigue enseñando lo mismo que enseñaba: qué jugó y con
+quién. Ni precios, ni estados de pago, ni reservas canceladas. Eso es suyo.
+
+### La partida que se seguía ofreciendo después de jugarse
+
+El cron cierra las partidas a las 04:00, así que entre que una termina y el
+cron pasa hay hasta un día en el que la fila sigue diciendo `PUBLISHED`. La web
+la enseñaba como abierta —con su precio, sus plazas libres y su botón— y quien
+picaba se llevaba un «esta partida ya ha empezado» al pulsar: **el servicio de
+reservas sí lo comprobaba; la interfaz no.**
+
+Ahora hay `estadoVisible()`, que **deduce** el estado en vez de creerse la
+columna: publicada y con la hora pasada es, a efectos de lo que se enseña, una
+partida jugada. La usan la ficha y la campaña. Así no hay dos verdades: la fila
+dice lo que el cron sabe, y la función dice lo que es verdad ahora mismo.
+
+Al arreglarlo salió un segundo fallo en la misma pantalla: **el orden de las
+ramas**. El gate de fecha estaba al final de la cadena, después del «inicia
+sesión para reservar», así que a quien no había entrado se le seguía invitando
+a reservar una mesa ya jugada. Lo que cierra la puerta va antes que lo que
+invita a entrar.
+
+Cubierto con una prueba de punta a punta: una partida publicada con la hora
+pasada no ofrece reservar.

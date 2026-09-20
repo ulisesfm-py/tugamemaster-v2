@@ -4,6 +4,7 @@ import {
   ETIQUETAS,
   IDIOMAS,
   duracionEnHoras,
+  estadoVisible,
   etiquetasDe,
   etiquetasPorGrupo,
   idiomasDeLaMesa,
@@ -124,5 +125,29 @@ describe('tipo de mesa', () => {
 
   it('continuar una partida ya la hace de campana, aunque no tenga numero', () => {
     expect(tipoDeMesa({ previousGameId: 'g1' }).texto).toBe('Sesión de campaña');
+  });
+});
+
+describe('estado visible', () => {
+  const AYER = new Date('2026-09-19T18:00:00Z');
+  const MANANA = new Date('2026-09-21T18:00:00Z');
+  const AHORA = new Date('2026-09-20T18:00:00Z');
+
+  it('una partida publicada y futura sigue publicada', () => {
+    expect(estadoVisible('PUBLISHED', MANANA, AHORA)).toBe('PUBLISHED');
+  });
+
+  it('una publicada cuya hora ya paso se ensena como jugada', () => {
+    // El cron la cierra de madrugada; hasta entonces la fila dice PUBLISHED y
+    // la web la ofrecia como abierta.
+    expect(estadoVisible('PUBLISHED', AYER, AHORA)).toBe('COMPLETED');
+  });
+
+  it('una cancelada sigue cancelada aunque su fecha haya pasado', () => {
+    expect(estadoVisible('CANCELLED', AYER, AHORA)).toBe('CANCELLED');
+  });
+
+  it('un borrador con fecha pasada sigue siendo borrador', () => {
+    expect(estadoVisible('DRAFT', AYER, AHORA)).toBe('DRAFT');
   });
 });

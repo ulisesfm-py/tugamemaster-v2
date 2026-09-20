@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Avatar, Etiqueta, Fecha } from '@/components/ui';
+import { Avatar, EnlaceBoton, Etiqueta, Fecha, Vacio } from '@/components/ui';
 import { perfilPublicoUsuario } from '@/modules/profiles/queries';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -16,6 +16,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/** Un par de etiquetas con su rótulo. */
+function Gustos({ titulo, valores }: { titulo: string; valores: string[] }) {
+  if (valores.length === 0) return null;
+
+  return (
+    <section className="mt-6">
+      <h2 className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+        {titulo}
+      </h2>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {valores.map((v) => (
+          <Etiqueta key={v}>{v}</Etiqueta>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function UsuarioPage({ params }: Props) {
   const { slug } = await params;
   const perfil = await perfilPublicoUsuario(slug);
@@ -25,15 +43,16 @@ export default async function UsuarioPage({ params }: Props) {
   const { user, partidasJugadas, historial, esGm } = perfil;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-3xl px-4 py-10">
       <header className="flex flex-wrap items-start gap-5">
-        <Avatar src={user.image} nombre={user.name} tamano={72} />
+        <Avatar src={user.image} nombre={user.name} tamano={80} />
 
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+          <h1 className="font-heading text-foreground text-3xl font-extrabold">
             {user.name}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+
+          <p className="text-muted-foreground mt-1.5">
             {partidasJugadas === 0
               ? 'Todavía no ha jugado ninguna partida aquí.'
               : `Ha jugado ${partidasJugadas} ${
@@ -42,65 +61,45 @@ export default async function UsuarioPage({ params }: Props) {
           </p>
 
           {esGm && (
-            <Link
-              href={`/gm/${user.slug}`}
-              className="mt-3 inline-block text-sm font-medium text-indigo-600 hover:underline"
-            >
-              Ver su perfil de game master →
-            </Link>
+            <div className="mt-4">
+              <EnlaceBoton href={`/gm/${user.slug}`} variante="perfil" tamano="sm">
+                Ver su perfil de game master
+              </EnlaceBoton>
+            </div>
           )}
         </div>
       </header>
 
       {user.bio && (
-        <p className="mt-8 whitespace-pre-line text-slate-700 dark:text-slate-300">
+        <p className="text-muted-foreground mt-8 leading-relaxed whitespace-pre-line">
           {user.bio}
         </p>
       )}
 
-      {user.preferredSystems.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Sistemas que le gustan
-          </h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {user.preferredSystems.map((s) => (
-              <Etiqueta key={s}>{s}</Etiqueta>
-            ))}
-          </div>
-        </section>
-      )}
+      <Gustos titulo="Sistemas que le gustan" valores={user.preferredSystems} />
+      <Gustos titulo="Estilo de juego" valores={user.preferredStyles} />
 
-      {user.preferredStyles.length > 0 && (
-        <section className="mt-6">
-          <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Estilo de juego
-          </h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {user.preferredStyles.map((s) => (
-              <Etiqueta key={s}>{s}</Etiqueta>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="mt-10">
+        <h2 className="font-heading text-foreground text-xl font-bold">
+          Partidas jugadas
+        </h2>
 
-      {historial.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Partidas jugadas
-          </h2>
-
-          {/* Que jugo y con quien. Ni precios ni estados de pago: eso es suyo. */}
-          <ul className="mt-3 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+        {historial.length === 0 ? (
+          <Vacio className="mt-4" titulo="Aún no ha jugado nada aquí">
+            Cuando termine su primera mesa, aparecerá en esta lista.
+          </Vacio>
+        ) : (
+          /* Qué jugó y con quién. Ni precios ni estados de pago: eso es suyo. */
+          <ul className="border-border divide-border mt-4 divide-y rounded-sm border">
             {historial.map((p) => (
               <li key={p.id} className="px-4 py-3">
                 <Link
                   href={`/partidas/${p.slug}`}
-                  className="text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
+                  className="text-foreground text-sm font-medium hover:underline"
                 >
                   {p.title}
                 </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-muted-foreground text-xs">
                   {p.system} · <Fecha valor={p.startsAt} /> · dirigida por{' '}
                   <Link href={`/gm/${p.gm.user.slug}`} className="hover:underline">
                     {p.gm.user.name}
@@ -109,8 +108,8 @@ export default async function UsuarioPage({ params }: Props) {
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
     </main>
   );
 }

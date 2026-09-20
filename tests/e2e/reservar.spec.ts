@@ -89,6 +89,21 @@ test('el aforo se respeta: sin plazas no se puede reservar', async ({ page }) =>
   await expect(page.getByRole('button', { name: 'Reservar plaza' })).toHaveCount(0);
 });
 
+test('una partida publicada cuya hora ya paso no se puede reservar', async ({ page }) => {
+  // El cron la cierra de madrugada: hasta entonces la fila sigue diciendo
+  // PUBLISHED, y la web la ofrecia como abierta. El servicio si lo comprueba,
+  // asi que quien picaba se llevaba el error al pulsar.
+  const partida = await escenario.crearPartida('La que ya se jugo', {
+    empiezaEnHoras: -5,
+  });
+
+  await entrarComo(page, USUARIOS.ana);
+  await page.goto(`/partidas/${partida.slug}`);
+
+  await expect(page.getByText('Esta partida ya se ha jugado.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reservar plaza' })).toHaveCount(0);
+});
+
 test('el game master no puede reservar en su propia partida', async ({ page }) => {
   const partida = await escenario.crearPartida('La mia');
 
