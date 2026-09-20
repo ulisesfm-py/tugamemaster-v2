@@ -38,7 +38,7 @@ export async function reportarIncidencia(
   if (texto.length < 20) {
     return {
       ok: false,
-      mensaje: 'Cuentanos que paso con algo mas de detalle (al menos 20 caracteres)',
+      mensaje: 'Cuéntanos qué pasó con algo más de detalle (al menos 20 caracteres)',
     };
   }
 
@@ -70,7 +70,7 @@ export async function reportarIncidencia(
   }
 
   if (reserva.game.startsAt.getTime() > Date.now()) {
-    return { ok: false, mensaje: 'La partida todavia no ha empezado' };
+    return { ok: false, mensaje: 'La partida todavía no ha empezado' };
   }
 
   if (reserva.game.payout?.status === 'PAID') {
@@ -126,7 +126,7 @@ export async function aprobarIncidencia(
   if (!incidencia) return { ok: false, mensaje: 'Esa incidencia no existe' };
 
   if (incidencia.status !== 'OPEN') {
-    return { ok: false, mensaje: 'Esa incidencia ya esta resuelta' };
+    return { ok: false, mensaje: 'Esa incidencia ya está resuelta' };
   }
 
   if (incidencia.booking.game.payout?.status === 'PAID') {
@@ -203,7 +203,7 @@ export async function rechazarIncidencia(
   if (!incidencia) return { ok: false, mensaje: 'Esa incidencia no existe' };
 
   if (incidencia.status !== 'OPEN') {
-    return { ok: false, mensaje: 'Esa incidencia ya esta resuelta' };
+    return { ok: false, mensaje: 'Esa incidencia ya está resuelta' };
   }
 
   if (!nota.trim()) {

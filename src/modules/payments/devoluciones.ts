@@ -54,7 +54,7 @@ export async function devolverADinero(
     return {
       ok: false,
       mensaje:
-        'Esta reserva se pago integramente con saldo: no hay nada que devolver a una tarjeta',
+        'Esta reserva se pagó íntegramente con saldo: no hay nada que devolver a una tarjeta',
     };
   }
 
@@ -112,7 +112,7 @@ export async function devolverADinero(
         currency: reserva.currency,
         stripeId: reembolso.id,
         idempotencyKey: `cashout:${reserva.id}`,
-        failureMessage: nota.trim() || 'Devolucion a la tarjeta decidida por un admin',
+        failureMessage: nota.trim() || 'Devolución a la tarjeta decidida por un admin',
       },
     }),
   ]);

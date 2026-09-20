@@ -32,7 +32,7 @@ async function esAdministrador(userId: string): Promise<boolean> {
 
 export async function crearPost(userId: string, input: unknown): Promise<ResultadoPost> {
   if (!(await esAdministrador(userId))) {
-    return { ok: false, mensaje: 'No tienes permiso para publicar articulos' };
+    return { ok: false, mensaje: 'No tienes permiso para publicar artículos' };
   }
 
   const parsed = postSchema.safeParse(input);
@@ -85,7 +85,7 @@ export async function actualizarPost(
     select: { slug: true },
   });
 
-  if (!post) return { ok: false, mensaje: 'Ese articulo no existe' };
+  if (!post) return { ok: false, mensaje: 'Ese artículo no existe' };
 
   const d = parsed.data;
 
@@ -119,7 +119,7 @@ export async function publicarPost(
     select: { publishedAt: true },
   });
 
-  if (!post) return { ok: false, mensaje: 'Ese articulo no existe' };
+  if (!post) return { ok: false, mensaje: 'Ese artículo no existe' };
 
   await db.post.update({
     where: { id: postId },
@@ -142,7 +142,7 @@ export async function despublicarPost(
   }
 
   const post = await db.post.findUnique({ where: { id: postId }, select: { id: true } });
-  if (!post) return { ok: false, mensaje: 'Ese articulo no existe' };
+  if (!post) return { ok: false, mensaje: 'Ese artículo no existe' };
 
   await db.post.update({ where: { id: postId }, data: { status: 'DRAFT' } });
 
@@ -169,12 +169,12 @@ export async function borrarPost(
     select: { status: true, coverUrl: true },
   });
 
-  if (!post) return { ok: false, mensaje: 'Ese articulo no existe' };
+  if (!post) return { ok: false, mensaje: 'Ese artículo no existe' };
 
   if (post.status === 'PUBLISHED') {
     return {
       ok: false,
-      mensaje: 'Retira primero el articulo del blog: lo publicado no se borra de golpe',
+      mensaje: 'Retira primero el artículo del blog: lo publicado no se borra de golpe',
     };
   }
 
@@ -201,7 +201,7 @@ export async function subirPortada(
     select: { coverUrl: true },
   });
 
-  if (!post) return { ok: false, mensaje: 'Ese articulo no existe' };
+  if (!post) return { ok: false, mensaje: 'Ese artículo no existe' };
 
   const subida = await subirImagen(`blog/${postId}`, file);
   if (!subida.ok) return subida;
@@ -237,7 +237,7 @@ export async function comentar(
   });
 
   if (!post || post.status !== 'PUBLISHED') {
-    return { ok: false, mensaje: 'Ese articulo no admite comentarios' };
+    return { ok: false, mensaje: 'Ese artículo no admite comentarios' };
   }
 
   await db.comment.create({ data: { postId, userId, body: parsed.data.body } });
@@ -284,7 +284,7 @@ export async function alternarLike(
   });
 
   if (!post || post.status !== 'PUBLISHED') {
-    return { ok: false, mensaje: 'Ese articulo no esta publicado' };
+    return { ok: false, mensaje: 'Ese artículo no está publicado' };
   }
 
   const clave = { postId_userId: { postId, userId } };

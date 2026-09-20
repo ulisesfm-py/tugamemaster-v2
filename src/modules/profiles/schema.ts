@@ -24,12 +24,12 @@ export const perfilJugadorSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Dinos como te llamas')
+    .min(2, 'Dinos cómo te llamas')
     .max(60, 'El nombre es demasiado largo'),
   bio: z
     .string()
     .trim()
-    .max(500, 'La descripcion no puede pasar de 500 caracteres')
+    .max(500, 'La descripción no puede pasar de 500 caracteres')
     .optional()
     .transform((v) => v || null),
   preferredSystems: etiquetas(12, 'sistemas'),
@@ -45,11 +45,11 @@ export const perfilGmSchema = z.object({
   about: z
     .string()
     .trim()
-    .max(2000, 'La descripcion no puede pasar de 2000 caracteres')
+    .max(2000, 'La descripción no puede pasar de 2000 caracteres')
     .optional()
     .transform((v) => v || null),
   languages: z
-    .array(z.string().trim().length(2, 'Usa codigos de dos letras: es, en, fr'))
+    .array(z.string().trim().length(2, 'Usa códigos de dos letras: es, en, fr'))
     .min(1, 'Indica al menos un idioma')
     .max(8, 'Como mucho 8 idiomas')
     .transform((lista) => [...new Set(lista.map((l) => l.toLowerCase()))]),
@@ -60,8 +60,8 @@ export const perfilGmSchema = z.object({
     (v) => (v === '' || v === null || v === undefined ? null : v),
     z.coerce
       .number()
-      .int('Los anos de experiencia tienen que ser un numero entero')
-      .min(0, 'Los anos de experiencia no pueden ser negativos')
+      .int('Los años de experiencia tienen que ser un número entero')
+      .min(0, 'Los años de experiencia no pueden ser negativos')
       .max(60, 'Esa cifra parece un error')
       .nullable(),
   ),

@@ -18,7 +18,7 @@ export async function empezarAltaAction(
   _formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   let destino: string;
 
@@ -50,12 +50,12 @@ export async function refrescarEstadoAction(
   _formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const guardado = await estadoGuardado(session.user.id);
 
   if (!guardado?.stripeAccountId) {
-    return { error: 'Todavia no has empezado el alta' };
+    return { error: 'Todavía no has empezado el alta' };
   }
 
   try {

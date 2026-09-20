@@ -25,7 +25,7 @@ function validar(datos: DatosResena) {
   if (!resultado.success) {
     return {
       ok: false as const,
-      mensaje: resultado.error.issues[0]?.message ?? 'Revisa los datos de la resena',
+      mensaje: resultado.error.issues[0]?.message ?? 'Revisa los datos de la reseña',
     };
   }
 
@@ -115,11 +115,11 @@ export async function editarResena(
   });
 
   if (!resena || resena.authorId !== userId) {
-    return { ok: false, mensaje: 'Esa resena no es tuya' };
+    return { ok: false, mensaje: 'Esa reseña no es tuya' };
   }
 
   if (!puedeEditar(resena.createdAt)) {
-    return { ok: false, mensaje: 'El plazo para corregir esta resena ya paso' };
+    return { ok: false, mensaje: 'El plazo para corregir esta reseña ya pasó' };
   }
 
   await db.review.update({

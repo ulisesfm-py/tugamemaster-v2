@@ -24,7 +24,7 @@ export async function reportarIncidenciaAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await reportarIncidencia(
     String(formData.get('bookingId') ?? ''),
@@ -109,6 +109,6 @@ export async function devolverADineroAction(
     };
   } catch (error) {
     console.error('Fallo al devolver a la tarjeta:', error);
-    return { error: 'Stripe rechazo la devolucion. Revisa el panel de Stripe.' };
+    return { error: 'Stripe rechazó la devolución. Revisa el panel de Stripe.' };
   }
 }

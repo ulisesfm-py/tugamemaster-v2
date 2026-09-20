@@ -14,22 +14,22 @@ export const emailSchema = z
   .string()
   .trim()
   .min(1, 'El email es obligatorio')
-  .email('Ese email no parece valido')
+  .email('Ese email no parece válido')
   .toLowerCase();
 
 export const passwordSchema = z
   .string()
   .min(
     LONGITUD_MINIMA_PASSWORD,
-    `La contrasena debe tener al menos ${LONGITUD_MINIMA_PASSWORD} caracteres`,
+    `La contraseña debe tener al menos ${LONGITUD_MINIMA_PASSWORD} caracteres`,
   )
-  .max(200, 'La contrasena es demasiado larga');
+  .max(200, 'La contraseña es demasiado larga');
 
 export const registerSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Dinos como te llamas')
+    .min(2, 'Dinos cómo te llamas')
     .max(60, 'El nombre es demasiado largo'),
   email: emailSchema,
   password: passwordSchema,
@@ -39,7 +39,7 @@ export const loginSchema = z.object({
   email: emailSchema,
   // En el login no se aplican las reglas de longitud: una contrasena antigua
   // que ya no cumpliria las reglas actuales debe poder seguir entrando.
-  password: z.string().min(1, 'Escribe tu contrasena'),
+  password: z.string().min(1, 'Escribe tu contraseña'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -20,7 +20,7 @@ export async function reservarAction(
   formData: FormData,
 ): Promise<EstadoReserva> {
   const session = await auth();
-  if (!session?.user) return { error: 'Inicia sesion para reservar' };
+  if (!session?.user) return { error: 'Inicia sesión para reservar' };
 
   const gameId = String(formData.get('gameId') ?? '');
   const slug = String(formData.get('slug') ?? '');
@@ -56,10 +56,10 @@ export async function reservarAction(
     destino = pago.url;
   } catch (error) {
     unstable_rethrow(error);
-    console.error('No se pudo crear la sesion de pago:', error);
+    console.error('No se pudo crear la sesión de pago:', error);
     return {
       error:
-        'Tu plaza esta guardada, pero no hemos podido abrir el pago. ' +
+        'Tu plaza está guardada, pero no hemos podido abrir el pago. ' +
         'Intentalo de nuevo desde Mis reservas.',
     };
   }
@@ -73,7 +73,7 @@ export async function cancelarReservaAction(
   formData: FormData,
 ): Promise<EstadoReserva> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await cancelarReserva(
     String(formData.get('bookingId') ?? ''),

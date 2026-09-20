@@ -21,7 +21,7 @@ export async function dejarResenaAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await dejarResena(
     String(formData.get('bookingId') ?? ''),
@@ -41,7 +41,7 @@ export async function editarResenaAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await editarResena(
     String(formData.get('reviewId') ?? ''),
@@ -53,5 +53,5 @@ export async function editarResenaAction(
 
   revalidar(String(formData.get('gmSlug') ?? ''));
 
-  return { ok: true, mensaje: 'Valoracion actualizada.' };
+  return { ok: true, mensaje: 'Valoración actualizada.' };
 }

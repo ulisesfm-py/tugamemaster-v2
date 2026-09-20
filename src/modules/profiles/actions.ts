@@ -24,7 +24,7 @@ export async function guardarPerfilJugadorAction(
   formData: FormData,
 ): Promise<EstadoPerfil> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await actualizarPerfilJugador(session.user.id, {
     name: String(formData.get('name') ?? ''),
@@ -47,7 +47,7 @@ export async function guardarPerfilGmAction(
   formData: FormData,
 ): Promise<EstadoPerfil> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await guardarPerfilGm(session.user.id, {
     headline: String(formData.get('headline') ?? ''),
@@ -70,7 +70,7 @@ export async function subirAvatarAction(
   formData: FormData,
 ): Promise<EstadoPerfil> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const file = formData.get('avatar');
   if (!(file instanceof File)) return { error: 'No has elegido ninguna imagen' };
@@ -90,7 +90,7 @@ export async function quitarAvatarAction(
   _formData: FormData,
 ): Promise<EstadoPerfil> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await quitarAvatar(session.user.id);
   if (!resultado.ok) return { error: resultado.mensaje };

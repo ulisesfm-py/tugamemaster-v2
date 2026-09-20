@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
 import type { EstadoFormulario } from '@/modules/users/actions';
 
 /**
@@ -20,111 +21,86 @@ function BotonEnviar({ children }: { children: string }) {
   const { pending } = useFormStatus();
 
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition hover:bg-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-slate-900"
-    >
-      {pending ? 'Un momento...' : children}
-    </button>
+    <Button type="submit" tamano="lg" disabled={pending} className="w-full">
+      {pending ? 'Un momento…' : children}
+    </Button>
   );
 }
-
-const claseCampo =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-indigo-900';
 
 export function AuthForm({
   modo,
   accion,
   accionDiscord,
+  minimoPassword,
 }: {
   modo: 'login' | 'registro';
   accion: Accion;
   /** Ausente mientras Discord no este configurado: entonces no se ofrece. */
   accionDiscord?: () => Promise<void>;
+  /**
+   * Longitud minima, para decirla antes de que la rechace el servidor.
+   *
+   * Llega como propiedad desde la pagina porque la constante vive junto al
+   * hash de argon2, un binario nativo que no puede entrar en el navegador.
+   */
+  minimoPassword: number;
 }) {
   const [estado, formAction] = useActionState<EstadoFormulario, FormData>(accion, null);
 
   const esRegistro = modo === 'registro';
 
   return (
-    <div className="w-full max-w-sm">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+    <div className="border-border bg-card rounded-sm border p-6 sm:p-8">
+      <h1 className="font-heading text-foreground text-2xl font-extrabold">
         {esRegistro ? 'Crea tu cuenta' : 'Entra en TuGameMaster'}
       </h1>
-      <p className="mt-1 mb-6 text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-1 mb-6 text-sm">
         {esRegistro
           ? 'Para reservar partidas o dirigir las tuyas.'
           : 'Bienvenido de vuelta.'}
       </p>
 
-      <form action={formAction} className="space-y-4" noValidate>
+      <form action={formAction} className="flex flex-col gap-4" noValidate>
         {esRegistro && (
-          <div>
-            <label
-              htmlFor="name"
-              className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              Nombre
-            </label>
+          <Campo id="name" etiqueta="Nombre">
             <input
               id="name"
               name="name"
               type="text"
               autoComplete="name"
               required
-              className={claseCampo}
+              className={CLASE_CONTROL}
             />
-          </div>
+          </Campo>
         )}
 
-        <div>
-          <label
-            htmlFor="email"
-            className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Email
-          </label>
+        <Campo id="email" etiqueta="Email">
           <input
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             required
-            className={claseCampo}
+            className={CLASE_CONTROL}
           />
-        </div>
+        </Campo>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Contraseña
-          </label>
+        <Campo
+          id="password"
+          etiqueta="Contraseña"
+          ayuda={esRegistro ? `Al menos ${minimoPassword} caracteres.` : undefined}
+        >
           <input
             id="password"
             name="password"
             type="password"
             autoComplete={esRegistro ? 'new-password' : 'current-password'}
             required
-            className={claseCampo}
+            className={CLASE_CONTROL}
           />
-          {esRegistro && (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Al menos 10 caracteres.
-            </p>
-          )}
-        </div>
+        </Campo>
 
-        {estado?.error && (
-          <p
-            role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          >
-            {estado.error}
-          </p>
-        )}
+        {estado?.error && <Aviso tono="error">{estado.error}</Aviso>}
 
         <BotonEnviar>{esRegistro ? 'Crear cuenta' : 'Entrar'}</BotonEnviar>
       </form>
@@ -132,37 +108,31 @@ export function AuthForm({
       {accionDiscord && (
         <>
           <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-            <span className="text-xs text-slate-500 dark:text-slate-400">o</span>
-            <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+            <span className="bg-border h-px flex-1" />
+            <span className="text-muted-foreground text-xs">o</span>
+            <span className="bg-border h-px flex-1" />
           </div>
 
           <form action={accionDiscord}>
-            <button
-              type="submit"
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
+            <Button type="submit" variante="perfil" tamano="lg" className="w-full">
               Continuar con Discord
-            </button>
+            </Button>
           </form>
         </>
       )}
 
-      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-6 text-center text-sm">
         {esRegistro ? (
           <>
             ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="font-medium text-indigo-600 hover:underline">
+            <Link href="/login" className="text-primary font-medium hover:underline">
               Entra
             </Link>
           </>
         ) : (
           <>
             ¿Aún no tienes cuenta?{' '}
-            <Link
-              href="/registro"
-              className="font-medium text-indigo-600 hover:underline"
-            >
+            <Link href="/registro" className="text-primary font-medium hover:underline">
               Créala
             </Link>
           </>

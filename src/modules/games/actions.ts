@@ -40,7 +40,7 @@ export async function crearPartidaAction(
   formData: FormData,
 ): Promise<EstadoPartida> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await crearPartida(session.user.id, datosDelFormulario(formData));
 
@@ -55,7 +55,7 @@ export async function actualizarPartidaAction(
   formData: FormData,
 ): Promise<EstadoPartida> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const gameId = String(formData.get('gameId') ?? '');
 
@@ -84,7 +84,7 @@ async function accionSobrePartida(
   ) => Promise<{ ok: boolean; mensaje?: string }>,
 ): Promise<EstadoPartida> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const gameId = String(formData.get('gameId') ?? '');
   const resultado = await operacion(session.user.id, gameId);
@@ -138,7 +138,7 @@ export async function subirLaminaAction(
   formData: FormData,
 ): Promise<EstadoPartida> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const file = formData.get('lamina');
   if (!(file instanceof File)) return { error: 'No has elegido ninguna imagen' };

@@ -13,7 +13,7 @@ export async function guardarNotaAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const gameId = String(formData.get('gameId') ?? '');
 
@@ -26,7 +26,7 @@ export async function guardarNotaAction(
   revalidatePath(`/cuenta/partidas/${gameId}`);
   revalidatePath('/mis-reservas');
 
-  return { ok: true, mensaje: 'Nota guardada. La veran quienes jugaron la sesion.' };
+  return { ok: true, mensaje: 'Nota guardada. La verán quienes jugaron la sesión.' };
 }
 
 export async function crearContinuacionAction(
@@ -34,7 +34,7 @@ export async function crearContinuacionAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await crearContinuacion(
     session.user.id,

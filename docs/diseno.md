@@ -1203,3 +1203,44 @@ por delante lo que escribió otra gente.
 La prueba nueva comprueba primero **quién no entra**: desde `/admin` se mueven
 devoluciones, así que un usuario normal recibe un 404 en las tres rutas. Luego,
 que un administrador ve el índice y llega a las dos pantallas.
+
+## Entrar y registrarse
+
+Las dos últimas, y con ellas **no queda ni una clase de la paleta vieja en toda
+la web**: cero ficheros con `slate-`, `indigo-`, `emerald-`, `amber-` o `rose-`.
+
+Van sin cabecera ni pie a propósito: son las únicas pantallas con una sola
+tarea, y cada enlace de más es una puerta por la que irse a mitad. Lo que sí
+hacía falta era **una manera de volver**: el nombre de arriba lleva a la
+portada, que antes solo se alcanzaba con el botón de atrás del navegador.
+
+La longitud mínima de la contraseña la pasa la página como propiedad en vez de
+escribirla el formulario. No es ceremonia: la constante vive junto al hash de
+argon2, un binario nativo que no puede entrar en el navegador, y escribir el
+número a mano en la vista es garantizar que un día deje de coincidir con el que
+exige el servidor.
+
+## Todos los mensajes de error estaban sin tildes
+
+Al probar el registro con una contraseña corta salió «La contrasena debe tener
+al menos 10 caracteres». Tirando del hilo: **casi cien cadenas visibles al
+usuario, en dieciocho ficheros**, escritas en el ASCII que el proyecto usa para
+los comentarios. «Inicia sesion para reservar», «Esa resena no es tuya»,
+«Stripe rechazo la devolucion», «Cuentanos que paso».
+
+Es el mismo fallo que apareció una vez en las notas del monedero, pero
+sistémico: la convención de comentarios se había derramado en lo que lee la
+gente, y justo en los mensajes de error —cuando algo ha salido mal y el
+producto debería parecer especialmente cuidado.
+
+Arreglado con sustituciones **una a una y revisadas a mano**, no con un
+reemplazo por palabras: «esta partida» no lleva tilde y «ya está resuelta» sí,
+y una pasada ciega habría metido faltas nuevas donde no las había. Los textos
+de los registros del cron se quedan en ASCII, que es su sitio.
+
+## Y otra prueba que se cumplía antes de tiempo
+
+La que comprueba que desde entrar se vuelve a la portada daba por buena la
+navegación porque **el `<h1>` de la propia pantalla de entrar sigue visible
+hasta que llega la otra página**. Tercera vez que aparece el mismo patrón en
+este trabajo; lleva ya su `waitForURL`.

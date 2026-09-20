@@ -31,10 +31,10 @@ export type Valorabilidad = { ok: true } | { ok: false; motivo: MotivoNoValorabl
 
 /** Lo que se le dice al jugador cuando no puede valorar. */
 export const MENSAJE_NO_VALORABLE: Record<MotivoNoValorable, string> = {
-  NO_PAGADA: 'Solo se pueden valorar las partidas que jugaste y pagaste aqui',
-  NO_TERMINADA: 'La partida todavia no ha terminado',
+  NO_PAGADA: 'Solo se pueden valorar las partidas que jugaste y pagaste aquí',
+  NO_TERMINADA: 'La partida todavía no ha terminado',
   REEMBOLSADA:
-    'Esta reserva se reembolso por una incidencia, asi que no cuenta para la reputacion del game master',
+    'Esta reserva se reembolsó por una incidencia, así que no cuenta para la reputación del game master',
   PLAZO_AGOTADO: `El plazo para valorar era de ${DIAS_PARA_VALORAR} dias tras la partida`,
 };
 
@@ -88,8 +88,8 @@ export function puedeEditar(escritaEn: Date, ahora: Date = new Date()): boolean 
 export const TEXTO_RESENAS = {
   resumen: `Puedes valorar al game master hasta ${DIAS_PARA_VALORAR} dias despues de la partida.`,
   detalle: [
-    'Solo valora quien reservo y pago su plaza aqui, y solo despues de jugar. Por eso las estrellas de un game master certifican partidas gestionadas por la plataforma.',
+    'Solo valora quien reservó y pagó su plaza aquí, y solo después de jugar. Por eso las estrellas de un game master certifican partidas gestionadas por la plataforma.',
     `Tienes ${DIAS_PARA_VALORAR} dias desde que termina la partida para dejar tu valoracion, y ${DIAS_PARA_EDITAR} dias para corregirla una vez escrita.`,
-    'Una valoracion baja no retiene el pago al game master: para eso estan las incidencias.',
+    'Una valoración baja no retiene el pago al game master: para eso están las incidencias.',
   ],
 } as const;

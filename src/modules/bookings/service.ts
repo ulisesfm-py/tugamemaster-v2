@@ -154,7 +154,7 @@ export async function reservarAsiento(
         return {
           ok: false as const,
           error: 'SOLO_CONTINUACION' as const,
-          mensaje: 'Esta sesion es solo para quienes jugaron la anterior',
+          mensaje: 'Esta sesión es solo para quienes jugaron la anterior',
         };
       }
     }
@@ -283,7 +283,7 @@ export async function cancelarReserva(
   }
 
   if (!['PENDING', ...ESTADOS_PAGADOS].includes(reserva.status)) {
-    return { ok: false, mensaje: 'Esa reserva ya no esta activa' };
+    return { ok: false, mensaje: 'Esa reserva ya no está activa' };
   }
 
   if (reserva.game.startsAt.getTime() <= Date.now()) {

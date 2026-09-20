@@ -157,7 +157,7 @@ export async function comentarAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Inicia sesion para comentar' };
+  if (!session?.user) return { error: 'Inicia sesión para comentar' };
 
   const resultado = await comentar(
     session.user.id,
@@ -179,7 +179,7 @@ export async function borrarComentarioAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Tienes que iniciar sesion' };
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await borrarComentario(
     { id: session.user.id, esAdmin: session.user.isAdmin === true },
@@ -198,7 +198,7 @@ export async function alternarLikeAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   const session = await auth();
-  if (!session?.user) return { error: 'Inicia sesion para dar like' };
+  if (!session?.user) return { error: 'Inicia sesión para dar like' };
 
   const resultado = await alternarLike(
     session.user.id,

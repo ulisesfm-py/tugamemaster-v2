@@ -30,8 +30,8 @@ export const postSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(TITULO_MINIMO, `El titulo debe tener al menos ${TITULO_MINIMO} caracteres`)
-    .max(TITULO_MAXIMO, 'El titulo es demasiado largo'),
+    .min(TITULO_MINIMO, `El título debe tener al menos ${TITULO_MINIMO} caracteres`)
+    .max(TITULO_MAXIMO, 'El título es demasiado largo'),
 
   excerpt: resumenOpcional,
 
@@ -39,7 +39,7 @@ export const postSchema = z.object({
     .string()
     .trim()
     .min(CONTENIDO_MINIMO, `Escribe al menos ${CONTENIDO_MINIMO} caracteres`)
-    .max(CONTENIDO_MAXIMO, 'El articulo es demasiado largo'),
+    .max(CONTENIDO_MAXIMO, 'El artículo es demasiado largo'),
 });
 
 export type PostInput = z.infer<typeof postSchema>;

@@ -54,7 +54,7 @@ export async function registrarAction(
     unstable_rethrow(error);
 
     return {
-      error: 'Tu cuenta se creo, pero no pudimos iniciar sesion. Prueba a entrar.',
+      error: 'Tu cuenta se creó, pero no pudimos iniciar sesión. Prueba a entrar.',
     };
   }
 
@@ -84,7 +84,7 @@ export async function entrarAction(
     if (error instanceof AuthError) {
       // Mensaje deliberadamente ambiguo: decir cual de los dos campos falla
       // permitiria averiguar que emails tienen cuenta.
-      return { error: 'Email o contrasena incorrectos' };
+      return { error: 'Email o contraseña incorrectos' };
     }
 
     throw error;

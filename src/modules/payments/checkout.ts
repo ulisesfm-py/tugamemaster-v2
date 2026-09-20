@@ -50,7 +50,7 @@ export async function crearSesionDeCheckout(
   if (!reserva) return { ok: false, mensaje: 'Esa reserva no existe' };
 
   if (reserva.status !== 'PENDING') {
-    return { ok: false, mensaje: 'Esta reserva ya no esta pendiente de pago' };
+    return { ok: false, mensaje: 'Esta reserva ya no está pendiente de pago' };
   }
 
   // Solo se cobra lo que el saldo no cubre.

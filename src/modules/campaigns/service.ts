@@ -50,7 +50,7 @@ export async function guardarNota(
   }
 
   if (!partidaTerminada(partida.status, partida.endsAt)) {
-    return { ok: false, mensaje: 'La partida todavia no se ha jugado' };
+    return { ok: false, mensaje: 'La partida todavía no se ha jugado' };
   }
 
   await db.sessionNote.upsert({
@@ -124,7 +124,7 @@ export async function crearContinuacion(
   if (anterior.nextGame) {
     return {
       ok: false,
-      mensaje: 'Esta partida ya tiene una continuacion creada',
+      mensaje: 'Esta partida ya tiene una continuación creada',
     };
   }
 
