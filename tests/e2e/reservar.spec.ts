@@ -30,8 +30,21 @@ test('una partida publicada aparece en el portal y se puede abrir', async ({ pag
 
   await page.getByRole('link', { name: partida.title }).click();
 
-  await expect(page.getByRole('heading', { name: partida.title })).toBeVisible();
+  // Sin esta espera, lo de debajo se cumple en el propio listado: alli tambien
+  // hay un encabezado con el titulo y un recuento de plazas igual, asi que la
+  // prueba se daba por buena sin haber abierto nunca la partida.
+  await page.waitForURL(`**/partidas/${partida.slug}`);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: partida.title }),
+  ).toBeVisible();
   await expect(page.getByText('4 de 4 plazas libres')).toBeVisible();
+
+  // La ficha tecnica: es lo que contesta «¿es esta mesa para mi?» y se
+  // comprueba aqui porque son datos del modelo, no texto fijo de la plantilla.
+  await expect(page.getByText('Abierta a todos')).toBeVisible();
+  await expect(page.getByText('A partir de 14 años')).toBeVisible();
+  await expect(page.getByText('Español', { exact: true })).toBeVisible();
 });
 
 test('sin sesion no se puede reservar: se invita a entrar', async ({ page }) => {
@@ -82,7 +95,9 @@ test('el game master no puede reservar en su propia partida', async ({ page }) =
   await entrarComo(page, USUARIOS.gm);
   await page.goto(`/partidas/${partida.slug}`);
 
-  await expect(page.getByText('Es tu partida.')).toBeVisible();
+  // Es un enlace de verdad, no un boton disfrazado: se comprueba por su rol,
+  // que es lo que anuncia un lector de pantalla.
+  await expect(page.getByRole('link', { name: 'Gestionar mi partida' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Reservar plaza' })).toHaveCount(0);
 });
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { PartidaCard } from '@/components/partida-card';
-import { Avatar, Button, Estrellas, Vacio } from '@/components/ui';
+import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
 import { COMISION_PUNTOS_BASICOS, formatearImporte } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
 import { resumenDe } from '@/modules/blog/politica';
@@ -71,15 +71,12 @@ export default async function Portada() {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button
-              render={<Link href="/partidas">Ver partidas abiertas</Link>}
-              tamano="lg"
-            />
-            <Button
-              variante="perfil"
-              tamano="lg"
-              render={<Link href="/gm">Conocer a los game masters</Link>}
-            />
+            <EnlaceBoton href="/partidas" tamano="lg">
+              Ver partidas abiertas
+            </EnlaceBoton>
+            <EnlaceBoton href="/gm" variante="perfil" tamano="lg">
+              Conocer a los game masters
+            </EnlaceBoton>
           </div>
         </div>
       </section>
@@ -107,7 +104,7 @@ export default async function Portada() {
           <Vacio
             className="mt-6"
             titulo="No hay ninguna mesa abierta ahora mismo"
-            accion={<Button render={<Link href="/gm">Ver game masters</Link>} />}
+            accion={<EnlaceBoton href="/gm">Ver game masters</EnlaceBoton>}
           >
             Vuelve en unos días, o mira qué game masters dirigen aquí para no perderte su
             próxima partida.
@@ -292,7 +289,7 @@ export default async function Portada() {
             </ul>
 
             <div className="mt-7">
-              <Button render={<Link href="/cuenta/gm">Abrir mi mesa</Link>} />
+              <EnlaceBoton href="/cuenta/gm">Abrir mi mesa</EnlaceBoton>
             </div>
           </div>
 

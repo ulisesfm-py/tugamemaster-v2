@@ -26,6 +26,12 @@ const nextConfig: NextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
         pathname: '/blog/**',
       },
+      {
+        // Laminas de las partidas, que suben los game masters.
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        pathname: '/partidas/**',
+      },
     ],
   },
 };

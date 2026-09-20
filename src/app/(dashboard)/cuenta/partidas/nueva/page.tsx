@@ -35,7 +35,11 @@ export default async function NuevaPartidaPage() {
       </p>
 
       <div className="mt-8">
-        <PartidaForm accion={crearPartidaAction} textoBoton="Crear borrador" />
+        <PartidaForm
+          accion={crearPartidaAction}
+          textoBoton="Crear borrador"
+          idiomasPorDefecto={perfil.gmProfile.languages}
+        />
       </div>
     </main>
   );

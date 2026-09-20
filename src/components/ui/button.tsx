@@ -1,5 +1,6 @@
 import { Button as ButtonPrimitive } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
@@ -53,4 +54,31 @@ function Button({ className, variante, tamano, ...props }: Props) {
   );
 }
 
-export { Button, variantes as variantesDeBoton };
+/**
+ * Un enlace con aspecto de boton.
+ *
+ * No pasa por la primitiva de Base UI a proposito. Al pintarla como enlace,
+ * esa marca el elemento con `role="button"`, y entonces un lector de pantalla
+ * anuncia «boton» algo que en realidad navega: se pierde el «enlace» y se
+ * miente sobre lo que va a pasar al pulsarlo. Aqui solo se toman las clases y
+ * el <a> sigue siendo un <a>.
+ *
+ * Regla: si al pulsarlo se va a otra pagina, es `EnlaceBoton`; si ejecuta algo
+ * en esta, es `Button`.
+ */
+function EnlaceBoton({
+  className,
+  variante,
+  tamano,
+  ...props
+}: React.ComponentProps<typeof Link> & VariantProps<typeof variantes>) {
+  return (
+    <Link
+      data-slot="enlace-boton"
+      className={cn(variantes({ variante, tamano, className }))}
+      {...props}
+    />
+  );
+}
+
+export { Button, EnlaceBoton, variantes as variantesDeBoton };

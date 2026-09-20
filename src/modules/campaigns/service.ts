@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { camposDeLaPartida } from '@/modules/games/service';
 import { partidaSchema } from '@/modules/games/schema';
 import { slugDisponible } from '@/modules/users/slug';
 
@@ -101,6 +102,7 @@ export async function crearContinuacion(
       gmId: true,
       campaignId: true,
       sessionNumber: true,
+      imageUrl: true,
       gm: { select: { userId: true } },
       nextGame: { select: { id: true } },
     },
@@ -181,18 +183,16 @@ export async function crearContinuacion(
 
     return tx.game.create({
       data: {
+        ...camposDeLaPartida(d),
         gmId: anterior.gmId,
         campaignId,
         previousGameId: anterior.id,
         sessionNumber: numeroSiguiente(anterior.sessionNumber),
-        title: d.title,
         slug,
-        description: d.description,
-        system: d.system,
-        startsAt: d.startsAt,
-        endsAt: new Date(d.startsAt.getTime() + d.durationHours * 3_600_000),
-        seatsTotal: d.seatsTotal,
-        priceCents: d.priceCents,
+        // La siguiente sesion hereda la lamina: es la misma campana y la misma
+        // mesa. Por eso `subirLamina` comprueba quien mas la usa antes de
+        // borrar una imagen que se reemplaza.
+        imageUrl: anterior.imageUrl,
         status: 'DRAFT',
       },
       select: { id: true, slug: true },

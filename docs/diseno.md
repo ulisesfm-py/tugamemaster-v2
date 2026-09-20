@@ -723,3 +723,102 @@ al resto de campos pendientes.
 `<p>`. Es HTML inválido y **rompía la hidratación** en el listado de partidas y
 en el propio muestrario. Es justo el tipo de cosa que no se ve leyendo el
 código y salta a la primera al abrir la consola.
+
+---
+
+# D5 · Las páginas
+
+Por tandas: primero las públicas, que son las que venden; luego las privadas; y
+al final administración.
+
+## Portada `/`
+
+Siete bloques: titular, **partidas abiertas**, cómo funciona, la garantía, quién
+dirige, captación de game masters y el blog.
+
+Las partidas van arriba del todo, justo detrás del titular, porque son el
+producto: cualquier cosa que se ponga delante las retrasa. Se enseñan en una
+**fila deslizable**, no en un carrusel: un carrusel que rota solo enseña una
+cosa cada vez y casi nadie pasa de la primera; así se ven tres o cuatro enteras.
+
+La garantía **sale de las constantes de `politica.ts`**, no de texto escrito a
+mano. Si mañana cambia el 90%, cambia también en la portada. Y el ejemplo de
+ingresos para game masters enseña el reparto entero —75 €, menos 3,75 € de
+comisión, menos 2,85 € de pasarela, quedan 68,40 €— porque esa transparencia es
+el argumento, no letra pequeña.
+
+La portada vivía en la raíz y era la única página sin cabecera ni pie. Ahora
+está en `(public)`.
+
+## Ficha de una partida `/partidas/[slug]`
+
+Era **la mayor laguna de contenido de la web**: quien entraba sabía qué sistema
+era, cuándo y cuánto costaba, pero no si le iba a encajar. Y eso es justo lo que
+decide si se apunta.
+
+### Los datos que faltaban
+
+Cinco columnas nuevas en `Game`, con su migración:
+
+| Campo        | Para qué                                                      |
+| ------------ | ------------------------------------------------------------- |
+| `imageUrl`   | La lámina, en la tarjeta y en la ficha                        |
+| `languages`  | El idioma **de la mesa**, no el del game master               |
+| `experience` | Cuánta soltura se presupone: abierta, con rodaje, con soltura |
+| `minAge`     | Edad mínima. Relevante y hasta ahora invisible                |
+| `tags`       | Etiquetas de estilo y de tema                                 |
+
+Tres decisiones dentro de eso:
+
+**El idioma pasa a la partida.** Estaba solo en el perfil del game master, y un
+GM bilingüe no dirige cada mesa en los dos idiomas. Las partidas que ya
+existían heredaron los suyos en la migración, así que no se perdió ni se
+inventó información; y las de un GM que no declaró ninguno siguen cayendo a los
+del GM al leerlas.
+
+**Las etiquetas son vocabulario cerrado**, en `modules/games/ficha.ts`. Texto
+libre daría «Terror», «terror» y «TERROR» como tres cosas distintas, y con eso
+no se filtra ni se agrupa. El grupo al que pertenece cada etiqueta vive en el
+vocabulario, no en la base de datos: en `Game` hay **una sola columna**.
+
+**Qué clase de mesa es no se guarda: se deduce.** Una partida con campaña o que
+continúa a otra es una sesión de campaña; el resto son partidas sueltas. Es la
+primera pregunta de quien mira y hasta ahora no se contestaba en ningún sitio.
+
+### Cómo queda la página
+
+Dos columnas. A la izquierda, **la ficha antes que la descripción**: contesta
+«¿es esta mesa para mí?» en cinco segundos, y solo quien ya sabe que puede
+encajar tiene motivo para leerse el resto. Debajo, la descripción, la nota de
+sesión si la hay, y quién dirige con sus estrellas y sus partidas.
+
+A la derecha, precio, plazas y botón, pegados al hacer scroll. **En móvil ese
+bloque va primero**, antes que toda la ficha: quien llega decidido no tiene por
+qué recorrerla entera.
+
+Y **la garantía va junto al precio**, no escondida en un enlace legal. Es justo
+donde aparece la duda de «¿y si sale mal?». Los números, otra vez, de
+`politica.ts`.
+
+## Enlaces que decían ser botones
+
+Base UI marca con `role="button"` cualquier cosa que pinte a través de su
+primitiva de botón. Con `render={<Link>}` eso produce un `<a href>` que un
+lector de pantalla anuncia como **botón**: miente sobre lo que va a pasar al
+pulsarlo y pierde lo que un enlace sabe hacer. Pasaba en la portada y se habría
+repetido en cada página nueva.
+
+Ahora hay `EnlaceBoton`, que solo toma las clases y deja el `<a>` en paz. La
+regla: **si al pulsarlo se va a otra página, es `EnlaceBoton`; si ejecuta algo
+en esta, es `Button`.**
+
+## Otra prueba que pasaba por casualidad
+
+La que comprueba que una partida del listado se puede abrir hacía clic y
+verificaba «hay un encabezado con el título» y «4 de 4 plazas libres». Las dos
+cosas **son ciertas también en el propio listado**, así que la prueba se daba
+por buena sin haber llegado nunca a la ficha. Salió a la luz al añadirle una
+comprobación de la ficha técnica, que encontró dos tarjetas en vez de una.
+
+Lleva ya un `waitForURL`. Es el mismo error de la vez anterior con otra cara:
+**una comprobación que se cumple antes de que pase lo que se quiere comprobar.**

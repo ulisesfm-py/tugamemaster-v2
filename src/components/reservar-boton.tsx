@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
@@ -11,17 +12,15 @@ function Boton({ texto, destructivo }: { texto: string; destructivo?: boolean })
   const { pending } = useFormStatus();
 
   return (
-    <button
+    <Button
       type="submit"
+      variante={destructivo ? 'peligro' : 'solido'}
+      tamano="lg"
       disabled={pending}
-      className={
-        destructivo
-          ? 'rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
-          : 'rounded-lg bg-indigo-600 px-5 py-2.5 font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60'
-      }
+      className="w-full"
     >
-      {pending ? 'Un momento...' : texto}
-    </button>
+      {pending ? 'Un momento…' : texto}
+    </Button>
   );
 }
 
@@ -52,21 +51,15 @@ export function ReservarBoton({
       </form>
 
       {estado && 'error' in estado && (
-        <p
-          role="alert"
-          className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
+        <Aviso tono="error" className="mt-3">
           {estado.error}
-        </p>
+        </Aviso>
       )}
 
       {estado && 'ok' in estado && (
-        <p
-          role="status"
-          className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-        >
+        <Aviso tono="exito" className="mt-3">
           {estado.mensaje ?? 'Hecho.'}
-        </p>
+        </Aviso>
       )}
     </div>
   );

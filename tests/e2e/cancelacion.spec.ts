@@ -48,7 +48,7 @@ test('cancelar una partida devuelve el 100% en saldo a quien pago', async ({ pag
 
   // Donde si se ve es en la pagina publica de la partida.
   await page.goto(`/partidas/${partida.slug}`);
-  await expect(page.getByText('Esta partida fue cancelada.')).toBeVisible();
+  await expect(page.getByText('Partida cancelada')).toBeVisible();
 
   expect(await escenario.saldoDe(USUARIOS.ana)).toBe(saldoAntes + 1500);
 });

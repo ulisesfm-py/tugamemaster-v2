@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
+import { Lamina } from '@/components/lamina';
 import { Avatar, Fecha, Precio } from '@/components/ui';
+import { etiquetasDe, type Experiencia } from '@/modules/games/ficha';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,12 +21,18 @@ import { cn } from '@/lib/utils';
  * 3. **Hay lamina siempre.** Cuando el GM no sube imagen —que sera lo normal
  *    al principio— se compone una con el sistema de juego en grande, en vez de
  *    dejar un hueco gris.
+ * 4. **«Abierta a todos» se ensena en la tarjeta.** De toda la ficha tecnica
+ *    es el dato que mas gente descarta o elige de un vistazo, y el que mas
+ *    miedo quita a quien nunca ha jugado.
  */
 
 type Partida = {
   title: string;
   slug: string;
   system: string;
+  imageUrl: string | null;
+  experience: Experiencia;
+  tags: string[];
   startsAt: Date;
   seatsTotal: number;
   priceCents: number;
@@ -57,6 +65,9 @@ export function PartidaCard({
   const libres = partida.seatsTotal - partida._count.bookings;
   const aforo = plazas(libres, partida.seatsTotal);
 
+  // Dos como mucho: la tarjeta tiene que seguir leyendose de un vistazo.
+  const etiquetas = etiquetasDe(partida.tags).slice(0, 2);
+
   return (
     <li className={cn('h-full', className)}>
       <Link
@@ -64,11 +75,11 @@ export function PartidaCard({
         className="group border-border bg-card hover:border-primary hover:shadow-primary/55 focus-visible:ring-ring focus-visible:ring-offset-background flex h-full flex-col overflow-hidden rounded-sm border transition hover:-translate-y-0.5 hover:shadow-[0_6px_26px_-10px] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
       >
         <div className="from-accent/20 to-background relative grid aspect-[16/9] place-items-center overflow-hidden bg-gradient-to-br">
-          {/* Sin imagen propia todavia: el sistema de juego hace de portada.
-              Ver docs/diseno.md — `Game` no tiene campo de imagen. */}
-          <span className="font-heading text-foreground/55 px-4 text-center text-xl font-extrabold">
-            {partida.system}
-          </span>
+          <Lamina
+            src={partida.imageUrl}
+            system={partida.system}
+            sizes="(max-width: 640px) 90vw, 20rem"
+          />
 
           <span
             className={`absolute top-2 left-2 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase ${
@@ -93,6 +104,24 @@ export function PartidaCard({
           <p className="text-muted-foreground text-sm">
             <Fecha valor={partida.startsAt} />
           </p>
+
+          {(partida.experience === 'ABIERTA' || etiquetas.length > 0) && (
+            <p className="flex flex-wrap gap-1.5">
+              {partida.experience === 'ABIERTA' && (
+                <span className="border-success/35 bg-success/10 text-success rounded-full border px-2 py-0.5 text-[11px] font-semibold">
+                  Abierta a todos
+                </span>
+              )}
+              {etiquetas.map((e) => (
+                <span
+                  key={e.id}
+                  className="border-border text-muted-foreground rounded-full border px-2 py-0.5 text-[11px]"
+                >
+                  {e.texto}
+                </span>
+              ))}
+            </p>
+          )}
 
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Avatar

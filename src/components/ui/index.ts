@@ -5,7 +5,7 @@
  * que ya lo importaban cuando era un unico fichero.
  */
 export { Avatar, Estrellas, Etiqueta, Fecha, Precio } from './basicos';
-export { Button, variantesDeBoton } from './button';
+export { Button, EnlaceBoton, variantesDeBoton } from './button';
 export { Aviso } from './aviso';
 export { Campo, CLASE_CONTROL } from './campo';
 export {

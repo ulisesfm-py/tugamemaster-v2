@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { ImagenForm } from '@/components/imagen-form';
 import { NotaSesion } from '@/components/nota-sesion';
 import { PartidaForm } from '@/components/partida-form';
 import { ReservarBoton } from '@/components/reservar-boton';
@@ -15,6 +16,7 @@ import {
   cancelarPartidaAction,
   despublicarPartidaAction,
   publicarPartidaAction,
+  subirLaminaAction,
 } from '@/modules/games/actions';
 import { miPartida } from '@/modules/games/queries';
 
@@ -190,6 +192,27 @@ export default async function GestionarPartidaPage({ params }: Props) {
           </ul>
         )}
       </section>
+
+      {editable && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+            Lámina
+          </h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Es lo primero que se ve de tu partida en el portal. Sin ella se compone una
+            con el nombre del sistema, que cumple pero no llama.
+          </p>
+
+          <div className="mt-4">
+            <ImagenForm
+              accion={subirLaminaAction}
+              campo="lamina"
+              campos={{ gameId: partida.id, slug: partida.slug }}
+              textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
+            />
+          </div>
+        </section>
+      )}
 
       {editable && (
         <section className="mt-10">

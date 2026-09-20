@@ -54,6 +54,12 @@ export default async function ContinuacionPage({ params }: Props) {
     // abrir hueco para alguien nuevo, lo sube a mano.
     seatsTotal: Math.max(1, anterior._count.bookings),
     priceCents: anterior.priceCents,
+    // La ficha tecnica se hereda entera: es la misma mesa, la misma gente y el
+    // mismo tono. Todo sigue siendo editable.
+    languages: anterior.languages,
+    experience: anterior.experience,
+    minAge: anterior.minAge,
+    tags: anterior.tags,
   };
 
   return (

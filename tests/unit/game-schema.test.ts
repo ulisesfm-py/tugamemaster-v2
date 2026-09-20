@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { ETIQUETAS, MAXIMO_ETIQUETAS } from '@/modules/games/ficha';
 import { filtrosSchema, partidaSchema } from '@/modules/games/schema';
 
 /** Una fecha suficientemente lejana para pasar la antelacion minima. */
@@ -16,6 +17,10 @@ const base = {
   durationHours: '3',
   seatsTotal: '5',
   priceCents: '20',
+  languages: ['es'],
+  experience: 'ABIERTA',
+  tags: ['terror', 'investigacion'],
+  minAge: '',
 };
 
 describe('partidaSchema: precio', () => {
@@ -112,5 +117,64 @@ describe('filtrosSchema', () => {
 
   it('rechaza un precio maximo negativo', () => {
     expect(filtrosSchema.safeParse({ maxPrecio: '-3' }).success).toBe(false);
+  });
+});
+
+describe('partidaSchema: ficha tecnica', () => {
+  it('exige al menos un idioma de mesa', () => {
+    expect(partidaSchema.safeParse({ ...base, languages: [] }).success).toBe(false);
+  });
+
+  it('rechaza un idioma que no esta en el vocabulario', () => {
+    // Llega de un formulario: cualquiera puede mandar lo que quiera.
+    expect(partidaSchema.safeParse({ ...base, languages: ['klingon'] }).success).toBe(
+      false,
+    );
+  });
+
+  it('rechaza una etiqueta inventada', () => {
+    expect(partidaSchema.safeParse({ ...base, tags: ['terror', 'zombis'] }).success).toBe(
+      false,
+    );
+  });
+
+  it('rechaza la misma etiqueta dos veces', () => {
+    expect(partidaSchema.safeParse({ ...base, tags: ['terror', 'terror'] }).success).toBe(
+      false,
+    );
+  });
+
+  it('rechaza mas etiquetas de las que caben', () => {
+    const muchas = ETIQUETAS.slice(0, MAXIMO_ETIQUETAS + 1).map((e) => e.id);
+
+    expect(partidaSchema.safeParse({ ...base, tags: muchas }).success).toBe(false);
+  });
+
+  it('admite una partida sin etiquetas', () => {
+    expect(partidaSchema.safeParse({ ...base, tags: [] }).success).toBe(true);
+  });
+
+  it('rechaza un nivel de experiencia que no existe', () => {
+    expect(partidaSchema.safeParse({ ...base, experience: 'EXPERTO' }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('partidaSchema: edad minima', () => {
+  it('entiende el campo vacio como «sin minimo», no como cero', () => {
+    expect(partidaSchema.parse({ ...base, minAge: '' }).minAge).toBeNull();
+  });
+
+  it('convierte la edad a numero', () => {
+    expect(partidaSchema.parse({ ...base, minAge: '16' }).minAge).toBe(16);
+  });
+
+  it('rechaza una edad que no dice nada', () => {
+    expect(partidaSchema.safeParse({ ...base, minAge: '3' }).success).toBe(false);
+  });
+
+  it('rechaza una edad absurda', () => {
+    expect(partidaSchema.safeParse({ ...base, minAge: '120' }).success).toBe(false);
   });
 });

@@ -98,8 +98,11 @@ export class Escenario {
       `INSERT INTO "Game"
          ("id", "gmId", "title", "slug", "description", "system",
           "startsAt", "endsAt", "seatsTotal", "priceCents", "currency",
-          "status", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'EUR', $11::"GameStatus", now(), now())`,
+          "status", "languages", "experience", "tags", "minAge",
+          "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'EUR', $11::"GameStatus",
+               ARRAY['es'], 'ABIERTA'::"GameExperience", ARRAY['combate'], 14,
+               now(), now())`,
       [
         id,
         perfil.id,

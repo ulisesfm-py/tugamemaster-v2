@@ -166,7 +166,14 @@ async function main() {
   const sesion1Inicio = dias(-10);
   const sesion1 = await db.game.upsert({
     where: { slug: 'la-sombra-sobre-cadiz-1' },
-    update: {},
+    // La ficha se refresca al reseedear: son datos de muestra y tienen que
+    // reflejar el modelo de hoy, no el del dia en que se creo la fila.
+    update: {
+      languages: ['es'],
+      experience: 'ALGUNA',
+      tags: ['investigacion', 'terror', 'interpretacion'],
+      minAge: 16,
+    },
     create: {
       gmId: gmLaura.id,
       campaignId: campana.id,
@@ -174,6 +181,10 @@ async function main() {
       slug: 'la-sombra-sobre-cadiz-1',
       description: 'Los investigadores llegan al puerto siguiendo una carta.',
       system: 'Call of Cthulhu 7e',
+      languages: ['es'],
+      experience: 'ALGUNA',
+      tags: ['investigacion', 'terror', 'interpretacion'],
+      minAge: 16,
       startsAt: sesion1Inicio,
       endsAt: masHoras(sesion1Inicio, 4),
       seatsTotal: 4,
@@ -203,7 +214,14 @@ async function main() {
   const sesion2Inicio = dias(5);
   await db.game.upsert({
     where: { slug: 'la-sombra-sobre-cadiz-2' },
-    update: {},
+    // La ficha se refresca al reseedear: son datos de muestra y tienen que
+    // reflejar el modelo de hoy, no el del dia en que se creo la fila.
+    update: {
+      languages: ['es'],
+      experience: 'ALGUNA',
+      tags: ['investigacion', 'terror', 'interpretacion'],
+      minAge: 16,
+    },
     create: {
       gmId: gmLaura.id,
       campaignId: campana.id,
@@ -211,6 +229,10 @@ async function main() {
       slug: 'la-sombra-sobre-cadiz-2',
       description: 'El diario revela un nombre. Alguien mas lo esta buscando.',
       system: 'Call of Cthulhu 7e',
+      languages: ['es'],
+      experience: 'ALGUNA',
+      tags: ['investigacion', 'terror', 'interpretacion'],
+      minAge: 16,
       startsAt: sesion2Inicio,
       endsAt: masHoras(sesion2Inicio, 4),
       seatsTotal: 4,
@@ -226,13 +248,22 @@ async function main() {
   const oneshotInicio = dias(12);
   const oneshot = await db.game.upsert({
     where: { slug: 'el-faro-de-finisterre' },
-    update: {},
+    // La ficha se refresca al reseedear: son datos de muestra y tienen que
+    // reflejar el modelo de hoy, no el del dia en que se creo la fila.
+    update: {
+      languages: ['es', 'en'],
+      experience: 'ABIERTA',
+      tags: ['misterio', 'investigacion'],
+    },
     create: {
       gmId: gmLaura.id,
       title: 'El faro de Finisterre',
       slug: 'el-faro-de-finisterre',
       description: 'One-shot de terror costero para una tarde.',
       system: 'Vaesen',
+      languages: ['es', 'en'],
+      experience: 'ABIERTA',
+      tags: ['misterio', 'investigacion'],
       startsAt: oneshotInicio,
       endsAt: masHoras(oneshotInicio, 3),
       seatsTotal: 5,
@@ -245,13 +276,22 @@ async function main() {
   const borradorInicio = dias(20);
   await db.game.upsert({
     where: { slug: 'la-cripta-de-los-mil-dientes' },
-    update: {},
+    // La ficha se refresca al reseedear: son datos de muestra y tienen que
+    // reflejar el modelo de hoy, no el del dia en que se creo la fila.
+    update: {
+      languages: ['es'],
+      experience: 'VETERANA',
+      tags: ['combate', 'exploracion', 'fantasia-oscura'],
+    },
     create: {
       gmId: gmMarco.id,
       title: 'La cripta de los mil dientes',
       slug: 'la-cripta-de-los-mil-dientes',
       description: 'Mazmorra clasica, nivel 3, sin piedad.',
       system: 'D&D 5e',
+      languages: ['es'],
+      experience: 'VETERANA',
+      tags: ['combate', 'exploracion', 'fantasia-oscura'],
       startsAt: borradorInicio,
       endsAt: masHoras(borradorInicio, 4),
       seatsTotal: 6,

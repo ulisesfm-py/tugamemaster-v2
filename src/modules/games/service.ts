@@ -1,12 +1,13 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { borrarSiEsNuestra, subirImagen } from '@/lib/imagen';
 import { ESTADOS_PAGADOS } from '@/modules/bookings/service';
 import { avisarPartidaCancelada } from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 import { abonar } from '@/modules/wallet/service';
 
-import { partidaSchema } from './schema';
+import { partidaSchema, type PartidaInput } from './schema';
 
 /**
  * Reglas de negocio de las partidas.
@@ -25,6 +26,29 @@ async function gmDe(userId: string) {
 
 function horasDespues(fecha: Date, horas: number): Date {
   return new Date(fecha.getTime() + horas * 60 * 60 * 1000);
+}
+
+/**
+ * Los campos que crear y editar escriben igual.
+ *
+ * Estaban duplicados en las dos funciones y ya se habia colado una diferencia:
+ * al crear no se guardaba algo que al editar si. Con la ficha tecnica son el
+ * doble de campos, asi que se escriben una sola vez.
+ */
+export function camposDeLaPartida(d: PartidaInput) {
+  return {
+    title: d.title,
+    description: d.description,
+    system: d.system,
+    startsAt: d.startsAt,
+    endsAt: horasDespues(d.startsAt, d.durationHours),
+    seatsTotal: d.seatsTotal,
+    priceCents: d.priceCents,
+    languages: d.languages,
+    experience: d.experience,
+    minAge: d.minAge,
+    tags: d.tags,
+  };
 }
 
 /**
@@ -58,15 +82,9 @@ export async function crearPartida(
 
   const game = await db.game.create({
     data: {
+      ...camposDeLaPartida(d),
       gmId: gm.id,
-      title: d.title,
       slug,
-      description: d.description,
-      system: d.system,
-      startsAt: d.startsAt,
-      endsAt: horasDespues(d.startsAt, d.durationHours),
-      seatsTotal: d.seatsTotal,
-      priceCents: d.priceCents,
       // Nace siempre en borrador. Publicar es un paso aparte y con condiciones.
       status: 'DRAFT',
     },
@@ -119,18 +137,52 @@ export async function actualizarPartida(
 
   await db.game.update({
     where: { id: gameId },
-    data: {
-      title: d.title,
-      description: d.description,
-      system: d.system,
-      startsAt: d.startsAt,
-      endsAt: horasDespues(d.startsAt, d.durationHours),
-      seatsTotal: d.seatsTotal,
-      priceCents: d.priceCents,
-    },
+    data: camposDeLaPartida(d),
   });
 
   return { ok: true, gameId, slug: partida.slug };
+}
+
+export type ResultadoLamina = { ok: true; url: string } | { ok: false; mensaje: string };
+
+/**
+ * Cambia la lamina de una partida.
+ *
+ * Va aparte del formulario porque necesita que la partida exista ya: la imagen
+ * se guarda bajo su id. Mismo criterio que la portada de un articulo.
+ *
+ * La imagen anterior se borra **despues** de guardar la nueva. Al reves, un
+ * fallo en la subida dejaria la partida sin ninguna.
+ */
+export async function subirLamina(
+  userId: string,
+  gameId: string,
+  file: File,
+): Promise<ResultadoLamina> {
+  const partida = await db.game.findUnique({
+    where: { id: gameId },
+    select: { imageUrl: true, slug: true, gm: { select: { userId: true } } },
+  });
+
+  if (!partida || partida.gm.userId !== userId) {
+    return { ok: false, mensaje: 'Esa partida no es tuya' };
+  }
+
+  const subida = await subirImagen(`partidas/${gameId}`, file);
+  if (!subida.ok) return subida;
+
+  await db.game.update({ where: { id: gameId }, data: { imageUrl: subida.url } });
+
+  // La lamina anterior puede estar compartida: al crear la siguiente sesion de
+  // una campana, hereda la de la anterior. Borrarla sin mirar dejaria sin
+  // imagen a una partida que nadie ha tocado. Tras el update de arriba, este
+  // recuento ya no incluye a esta partida.
+  if (partida.imageUrl) {
+    const enUso = await db.game.count({ where: { imageUrl: partida.imageUrl } });
+    if (enUso === 0) await borrarSiEsNuestra(partida.imageUrl);
+  }
+
+  return { ok: true, url: subida.url };
 }
 
 export type ResultadoSimple = { ok: true } | { ok: false; mensaje: string };

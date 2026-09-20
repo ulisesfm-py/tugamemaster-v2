@@ -167,6 +167,17 @@ model Campaign {
   @@index([gmId])
 }
 
+/// Cuanta soltura se le presupone a quien se sienta a la mesa. No es un filtro
+/// de acceso: es lo que evita que alguien reserve y se sienta fuera de lugar.
+enum GameExperience {
+  /// Se explica todo. Nunca has jugado y no pasa nada.
+  ABIERTA
+  /// Conviene haber jugado antes, aunque sea a otra cosa.
+  ALGUNA
+  /// Se da por sabido el sistema.
+  VETERANA
+}
+
 enum GameStatus {
   /// Creada pero no visible en el portal.
   DRAFT
@@ -189,6 +200,24 @@ model Game {
 
   /// Sistema de juego ("D&D 5e", "Vampiro", ...).
   system String
+
+  /// Lamina de la partida. Nula mientras el GM no suba ninguna: la tarjeta
+  /// compone entonces una con el sistema de juego.
+  imageUrl String?
+
+  /// Idiomas de ESTA mesa, en codigo ISO. Van en la partida y no solo en el
+  /// GM porque quien dirige en dos idiomas no dirige cada mesa en ambos.
+  languages String[] @default([])
+
+  experience GameExperience @default(ABIERTA)
+
+  /// Edad minima para sentarse. Nula si no la hay.
+  minAge Int?
+
+  /// Etiquetas de estilo y tema, del vocabulario de `modules/games/ficha.ts`.
+  /// Van en una sola columna: el grupo al que pertenece cada una lo sabe el
+  /// vocabulario, no la base de datos.
+  tags String[] @default([])
 
   startsAt DateTime
   endsAt   DateTime

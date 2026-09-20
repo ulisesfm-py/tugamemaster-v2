@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { PortadaForm } from '@/components/portada-form';
+import { ImagenForm } from '@/components/imagen-form';
 import { PostForm } from '@/components/post-form';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { auth } from '@/lib/auth';
@@ -115,7 +115,12 @@ export default async function EditarPostPage({ params }: Props) {
         )}
 
         <div className="mt-4">
-          <PortadaForm accion={subirPortadaAction} postId={post.id} slug={post.slug} />
+          <ImagenForm
+            accion={subirPortadaAction}
+            campo="portada"
+            campos={{ postId: post.id, slug: post.slug }}
+            textoBoton="Subir portada"
+          />
         </div>
       </section>
 
