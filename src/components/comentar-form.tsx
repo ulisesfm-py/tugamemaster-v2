@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button, CLASE_CONTROL } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 import { COMENTARIO_MAXIMO } from '@/modules/blog/politica';
 
@@ -12,13 +13,9 @@ function Enviar() {
   const { pending } = useFormStatus();
 
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-60"
-    >
-      {pending ? 'Publicando...' : 'Comentar'}
-    </button>
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Publicando…' : 'Comentar'}
+    </Button>
   );
 }
 
@@ -41,7 +38,7 @@ export function ComentarForm({
   }, [estado]);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="flex flex-col items-start gap-3">
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="slug" value={slug} />
 
@@ -54,17 +51,14 @@ export function ComentarForm({
         rows={3}
         required
         maxLength={COMENTARIO_MAXIMO}
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-        placeholder="Escribe un comentario..."
+        className={CLASE_CONTROL}
+        placeholder="Escribe un comentario…"
       />
 
       {estado && 'error' in estado && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
+        <Aviso tono="error" className="w-full">
           {estado.error}
-        </p>
+        </Aviso>
       )}
 
       <Enviar />

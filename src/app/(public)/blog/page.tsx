@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Avatar, Fecha } from '@/components/ui';
+import { Avatar, Fecha, Vacio } from '@/components/ui';
 import { resumenDe } from '@/modules/blog/politica';
 import { listarPosts } from '@/modules/blog/queries';
 
@@ -15,22 +15,24 @@ export default async function BlogPage() {
   const posts = await listarPosts();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">Blog</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <h1 className="font-heading text-foreground text-3xl font-extrabold sm:text-4xl">
+        Blog
+      </h1>
+      <p className="text-muted-foreground mt-2">
         Sobre dirigir, jugar y sentarse a una mesa con desconocidos.
       </p>
 
       {posts.length === 0 ? (
-        <p className="mt-10 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          Todavía no hay artículos publicados.
-        </p>
+        <Vacio className="mt-8" titulo="Todavía no hay artículos publicados">
+          Cuando escribamos el primero, aparecerá aquí.
+        </Vacio>
       ) : (
-        <ul className="mt-10 space-y-8">
+        <ul className="mt-8 flex flex-col gap-6">
           {posts.map((post) => (
             <li
               key={post.id}
-              className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800"
+              className="border-border bg-card hover:border-primary overflow-hidden rounded-sm border transition"
             >
               {post.coverUrl && (
                 <Link href={`/blog/${post.slug}`} className="block">
@@ -39,23 +41,25 @@ export default async function BlogPage() {
                     alt=""
                     width={768}
                     height={320}
+                    sizes="(max-width: 768px) 100vw, 48rem"
                     className="h-44 w-full object-cover"
                   />
                 </Link>
               )}
 
               <div className="p-5">
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-                  <Link href={`/blog/${post.slug}`} className="hover:underline">
+                <h2 className="font-heading text-foreground text-xl font-bold text-balance">
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  >
                     {post.title}
                   </Link>
                 </h2>
 
-                <p className="mt-2 text-slate-700 dark:text-slate-300">
-                  {resumenDe(post)}
-                </p>
+                <p className="text-muted-foreground mt-2">{resumenDe(post)}</p>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-2 text-xs">
                   <Avatar src={post.author.image} nombre={post.author.name} tamano={24} />
                   <span>{post.author.name}</span>
                   {post.publishedAt && (

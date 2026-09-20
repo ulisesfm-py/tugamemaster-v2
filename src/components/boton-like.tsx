@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
@@ -15,17 +16,17 @@ function Boton({ gustado, total }: { gustado: boolean; total: number }) {
       type="submit"
       disabled={pending}
       aria-pressed={gustado}
-      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition disabled:opacity-60 ${
+      className={`focus-visible:ring-ring focus-visible:ring-offset-background inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60 ${
         gustado
-          ? 'border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-300'
-          : 'border-slate-300 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+          ? 'border-primary bg-primary/12 text-primary'
+          : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
       }`}
     >
       <span aria-hidden>{gustado ? '♥' : '♡'}</span>
       {/* El numero va fuera del texto accesible del estado para que un lector
           de pantalla anuncie "Me gusta, pulsado" y despues la cuenta. */}
       <span>{gustado ? 'Te gusta' : 'Me gusta'}</span>
-      <span className="text-slate-500 dark:text-slate-400">{total}</span>
+      <span className="text-muted-foreground tabular-nums">{total}</span>
     </button>
   );
 }
@@ -55,9 +56,9 @@ export function BotonLike({
       </form>
 
       {estado && 'error' in estado && (
-        <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">
+        <Aviso tono="error" className="mt-3">
           {estado.error}
-        </p>
+        </Aviso>
       )}
     </div>
   );

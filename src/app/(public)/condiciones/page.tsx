@@ -11,19 +11,22 @@ export const metadata: Metadata = {
 
 export default function CondicionesPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <h1 className="font-heading text-foreground text-3xl font-extrabold">
         Condiciones de reserva
       </h1>
+      <p className="text-muted-foreground mt-2">
+        Lo que pasa con tu dinero si algo sale mal. Es corto a propósito.
+      </p>
 
-      <section className="mt-8 space-y-4 text-slate-700 dark:text-slate-300">
+      <section className="text-muted-foreground mt-8 flex flex-col gap-4 leading-relaxed">
         {TEXTO_CONDICIONES.detalle.map((parrafo) => (
           <p key={parrafo}>{parrafo}</p>
         ))}
       </section>
 
-      <section className="mt-10 space-y-3 text-slate-700 dark:text-slate-300">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+      <section className="text-muted-foreground mt-10 flex flex-col gap-3 leading-relaxed">
+        <h2 className="font-heading text-foreground text-xl font-bold">
           Cuándo cobra el game master
         </h2>
         <p>
@@ -34,14 +37,12 @@ export default function CondicionesPage() {
         </p>
       </section>
 
-      <section className="mt-10 space-y-3 text-slate-700 dark:text-slate-300">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Cómo reclamar
-        </h2>
+      <section className="text-muted-foreground mt-10 flex flex-col gap-3 leading-relaxed">
+        <h2 className="font-heading text-foreground text-xl font-bold">Cómo reclamar</h2>
         <p>
-          Desde <strong>Mis reservas</strong>, en cualquier partida ya jugada, puedes
-          abrir una incidencia contando qué ocurrió. Mientras la revisamos, el pago al
-          game master queda detenido.
+          Desde <strong className="text-foreground">Mis reservas</strong>, en cualquier
+          partida ya jugada, puedes abrir una incidencia contando qué ocurrió. Mientras la
+          revisamos, el pago al game master queda detenido.
         </p>
       </section>
     </main>

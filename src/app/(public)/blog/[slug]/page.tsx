@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { BotonLike } from '@/components/boton-like';
 import { ComentarForm } from '@/components/comentar-form';
 import { ReservarBoton } from '@/components/reservar-boton';
-import { Avatar, Fecha } from '@/components/ui';
+import { Avatar, Aviso, Fecha } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import {
   alternarLikeAction,
@@ -42,25 +42,22 @@ export default async function ArticuloPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <Link
-        href="/blog"
-        className="text-sm text-slate-500 hover:underline dark:text-slate-400"
-      >
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <Link href="/blog" className="text-muted-foreground text-sm hover:underline">
         ← Blog
       </Link>
 
       {post.status !== 'PUBLISHED' && (
-        <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-          Este artículo es un borrador. Solo lo ven los administradores.
-        </p>
+        <Aviso tono="atencion" className="mt-4" titulo="Esto es un borrador">
+          Solo lo ven los administradores.
+        </Aviso>
       )}
 
-      <h1 className="mt-4 text-3xl font-semibold text-slate-900 dark:text-slate-50">
+      <h1 className="font-heading text-foreground mt-4 text-3xl font-extrabold text-balance sm:text-4xl">
         {post.title}
       </h1>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+      <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-2 text-sm">
         <Avatar src={post.author.image} nombre={post.author.name} tamano={32} />
         <span>{post.author.name}</span>
         <span>
@@ -74,18 +71,19 @@ export default async function ArticuloPage({ params }: Props) {
           alt=""
           width={768}
           height={400}
-          className="mt-8 w-full rounded-xl object-cover"
+          sizes="(max-width: 768px) 100vw, 48rem"
+          className="mt-8 w-full rounded-sm object-cover"
           priority
         />
       )}
 
       {/* Texto plano: se respetan los saltos de linea y no se interpreta
           ninguna marca. Ver modules/blog/schema.ts. */}
-      <article className="mt-8 leading-relaxed whitespace-pre-line text-slate-800 dark:text-slate-200">
+      <article className="text-foreground/90 mt-8 leading-relaxed whitespace-pre-line">
         {post.content}
       </article>
 
-      <div className="mt-10 border-t border-slate-200 pt-6 dark:border-slate-800">
+      <div className="border-border mt-10 border-t pt-6">
         {session?.user ? (
           <BotonLike
             accion={alternarLikeAction}
@@ -95,9 +93,9 @@ export default async function ArticuloPage({ params }: Props) {
             total={post._count.likes}
           />
         ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-muted-foreground text-sm">
             {post._count.likes} ♥ ·{' '}
-            <Link href="/login" className="text-indigo-600 hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Entra
             </Link>{' '}
             para dar like o comentar.
@@ -106,16 +104,16 @@ export default async function ArticuloPage({ params }: Props) {
       </div>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+        <h2 className="font-heading text-foreground text-xl font-bold">
           Comentarios ({post.comments.length})
         </h2>
 
         {post.comments.length > 0 && (
-          <ul className="mt-4 space-y-5">
+          <ul className="mt-4 flex flex-col gap-4">
             {post.comments.map((comentario) => (
               <li
                 key={comentario.id}
-                className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"
+                className="border-border bg-card rounded-sm border p-4"
               >
                 <div className="flex items-center gap-3">
                   <Avatar
@@ -126,17 +124,17 @@ export default async function ArticuloPage({ params }: Props) {
                   <div className="min-w-0">
                     <Link
                       href={`/u/${comentario.user.slug}`}
-                      className="text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
+                      className="text-foreground text-sm font-medium hover:underline"
                     >
                       {comentario.user.name}
                     </Link>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-muted-foreground text-xs">
                       <Fecha valor={comentario.createdAt} />
                     </p>
                   </div>
                 </div>
 
-                <p className="mt-3 whitespace-pre-line text-slate-700 dark:text-slate-300">
+                <p className="text-muted-foreground mt-3 whitespace-pre-line">
                   {comentario.body}
                 </p>
 
@@ -147,6 +145,7 @@ export default async function ArticuloPage({ params }: Props) {
                         accion={borrarComentarioAction}
                         texto="Retirar"
                         destructivo
+                        tamano="sm"
                         campos={{ commentId: comentario.id, slug }}
                       />
                     </div>
@@ -161,8 +160,8 @@ export default async function ArticuloPage({ params }: Props) {
             {session?.user ? (
               <ComentarForm accion={comentarAction} postId={post.id} slug={slug} />
             ) : (
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                <Link href="/login" className="text-indigo-600 hover:underline">
+              <p className="text-muted-foreground text-sm">
+                <Link href="/login" className="text-primary hover:underline">
                   Inicia sesión
                 </Link>{' '}
                 para dejar un comentario.

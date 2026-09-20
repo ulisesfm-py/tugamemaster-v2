@@ -216,6 +216,7 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                     accion={cancelarReservaAction}
                     texto="Liberar mi plaza"
                     destructivo
+                    completo
                     campos={{ bookingId: reservaActiva.id, slug: partida.slug }}
                   />
                 </>
@@ -243,6 +244,8 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                   <ReservarBoton
                     accion={reservarAction}
                     texto="Reservar plaza"
+                    tamano="lg"
+                    completo
                     campos={{ gameId: partida.id, slug: partida.slug }}
                   />
 

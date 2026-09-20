@@ -936,3 +936,19 @@ invita a entrar.
 
 Cubierto con una prueba de punta a punta: una partida publicada con la hora
 pasada no ofrece reservar.
+
+## Blog y condiciones
+
+Las últimas dos públicas, y con esto **la tanda pública está entera en Brasa**:
+portada, listado, ficha de partida, directorio de GMs, perfil de GM, campaña,
+perfil de jugador, blog, artículo y condiciones.
+
+En el blog no cambia el contenido, solo la piel. Lo único de fondo: el botón de
+retirar un comentario salía tan grande como el de reservar una plaza. El
+componente que los dibuja a los dos admite ya tamaño y ancho, y **no ocupa todo
+el ancho por defecto** — un panel de reserva lo quiere así, una fila de botones
+del panel del GM no.
+
+La página de condiciones gana una línea que dice lo que es: «lo que pasa con tu
+dinero si algo sale mal, es corto a propósito». El cuerpo lo sigue escribiendo
+`politica.ts`.

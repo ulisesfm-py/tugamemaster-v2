@@ -8,16 +8,26 @@ import type { EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
-function Boton({ texto, destructivo }: { texto: string; destructivo?: boolean }) {
+function Boton({
+  texto,
+  destructivo,
+  tamano,
+  completo,
+}: {
+  texto: string;
+  destructivo?: boolean;
+  tamano: 'sm' | 'md' | 'lg';
+  completo?: boolean;
+}) {
   const { pending } = useFormStatus();
 
   return (
     <Button
       type="submit"
       variante={destructivo ? 'peligro' : 'solido'}
-      tamano="lg"
+      tamano={tamano}
       disabled={pending}
-      className="w-full"
+      className={completo ? 'w-full' : undefined}
     >
       {pending ? 'Un momento…' : texto}
     </Button>
@@ -33,11 +43,16 @@ export function ReservarBoton({
   texto,
   campos,
   destructivo,
+  tamano = 'md',
+  completo,
 }: {
   accion: Accion;
   texto: string;
   campos: Record<string, string>;
   destructivo?: boolean;
+  tamano?: 'sm' | 'md' | 'lg';
+  /** Ocupa todo el ancho. Para el panel de reserva, no para una fila de botones. */
+  completo?: boolean;
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
@@ -47,7 +62,12 @@ export function ReservarBoton({
         {Object.entries(campos).map(([nombre, valor]) => (
           <input key={nombre} type="hidden" name={nombre} value={valor} />
         ))}
-        <Boton texto={texto} destructivo={destructivo} />
+        <Boton
+          texto={texto}
+          destructivo={destructivo}
+          tamano={tamano}
+          completo={completo}
+        />
       </form>
 
       {estado && 'error' in estado && (
