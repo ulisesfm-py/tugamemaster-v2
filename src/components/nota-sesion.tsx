@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button, CLASE_CONTROL } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 import { NOTA_MAXIMA, NOTA_MINIMA } from '@/modules/campaigns/politica';
 
@@ -12,13 +13,9 @@ function Guardar() {
   const { pending } = useFormStatus();
 
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-60"
-    >
-      {pending ? 'Guardando...' : 'Guardar nota'}
-    </button>
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Guardando…' : 'Guardar nota'}
+    </Button>
   );
 }
 
@@ -42,28 +39,29 @@ export function NotaSesion({
 
   if (!abierto) {
     return (
-      <div className="space-y-3">
-        <p className="rounded-xl border border-slate-200 p-4 text-sm whitespace-pre-line text-slate-700 dark:border-slate-800 dark:text-slate-300">
+      <div className="flex flex-col items-start gap-3">
+        <p className="border-border bg-card text-muted-foreground w-full rounded-sm border p-4 text-sm whitespace-pre-line">
           {contenido}
         </p>
-        <button
+        <Button
           type="button"
+          variante="enlace"
+          tamano="sm"
           onClick={() => setAbierto(true)}
-          className="text-sm text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
         >
           Editar la nota
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="gameId" value={gameId} />
 
       <label
         htmlFor={`nota-${gameId}`}
-        className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+        className="text-foreground block text-sm font-medium"
       >
         ¿Dónde quedó la sesión?
       </label>
@@ -75,42 +73,25 @@ export function NotaSesion({
         minLength={NOTA_MINIMA}
         maxLength={NOTA_MAXIMA}
         defaultValue={contenido ?? ''}
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-        placeholder="Niveles y puntos de vida, dónde se quedaron, qué pasó, qué tienen pendiente..."
+        className={CLASE_CONTROL}
+        placeholder="Niveles y puntos de vida, dónde se quedaron, qué pasó, qué tienen pendiente…"
       />
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-muted-foreground text-xs">
         La verán quienes jugaron esta sesión. No es pública: cuenta lo que hicieron sus
         personajes.
       </p>
 
-      {estado && 'error' in estado && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
-          {estado.error}
-        </p>
-      )}
-
+      {estado && 'error' in estado && <Aviso tono="error">{estado.error}</Aviso>}
       {estado && 'ok' in estado && (
-        <p
-          role="status"
-          className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-        >
-          {estado.mensaje ?? 'Guardada.'}
-        </p>
+        <Aviso tono="exito">{estado.mensaje ?? 'Guardada.'}</Aviso>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Guardar />
         {contenido !== null && (
-          <button
-            type="button"
-            onClick={() => setAbierto(false)}
-            className="text-sm text-slate-500 hover:underline dark:text-slate-400"
-          >
+          <Button type="button" variante="fantasma" onClick={() => setAbierto(false)}>
             Cancelar
-          </button>
+          </Button>
         )}
       </div>
     </form>

@@ -1092,3 +1092,35 @@ culpable: `Intl.NumberFormat` mete un **espacio fino inquebrantable** antes del
 €, y una expresión regular con un espacio normal no casa. Como cadena sí,
 porque Playwright normaliza los espacios. Conviene recordarlo: cualquier
 aserción sobre un importe formateado tiene esa trampa.
+
+## La ficha de gestión `/cuenta/partidas/[gameId]`
+
+Es la pantalla más cargada de la web —publicar, retirar, cancelar, ver quién
+viene, la lámina, la nota de sesión, la continuación y el formulario entero— y
+lo que más le faltaba era un orden.
+
+**«Cancelar partida» compartía caja con «Publicar»**, a un dedo de distancia.
+Una acción que devuelve el dinero de todo el mundo y no tiene vuelta atrás no
+puede estar donde se pulsa sin mirar. Ahora vive al final, en su propio
+recuadro, con lo que va a pasar escrito debajo de cada botón: «se devolverá el
+100% en saldo a 2 jugadores, no se puede deshacer».
+
+El resto sigue un orden por urgencia: en qué punto está la partida, lo que toca
+hacer ahora —publicar si es borrador, escribir la nota si ya se jugó—, quién
+viene, la lámina, y editar.
+
+Dos detalles pequeños:
+
+- **La lista de jugadores enseña el estado de cada reserva.** Una sin pagar
+  ocupa plaza pero puede caerse sola al vencer el plazo, y el GM no lo veía.
+- **El recuadro de riesgo tiene nombre accesible** (`aria-labelledby`), así que
+  es una región de verdad y se puede saltar a ella desde un lector de pantalla.
+  Un `<section>` sin nombre no es más que un `div` con otra etiqueta. De paso,
+  la prueba que lo comprueba pasó de un localizador retorcido a una línea.
+
+### Publicar no tenía ninguna prueba
+
+Las pruebas fabricaban las partidas ya publicadas con SQL, así que el camino
+que de verdad recorre un game master —crearla en borrador y soltarla al
+portal— no lo comprobaba nadie. Ahora hay una que lo recorre entero: el
+borrador no aparece en `/partidas`, el GM pulsa Publicar, y aparece.

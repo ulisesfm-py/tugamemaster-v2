@@ -6,7 +6,16 @@ import { ImagenForm } from '@/components/imagen-form';
 import { NotaSesion } from '@/components/nota-sesion';
 import { PartidaForm } from '@/components/partida-form';
 import { ReservarBoton } from '@/components/reservar-boton';
-import { Avatar, Fecha } from '@/components/ui';
+import {
+  Avatar,
+  Aviso,
+  EnlaceBoton,
+  Estado,
+  ESTADO_DE_PARTIDA,
+  ESTADO_DE_RESERVA,
+  Fecha,
+  Vacio,
+} from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { jugadoresDe } from '@/modules/bookings/queries';
 import { guardarNotaAction } from '@/modules/campaigns/actions';
@@ -18,11 +27,31 @@ import {
   publicarPartidaAction,
   subirLaminaAction,
 } from '@/modules/games/actions';
+import { estadoVisible } from '@/modules/games/ficha';
 import { miPartida } from '@/modules/games/queries';
 
 export const metadata: Metadata = { title: 'Gestionar partida · TuGameMaster' };
 
 type Props = { params: Promise<{ gameId: string }> };
+
+/** Un bloque de la ficha. */
+function Bloque({
+  titulo,
+  nota,
+  children,
+}: {
+  titulo: string;
+  nota?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-10">
+      <h2 className="font-heading text-foreground text-xl font-bold">{titulo}</h2>
+      {nota && <p className="text-muted-foreground mt-1 text-sm">{nota}</p>}
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
 
 export default async function GestionarPartidaPage({ params }: Props) {
   const { gameId } = await params;
@@ -42,191 +71,233 @@ export default async function GestionarPartidaPage({ params }: Props) {
   const terminada = partidaTerminada(partida.status, partida.endsAt);
   const pagadas = partida._count.bookings;
 
+  const visible = estadoVisible(partida.status, partida.startsAt);
+  const estado = ESTADO_DE_PARTIDA[visible];
+
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-2xl px-4 py-10">
       <Link
         href="/cuenta/partidas"
-        className="text-sm text-slate-500 hover:underline dark:text-slate-400"
+        className="text-muted-foreground text-sm hover:underline"
       >
         ← Mis partidas
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-        {partida.title}
-      </h1>
+      <div className="mt-4 flex flex-wrap items-start gap-x-3 gap-y-2">
+        <h1 className="font-heading text-foreground min-w-0 flex-1 text-3xl font-extrabold text-balance">
+          {partida.title}
+        </h1>
+        <Estado tono={estado.tono} className="mt-1.5">
+          {estado.texto}
+        </Estado>
+      </div>
 
-      {partida.status === 'PUBLISHED' && (
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Publicada en{' '}
-          <Link
-            href={`/partidas/${partida.slug}`}
-            className="text-indigo-600 hover:underline"
-          >
-            /partidas/{partida.slug}
-          </Link>
-        </p>
-      )}
-
-      <section className="mt-6 flex flex-wrap gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-        {partida.status === 'DRAFT' && (
-          <ReservarBoton
-            accion={publicarPartidaAction}
-            texto="Publicar"
-            campos={{ gameId: partida.id, slug: partida.slug }}
-          />
-        )}
-
-        {partida.status === 'PUBLISHED' && (
-          <ReservarBoton
-            accion={despublicarPartidaAction}
-            texto="Retirar del portal"
-            destructivo
-            campos={{ gameId: partida.id, slug: partida.slug }}
-          />
-        )}
-
-        {editable && (
-          <div>
-            <ReservarBoton
-              accion={cancelarPartidaAction}
-              texto="Cancelar partida"
-              destructivo
-              campos={{ gameId: partida.id, slug: partida.slug }}
-            />
-            {pagadas > 0 && (
-              <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                Se devolverá el 100% en saldo a {pagadas}{' '}
-                {pagadas === 1 ? 'jugador' : 'jugadores'}. No se puede deshacer.
-              </p>
-            )}
-          </div>
-        )}
-      </section>
+      <p className="text-muted-foreground mt-2 text-sm">
+        {partida.system} · <Fecha valor={partida.startsAt} />
+      </p>
 
       {partida.campaign && (
-        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-          Sesión {partida.sessionNumber} de la campaña{' '}
+        <p className="text-muted-foreground mt-1 text-sm">
+          Sesión {partida.sessionNumber} de{' '}
           <Link
             href={`/campanas/${partida.campaign.slug}`}
-            className="text-indigo-600 hover:underline"
+            className="text-primary hover:underline"
           >
             {partida.campaign.title}
           </Link>
         </p>
       )}
 
-      {terminada && (
-        <section className="mt-10">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Cómo acabó la sesión
-          </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Te servirá de plantilla para montar la siguiente, y a tus jugadores para
-            recordar dónde se quedaron.
+      {/* ── Lo primero: en qué punto está y qué se puede hacer ──── */}
+      {partida.status === 'DRAFT' && (
+        <section className="border-border bg-card mt-6 rounded-sm border p-5">
+          <p className="text-foreground font-medium">Todavía no la ve nadie</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Repásala entera y publícala cuando esté lista. Podrás retirarla después si
+            hace falta.
           </p>
-
           <div className="mt-4">
-            <NotaSesion
-              gameId={partida.id}
-              accion={guardarNotaAction}
-              contenido={partida.sessionNote?.content ?? null}
+            <ReservarBoton
+              accion={publicarPartidaAction}
+              texto="Publicar"
+              campos={{ gameId: partida.id, slug: partida.slug }}
             />
           </div>
+        </section>
+      )}
 
-          <div className="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+      {partida.status === 'PUBLISHED' && (
+        <p className="border-border text-muted-foreground mt-6 flex flex-wrap items-center gap-2 rounded-sm border border-dashed px-4 py-2.5 text-sm">
+          Está publicada en{' '}
+          <Link href={`/partidas/${partida.slug}`} className="text-primary underline">
+            /partidas/{partida.slug}
+          </Link>
+        </p>
+      )}
+
+      {partida.status === 'CANCELLED' && (
+        <Aviso tono="error" className="mt-6" titulo="Partida cancelada">
+          Quien había pagado su plaza recibió el importe íntegro en saldo.
+        </Aviso>
+      )}
+
+      {/* ── Lo urgente cuando ya se ha jugado ───────────────────── */}
+      {terminada && (
+        <Bloque
+          titulo="Cómo acabó la sesión"
+          nota="Te servirá de plantilla para montar la siguiente, y a tus jugadores para recordar dónde se quedaron."
+        >
+          <NotaSesion
+            gameId={partida.id}
+            accion={guardarNotaAction}
+            contenido={partida.sessionNote?.content ?? null}
+          />
+
+          <div className="border-border mt-6 rounded-sm border p-4">
             {partida.nextGame ? (
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground text-sm">
                 Ya has creado la continuación:{' '}
                 <Link
                   href={`/cuenta/partidas/${partida.nextGame.id}`}
-                  className="text-indigo-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   {partida.nextGame.title}
                 </Link>
               </p>
             ) : (
               <>
-                <p className="text-sm text-slate-700 dark:text-slate-300">
+                <p className="text-foreground text-sm font-medium">
                   ¿Seguís la historia otro día?
                 </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  La siguiente sesión solo la podrán reservar quienes jugaron esta.
+                <p className="text-muted-foreground mt-1 text-sm">
+                  La siguiente sesión solo la podrán reservar quienes jugaron esta, y
+                  nacerá con la ficha de esta ya rellenada.
                 </p>
-                <Link
-                  href={`/cuenta/partidas/${partida.id}/continuacion`}
-                  className="mt-3 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-                >
-                  Crear la siguiente sesión
-                </Link>
+                <div className="mt-4">
+                  <EnlaceBoton href={`/cuenta/partidas/${partida.id}/continuacion`}>
+                    Crear la siguiente sesión
+                  </EnlaceBoton>
+                </div>
               </>
             )}
           </div>
-        </section>
+        </Bloque>
       )}
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Jugadores ({jugadores.length} de {partida.seatsTotal})
-        </h2>
-
+      {/* ── Quién viene ─────────────────────────────────────────── */}
+      <Bloque titulo={`Jugadores (${jugadores.length} de ${partida.seatsTotal})`}>
         {jugadores.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Todavía no se ha apuntado nadie.
-          </p>
+          <Vacio titulo="Todavía no se ha apuntado nadie">
+            {partida.status === 'DRAFT'
+              ? 'Nadie puede reservar mientras siga en borrador.'
+              : 'Cuando alguien reserve su plaza, aparecerá aquí.'}
+          </Vacio>
         ) : (
-          <ul className="mt-3 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+          <ul className="border-border divide-border divide-y rounded-sm border">
             {jugadores.map((j) => (
-              <li key={j.id} className="flex items-center gap-3 px-4 py-3">
+              <li key={j.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <Avatar src={j.user.image} nombre={j.user.name} tamano={32} />
                 <Link
                   href={`/u/${j.user.slug}`}
-                  className="text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
+                  className="text-foreground text-sm font-medium hover:underline"
                 >
                   {j.user.name}
                 </Link>
-                <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+
+                {/* El estado importa: una reserva sin pagar todavia ocupa
+                    plaza, pero puede caerse sola al vencer el plazo. */}
+                <Estado tono={ESTADO_DE_RESERVA[j.status].tono}>
+                  {ESTADO_DE_RESERVA[j.status].texto}
+                </Estado>
+
+                <span className="text-muted-foreground ml-auto text-xs">
                   <Fecha valor={j.createdAt} />
                 </span>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Bloque>
 
       {editable && (
-        <section className="mt-10">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Lámina
-          </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Es lo primero que se ve de tu partida en el portal. Sin ella se compone una
-            con el nombre del sistema, que cumple pero no llama.
-          </p>
-
-          <div className="mt-4">
+        <>
+          <Bloque
+            titulo="Lámina"
+            nota="Es lo primero que se ve de tu partida en el portal. Sin ella se compone una con el nombre del sistema, que cumple pero no llama."
+          >
             <ImagenForm
               accion={subirLaminaAction}
               campo="lamina"
               campos={{ gameId: partida.id, slug: partida.slug }}
               textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
             />
-          </div>
-        </section>
-      )}
+          </Bloque>
 
-      {editable && (
-        <section className="mt-10">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Editar
-          </h2>
-          <div className="mt-4">
+          <Bloque titulo="Editar">
             <PartidaForm
               accion={actualizarPartidaAction}
               textoBoton="Guardar cambios"
               valores={partida}
             />
-          </div>
-        </section>
+          </Bloque>
+
+          {/* ── Lo que no tiene vuelta atrás, al final y aparte ─────
+              Antes «Cancelar partida» compartia caja con «Publicar», a un
+              dedo de distancia. Una accion que devuelve el dinero de
+              todo el mundo no puede estar donde se pulsa sin mirar. */}
+          {/* Con nombre accesible, asi que es una region de verdad y se puede
+              saltar a ella desde un lector de pantalla. Un <section> sin
+              nombre no es mas que un div con otra etiqueta. */}
+          <section
+            aria-labelledby="zona-de-riesgo"
+            className="border-destructive/30 mt-12 rounded-sm border border-dashed p-5"
+          >
+            <h2
+              id="zona-de-riesgo"
+              className="font-heading text-foreground text-base font-bold"
+            >
+              {partida.status === 'PUBLISHED' ? 'Retirar o cancelar' : 'Cancelar'}
+            </h2>
+
+            <div className="mt-4 flex flex-col gap-5">
+              {partida.status === 'PUBLISHED' && (
+                <div>
+                  <ReservarBoton
+                    accion={despublicarPartidaAction}
+                    texto="Retirar del portal"
+                    destructivo
+                    tamano="sm"
+                    campos={{ gameId: partida.id, slug: partida.slug }}
+                  />
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    Vuelve a borrador y deja de admitir reservas. Quien ya tenga plaza la
+                    conserva.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <ReservarBoton
+                  accion={cancelarPartidaAction}
+                  texto="Cancelar partida"
+                  destructivo
+                  tamano="sm"
+                  campos={{ gameId: partida.id, slug: partida.slug }}
+                />
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {pagadas > 0 ? (
+                    <>
+                      Se devolverá el 100% en saldo a {pagadas}{' '}
+                      {pagadas === 1 ? 'jugador' : 'jugadores'}. No se puede deshacer.
+                    </>
+                  ) : (
+                    'La partida queda cancelada para siempre. No se puede deshacer.'
+                  )}
+                </p>
+              </div>
+            </div>
+          </section>
+        </>
       )}
     </main>
   );

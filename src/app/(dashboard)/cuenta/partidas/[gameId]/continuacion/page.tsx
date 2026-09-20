@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { PartidaForm } from '@/components/partida-form';
+import { Campo, CLASE_CONTROL } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { crearContinuacionAction } from '@/modules/campaigns/actions';
 import {
@@ -63,19 +64,19 @@ export default async function ContinuacionPage({ params }: Props) {
   };
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-2xl px-4 py-10">
       <Link
         href={`/cuenta/partidas/${anterior.id}`}
-        className="text-sm text-slate-500 hover:underline dark:text-slate-400"
+        className="text-muted-foreground text-sm hover:underline"
       >
         ← {anterior.title}
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+      <h1 className="font-heading text-foreground mt-4 text-3xl font-extrabold">
         Sesión {numero}
       </h1>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-2 text-sm">
         Solo podrán reservar plaza {anterior._count.bookings}{' '}
         {anterior._count.bookings === 1 ? 'jugador' : 'jugadores'}: quienes pagaron y
         jugaron la sesión anterior. Nacerá como borrador, así que podrás revisarla antes
@@ -83,11 +84,11 @@ export default async function ContinuacionPage({ params }: Props) {
       </p>
 
       {anterior.sessionNote && (
-        <section className="mt-8 rounded-xl border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-900 dark:bg-indigo-950/40">
-          <h2 className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+        <section className="border-accent/30 bg-accent/5 mt-8 rounded-sm border p-5">
+          <h2 className="font-heading text-accent text-base font-bold">
             Dónde quedó la sesión anterior
           </h2>
-          <p className="mt-2 text-sm whitespace-pre-line text-indigo-900/90 dark:text-indigo-100/90">
+          <p className="text-foreground/90 mt-2 text-sm whitespace-pre-line">
             {anterior.sessionNote.content}
           </p>
         </section>
@@ -99,29 +100,26 @@ export default async function ContinuacionPage({ params }: Props) {
           textoBoton="Crear la sesión"
           valores={valores}
           extra={
-            <div>
-              <label
-                htmlFor="campaignSummary"
-                className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Sobre la campaña{' '}
-                <span className="font-normal text-slate-500">(opcional)</span>
-              </label>
+            <Campo
+              id="campaignSummary"
+              etiqueta="Sobre la campaña"
+              opcional
+              ayuda={
+                anterior.campaign
+                  ? 'Actualiza la descripción de la campaña. En blanco, se queda la que ya tenía.'
+                  : 'Esta es la primera continuación, así que aquí nace la campaña.'
+              }
+            >
               <textarea
                 id="campaignSummary"
                 name="campaignSummary"
                 rows={3}
                 maxLength={RESUMEN_MAXIMO}
                 defaultValue={anterior.campaign?.summary ?? ''}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-indigo-900"
+                className={CLASE_CONTROL}
                 placeholder="De qué va la campaña en dos líneas. Es lo que se ve en su página pública."
               />
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {anterior.campaign
-                  ? 'Actualiza la descripción de la campaña. En blanco, se queda la que ya tenía.'
-                  : 'Esta es la primera continuación, así que aquí nace la campaña.'}
-              </p>
-            </div>
+            </Campo>
           }
         />
       </div>
