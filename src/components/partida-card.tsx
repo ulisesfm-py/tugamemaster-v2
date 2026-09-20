@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Lamina } from '@/components/lamina';
 import { Avatar, Fecha, Precio } from '@/components/ui';
-import { etiquetasDe, type Experiencia } from '@/modules/games/ficha';
+import { etiquetasDe, PLAZAS_POCAS, type Experiencia } from '@/modules/games/ficha';
 import { cn } from '@/lib/utils';
 
 /**
@@ -48,8 +48,13 @@ type Partida = {
 /** Lo que se dice de las plazas, y con cuanta insistencia. */
 function plazas(libres: number, total: number) {
   if (libres <= 0) return { texto: 'Completa', urgente: false };
-  if (libres === 1) return { texto: 'Queda 1 plaza', urgente: true };
-  if (libres === 2) return { texto: 'Quedan 2 plazas', urgente: true };
+
+  if (libres <= PLAZAS_POCAS) {
+    return {
+      texto: libres === 1 ? 'Queda 1 plaza' : `Quedan ${libres} plazas`,
+      urgente: true,
+    };
+  }
 
   return { texto: `${libres} de ${total} plazas libres`, urgente: false };
 }

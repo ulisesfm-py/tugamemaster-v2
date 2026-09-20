@@ -822,3 +822,40 @@ comprobación de la ficha técnica, que encontró dos tarjetas en vez de una.
 
 Lleva ya un `waitForURL`. Es el mismo error de la vez anterior con otra cara:
 **una comprobación que se cumple antes de que pase lo que se quiere comprobar.**
+
+## Listado `/partidas`
+
+Lo que tenía era un formulario de cuatro filtros y una lista en una columna.
+Quien llega sin saber qué busca se encuentra la página en blanco: hay que
+rellenar algo para que pase cualquier cosa.
+
+Ahora, por encima de los filtros, hay **atajos curados**: esta semana, últimas
+plazas, para empezar, sin coste, y un par de temas. Son **enlaces, no botones**
+—cada uno es una URL que se puede compartir, guardar y enlazar desde fuera— y
+el que está puesto se marca con `aria-current`.
+
+Tres detalles que no se ven pero se notan:
+
+- **Los atajos viajan escondidos en el formulario.** Sin eso, buscar algo
+  dentro de «esta semana» te sacaba de «esta semana».
+- **El umbral de «últimas plazas» es el mismo que el de la tarjeta.** Vive en
+  `ficha.ts` y lo comparten los dos. Si se separaran, alguien filtraría por
+  últimas plazas y le saldrían mesas que no lo parecen.
+- **El vacío nombra el filtro que no ha dado resultados** —«ahora mismo no hay
+  ninguna mesa de terror»— en vez de un «no hay nada» que deja la duda de si
+  falla el buscador.
+
+Verificado contra la base de datos real, con mesas fabricadas a medida: los
+nueve casos devuelven exactamente las que deben. Un filtro que devuelve de más
+no se nota mirando la página —siguen saliendo partidas— y es justo lo que hace
+que la gente deje de fiarse de los filtros.
+
+### Y una limpieza que se dio por buena
+
+El guion de verificación borra lo que crea y luego comprueba que no queda nada.
+La comprobación buscaba **la marca de esa ejecución**, así que decía «limpio»
+mientras seguían ahí dos filas de un intento anterior que se había estrellado a
+mitad. Se vio al contar las partidas de la base, no en el propio guion.
+
+Es el mismo patrón otra vez: **una comprobación que no puede ver aquello de lo
+que debería avisar.**

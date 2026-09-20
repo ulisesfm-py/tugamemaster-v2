@@ -3,6 +3,7 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { ESTADOS_PAGADOS, filtroPlazaOcupada } from '@/modules/bookings/service';
 
+import { PLAZAS_POCAS } from './ficha';
 import type { Filtros } from './schema';
 
 /**
@@ -42,6 +43,12 @@ function seleccionTarjeta() {
   } as const;
 }
 
+/** Fin de la ventana de fechas que pide el filtro. */
+function hasta(cuando: 'semana' | 'mes'): Date {
+  const dias = cuando === 'semana' ? 7 : 30;
+  return new Date(Date.now() + dias * 86_400_000);
+}
+
 /** Listado publico: solo partidas publicadas que aun no han empezado. */
 export async function listarPartidas(filtros: Filtros) {
   const partidas = await db.game.findMany({
@@ -62,19 +69,29 @@ export async function listarPartidas(filtros: Filtros) {
       ...(filtros.maxPrecio !== undefined
         ? { priceCents: { lte: Math.round(filtros.maxPrecio * 100) } }
         : {}),
+      ...(filtros.experiencia ? { experience: filtros.experiencia } : {}),
+      ...(filtros.etiqueta ? { tags: { has: filtros.etiqueta } } : {}),
+      ...(filtros.cuando
+        ? { startsAt: { gte: new Date(), lte: hasta(filtros.cuando) } }
+        : {}),
     },
     orderBy: { startsAt: 'asc' },
     take: 60,
     select: seleccionTarjeta(),
   });
 
-  // "Solo con plazas libres" se filtra en memoria: depende del recuento de
-  // reservas, que Prisma no permite comparar contra otra columna en el where.
-  // Con 60 filas como maximo es irrelevante; si el catalogo crece, tocara
-  // mantener un contador desnormalizado en Game.
-  return filtros.soloLibres
-    ? partidas.filter((p) => p._count.bookings < p.seatsTotal)
-    : partidas;
+  // Las dos condiciones de aforo se resuelven en memoria: dependen del recuento
+  // de reservas, que Prisma no permite comparar contra otra columna en el
+  // where. Con 60 filas como maximo es irrelevante; si el catalogo crece,
+  // tocara mantener un contador desnormalizado en Game.
+  return partidas.filter((p) => {
+    const libres = p.seatsTotal - p._count.bookings;
+
+    if (filtros.ultimasPlazas) return libres > 0 && libres <= PLAZAS_POCAS;
+    if (filtros.soloLibres) return libres > 0;
+
+    return true;
+  });
 }
 
 /** Sistemas de juego existentes, para el desplegable de filtros. */

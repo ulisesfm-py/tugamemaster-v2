@@ -14,6 +14,15 @@
  * en la base de datos: en `Game` hay una sola columna.
  */
 
+/**
+ * A partir de cuantas plazas libres se deja de meter prisa.
+ *
+ * Lo comparten la tarjeta —que dice «queda 1 plaza»— y el filtro de «ultimas
+ * plazas» del listado. Si se separaran, alguien filtraria por ultimas plazas y
+ * le saldrian mesas que no lo parecen.
+ */
+export const PLAZAS_POCAS = 2;
+
 export const EXPERIENCIA = {
   ABIERTA: {
     titulo: 'Abierta a todos',

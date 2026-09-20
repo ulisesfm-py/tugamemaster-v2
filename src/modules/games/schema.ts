@@ -99,7 +99,14 @@ export const partidaSchema = z
 
 export type PartidaInput = z.infer<typeof partidaSchema>;
 
-/** Filtros del listado publico. Todos opcionales. */
+/**
+ * Filtros del listado publico. Todos opcionales.
+ *
+ * Vienen de la URL, que cualquiera puede escribir a mano, asi que se validan
+ * como cualquier otra entrada. Lo que no cuadre se ignora en vez de romper la
+ * pagina: un enlace viejo con un filtro que ya no existe tiene que seguir
+ * ensenando partidas.
+ */
 export const filtrosSchema = z.object({
   q: z.string().trim().max(80).optional(),
   system: z.string().trim().max(60).optional(),
@@ -107,6 +114,14 @@ export const filtrosSchema = z.object({
   maxPrecio: z.coerce.number().nonnegative().optional(),
   /** Solo partidas con plazas libres. */
   soloLibres: z.boolean().optional(),
+  /** Solo las que estan a punto de llenarse. */
+  ultimasPlazas: z.boolean().optional(),
+  /** Cuanta soltura se presupone. */
+  experiencia: z.enum(EXPERIENCIAS).optional(),
+  /** Una etiqueta del vocabulario. */
+  etiqueta: z.string().refine(esEtiqueta, 'Esa etiqueta no esta en la lista').optional(),
+  /** Ventana de fechas: los proximos siete o treinta dias. */
+  cuando: z.enum(['semana', 'mes']).optional(),
 });
 
 export type Filtros = z.infer<typeof filtrosSchema>;
