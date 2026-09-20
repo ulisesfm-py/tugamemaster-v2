@@ -3,76 +3,27 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
-
-const campo =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-indigo-900';
 
 function Guardar() {
   const { pending } = useFormStatus();
 
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-lg bg-indigo-600 px-4 py-2.5 font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {pending ? 'Guardando...' : 'Guardar cambios'}
-    </button>
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Guardando…' : 'Guardar cambios'}
+    </Button>
   );
 }
 
-function Aviso({ estado }: { estado: EstadoAccion }) {
+function Resultado({ estado }: { estado: EstadoAccion }) {
   if (!estado) return null;
 
-  if ('error' in estado) {
-    return (
-      <p
-        role="alert"
-        className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-      >
-        {estado.error}
-      </p>
-    );
-  }
+  if ('error' in estado) return <Aviso tono="error">{estado.error}</Aviso>;
 
-  return (
-    <p
-      role="status"
-      className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-    >
-      Guardado.
-    </p>
-  );
-}
-
-function Campo({
-  id,
-  etiqueta,
-  ayuda,
-  children,
-}: {
-  id: string;
-  etiqueta: string;
-  ayuda?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
-      >
-        {etiqueta}
-      </label>
-      {children}
-      {ayuda && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{ayuda}</p>
-      )}
-    </div>
-  );
+  return <Aviso tono="exito">Guardado.</Aviso>;
 }
 
 export function PerfilJugadorForm({
@@ -90,55 +41,65 @@ export function PerfilJugadorForm({
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <Campo id="name" etiqueta="Nombre">
         <input
           id="name"
           name="name"
           defaultValue={valores.name}
           required
-          className={campo}
+          className={CLASE_CONTROL}
         />
       </Campo>
 
-      <Campo id="bio" etiqueta="Sobre ti" ayuda="Máximo 500 caracteres.">
+      <Campo
+        id="bio"
+        etiqueta="Sobre ti"
+        opcional
+        ayuda="Lo que quieras contarle a la gente con la que vas a jugar. Máximo 500 caracteres."
+      >
         <textarea
           id="bio"
           name="bio"
           rows={4}
           defaultValue={valores.bio ?? ''}
-          className={campo}
+          className={CLASE_CONTROL}
         />
       </Campo>
 
       <Campo
         id="preferredSystems"
         etiqueta="Sistemas que te gustan"
+        opcional
         ayuda="Separados por comas. Por ejemplo: D&D 5e, Vaesen, Call of Cthulhu"
       >
         <input
           id="preferredSystems"
           name="preferredSystems"
           defaultValue={valores.preferredSystems.join(', ')}
-          className={campo}
+          className={CLASE_CONTROL}
         />
       </Campo>
 
       <Campo
         id="preferredStyles"
         etiqueta="Estilo de juego que prefieres"
+        opcional
         ayuda="Separados por comas. Por ejemplo: narrativo, combate, investigación"
       >
         <input
           id="preferredStyles"
           name="preferredStyles"
           defaultValue={valores.preferredStyles.join(', ')}
-          className={campo}
+          className={CLASE_CONTROL}
         />
       </Campo>
 
-      <Aviso estado={estado} />
-      <Guardar />
+      <Resultado estado={estado} />
+
+      <div>
+        <Guardar />
+      </div>
     </form>
   );
 }
@@ -159,87 +120,105 @@ export function PerfilGmForm({
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <Campo
-        id="headline"
-        etiqueta="Titular"
-        ayuda="Una línea que resuma qué tipo de mesas diriges."
-      >
-        <input
+    <form action={formAction} className="flex flex-col gap-8">
+      <fieldset className="flex flex-col gap-4">
+        <legend className="font-heading text-foreground mb-3 text-lg font-bold">
+          Cómo te presentas
+        </legend>
+
+        <Campo
           id="headline"
-          name="headline"
-          defaultValue={valores?.headline ?? ''}
-          required
-          minLength={10}
-          maxLength={120}
-          className={campo}
-          placeholder="Terror investigativo en los años 20"
-        />
-      </Campo>
+          etiqueta="Titular"
+          ayuda="Una línea que resuma qué tipo de mesas diriges."
+        >
+          <input
+            id="headline"
+            name="headline"
+            defaultValue={valores?.headline ?? ''}
+            required
+            minLength={10}
+            maxLength={120}
+            className={CLASE_CONTROL}
+            placeholder="Terror investigativo en los años 20"
+          />
+        </Campo>
 
-      <Campo
-        id="about"
-        etiqueta="Cómo diriges"
-        ayuda="Lo que un jugador querría saber antes de reservar. Máximo 2000 caracteres."
-      >
-        <textarea
+        <Campo
           id="about"
-          name="about"
-          rows={6}
-          defaultValue={valores?.about ?? ''}
-          className={campo}
-        />
-      </Campo>
+          etiqueta="Cómo diriges"
+          opcional
+          ayuda="Lo que un jugador querría saber antes de reservar. Máximo 2000 caracteres."
+        >
+          <textarea
+            id="about"
+            name="about"
+            rows={6}
+            defaultValue={valores?.about ?? ''}
+            className={CLASE_CONTROL}
+          />
+        </Campo>
 
-      <Campo
-        id="languages"
-        etiqueta="Idiomas"
-        ayuda="Códigos de dos letras separados por comas: es, en, fr"
-      >
-        <input
+        <Campo
           id="languages"
-          name="languages"
-          defaultValue={valores?.languages.join(', ') ?? 'es'}
-          required
-          className={campo}
-        />
-      </Campo>
+          etiqueta="Idiomas"
+          ayuda="Códigos de dos letras separados por comas: es, en, fr"
+        >
+          <input
+            id="languages"
+            name="languages"
+            defaultValue={valores?.languages.join(', ') ?? 'es'}
+            required
+            className={CLASE_CONTROL}
+          />
+        </Campo>
+      </fieldset>
 
-      {/* De aqui para abajo, lo que cuentas tu. La web lo ensena separado de
-          las estrellas y las partidas dirigidas, que salen de reservas
-          pagadas: si se mezclaran, «verificado» dejaria de significar nada. */}
-      <Campo
-        id="yearsExperience"
-        etiqueta="Años dirigiendo (opcional)"
-        ayuda="Se muestra como dato que cuentas tú, no como dato verificado."
-      >
-        <input
-          id="yearsExperience"
-          name="yearsExperience"
-          type="number"
-          min="0"
-          max="60"
-          step="1"
-          defaultValue={valores?.yearsExperience ?? ''}
-          className={`${campo} sm:w-32`}
-        />
-      </Campo>
+      {/* De aqui para abajo, lo que cuenta el GM de si mismo. Su perfil lo
+          ensena separado de las estrellas y las partidas dirigidas, que salen
+          de reservas pagadas; decirselo aqui explica por que se le piden
+          aparte y por que no pasa nada por dejarlo en blanco. */}
+      <fieldset className="flex flex-col gap-4">
+        <legend className="font-heading text-foreground text-lg font-bold">
+          Lo que cuentas tú
+        </legend>
+        <p className="text-muted-foreground -mt-2 text-sm">
+          Esto no lo comprobamos, y en tu perfil aparece separado de lo que sí
+          certificamos: tus estrellas y las partidas que has dirigido aquí.
+        </p>
 
-      <Campo
-        id="systems"
-        etiqueta="Sistemas que dominas (opcional)"
-        ayuda="Separados por comas: D&D 5e, Vaesen, Vampiro"
-      >
-        <input
+        <Campo id="yearsExperience" etiqueta="Años dirigiendo" opcional>
+          <input
+            id="yearsExperience"
+            name="yearsExperience"
+            type="number"
+            min="0"
+            max="60"
+            step="1"
+            defaultValue={valores?.yearsExperience ?? ''}
+            className={`${CLASE_CONTROL} sm:w-32`}
+          />
+        </Campo>
+
+        <Campo
           id="systems"
-          name="systems"
-          defaultValue={valores?.systems.join(', ') ?? ''}
-          className={campo}
-        />
-      </Campo>
+          etiqueta="Sistemas que dominas"
+          opcional
+          ayuda="Separados por comas: D&D 5e, Vaesen, Vampiro"
+        >
+          <input
+            id="systems"
+            name="systems"
+            defaultValue={valores?.systems.join(', ') ?? ''}
+            className={CLASE_CONTROL}
+          />
+        </Campo>
+      </fieldset>
 
-      <Aviso estado={estado} />
-      <Guardar />
+      <Resultado estado={estado} />
+
+      <div>
+        <Guardar />
+      </div>
     </form>
   );
 }

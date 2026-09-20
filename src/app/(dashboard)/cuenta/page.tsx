@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { AvatarForm } from '@/components/avatar-form';
 import { PerfilJugadorForm } from '@/components/perfil-form';
-import { Avatar } from '@/components/ui';
+import { Avatar, Aviso, EnlaceBoton } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { blobEnabled } from '@/lib/env';
 import {
@@ -12,9 +12,7 @@ import {
   quitarAvatarAction,
   subirAvatarAction,
 } from '@/modules/profiles/actions';
-import { formatearImporte } from '@/modules/payments/dinero';
 import { miPerfil } from '@/modules/profiles/queries';
-import { saldoDe } from '@/modules/wallet/service';
 
 export const metadata: Metadata = { title: 'Mi perfil · TuGameMaster' };
 
@@ -25,45 +23,28 @@ export default async function CuentaPage() {
   const perfil = await miPerfil(session.user.id);
   if (!perfil) redirect('/login');
 
-  const saldo = await saldoDe(session.user.id);
-
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <Link href="/dashboard" className="text-muted-foreground text-sm hover:underline">
+        ← Mi cuenta
+      </Link>
+
+      <h1 className="font-heading text-foreground mt-4 text-3xl font-extrabold sm:text-4xl">
         Mi perfil
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-2">
         Así te ven los demás en{' '}
-        <Link href={`/u/${perfil.slug}`} className="text-indigo-600 hover:underline">
+        <Link href={`/u/${perfil.slug}`} className="text-primary hover:underline">
           /u/{perfil.slug}
         </Link>
       </p>
 
-      <Link
-        href="/cuenta/saldo"
-        className="mt-8 flex items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
-      >
-        <span className="text-sm">
-          <span className="block font-medium text-slate-900 dark:text-slate-100">
-            Mi saldo
-          </span>
-          <span className="block text-slate-600 dark:text-slate-400">
-            Se aplica solo al reservar
-          </span>
-        </span>
-        <span className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-          {formatearImporte(saldo)}
-        </span>
-      </Link>
-
-      <section className="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+      <section className="border-border bg-card mt-8 rounded-sm border p-5">
         <div className="flex items-center gap-4">
           <Avatar src={perfil.image} nombre={perfil.name} tamano={56} />
-          <div className="text-sm">
-            <p className="font-medium text-slate-900 dark:text-slate-100">
-              Foto de perfil
-            </p>
-            <p className="mt-0.5 text-slate-600 dark:text-slate-400">
+          <div>
+            <p className="text-foreground text-sm font-medium">Foto de perfil</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
               {perfil.image
                 ? 'Puedes cambiarla o quitarla.'
                 : 'Sin foto se muestra tu inicial.'}
@@ -79,9 +60,9 @@ export default async function CuentaPage() {
               tieneFoto={perfil.image !== null}
             />
           ) : (
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <Aviso tono="dato">
               La subida de fotos no está configurada en este entorno.
-            </p>
+            </Aviso>
           )}
         </div>
       </section>
@@ -98,21 +79,23 @@ export default async function CuentaPage() {
         />
       </section>
 
-      <section className="mt-12 rounded-xl border border-slate-200 p-5 dark:border-slate-800">
-        <h2 className="font-semibold text-slate-900 dark:text-slate-50">
+      {/* El perfil de game master es otra cosa y vive en otra pagina: aqui
+          solo la puerta. El saldo se fue de esta pantalla a proposito —esta en
+          la cabecera y en el panel, y no es un dato del perfil. */}
+      <section className="border-border mt-12 rounded-sm border border-dashed p-5">
+        <h2 className="font-heading text-foreground text-base font-bold">
           {perfil.gmProfile ? 'Tu perfil de game master' : '¿Quieres dirigir partidas?'}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-muted-foreground mt-1 text-sm">
           {perfil.gmProfile
-            ? 'Edita cómo te presentas a los jugadores que buscan mesa.'
-            : 'Crea tu perfil de game master para poder abrir tus propias mesas.'}
+            ? 'Cómo te presentas a los jugadores que buscan mesa.'
+            : 'Crea tu perfil de game master y podrás abrir tus propias mesas.'}
         </p>
-        <Link
-          href="/cuenta/gm"
-          className="mt-4 inline-block rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-        >
-          {perfil.gmProfile ? 'Editar perfil de GM' : 'Crear perfil de GM'}
-        </Link>
+        <div className="mt-4">
+          <EnlaceBoton href="/cuenta/gm" variante="perfil">
+            {perfil.gmProfile ? 'Editar perfil de GM' : 'Crear perfil de GM'}
+          </EnlaceBoton>
+        </div>
       </section>
     </main>
   );

@@ -1124,3 +1124,40 @@ Las pruebas fabricaban las partidas ya publicadas con SQL, así que el camino
 que de verdad recorre un game master —crearla en borrador y soltarla al
 portal— no lo comprobaba nadie. Ahora hay una que lo recorre entero: el
 borrador no aparece en `/partidas`, el GM pulsa Publicar, y aparece.
+
+## Mi perfil `/cuenta` y perfil de GM `/cuenta/gm`
+
+Las dos páginas de «cómo me presento». Lo que cambia, además del aspecto:
+
+**El saldo se va de `/cuenta`.** Estaba ahí porque no tenía otro sitio; ahora
+vive en la cabecera y en el panel, que es donde se mira. Una página de editar
+perfil no es el lugar de un dato financiero, y verlo en tres sitios a la vez no
+lo hacía más fácil de encontrar.
+
+**El formulario de game master se parte en dos bloques con nombre**: «cómo te
+presentas» y «lo que cuentas tú», con la advertencia escrita entre ellos. Es la
+misma división que ordena su perfil público, así que al rellenarlo ya se
+entiende por qué unos datos van aparte y por qué no pasa nada por dejarlos en
+blanco.
+
+**Cada página dice lo que no es.** `/cuenta` remite al perfil de GM y `/cuenta/gm`
+a las partidas y los ingresos, con una línea que explica el reparto: «esta
+página es solo cómo te presentas; lo que diriges y lo que ganas está aparte».
+
+### La tercera copia del mismo subidor
+
+`AvatarForm` repetía entero el formulario de subida —comprobación de 2 MB
+incluida— que ya existía en `ImagenForm` desde que se hizo la lámina de una
+partida. Eran tres sitios donde corregir el día que cambie el límite. Ahora
+`AvatarForm` es `ImagenForm` más un botón de quitar.
+
+`perfil-form.tsx` tenía también su propio `campo`, su `Guardar`, su `Aviso` y
+su `Campo`, todos anteriores a las piezas compartidas. Fuera los cuatro.
+
+### Guardar el perfil no tenía ninguna prueba
+
+Y es de las pocas pantallas donde **un `name` equivocado no rompe nada a la
+vista**: el formulario se envía, la acción responde «guardado» y el dato se
+pierde por el camino. Ahora hay una prueba que escribe, guarda y lo comprueba
+donde de verdad cuenta —en el perfil público— y devuelve al usuario del seed lo
+que tenía.

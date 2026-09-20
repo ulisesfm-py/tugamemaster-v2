@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { PerfilGmForm } from '@/components/perfil-form';
+import { Aviso, EnlaceBoton, Estado } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { guardarPerfilGmAction } from '@/modules/profiles/actions';
 import { miPerfil } from '@/modules/profiles/queries';
@@ -19,53 +20,51 @@ export default async function CuentaGmPage() {
   const gm = perfil.gmProfile;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <Link
-        href="/cuenta"
-        className="text-sm text-slate-500 hover:underline dark:text-slate-400"
-      >
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <Link href="/cuenta" className="text-muted-foreground text-sm hover:underline">
         ← Mi perfil
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-        {gm ? 'Perfil de game master' : 'Crear perfil de game master'}
+      <h1 className="font-heading text-foreground mt-4 text-3xl font-extrabold sm:text-4xl">
+        {gm ? 'Perfil de game master' : 'Empezar a dirigir'}
       </h1>
 
-      {gm && (
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Público en{' '}
-          <Link href={`/gm/${perfil.slug}`} className="text-indigo-600 hover:underline">
-            /gm/{perfil.slug}
-          </Link>
-        </p>
-      )}
+      <p className="text-muted-foreground mt-2">
+        {gm ? (
+          <>
+            Público en{' '}
+            <Link href={`/gm/${perfil.slug}`} className="text-primary hover:underline">
+              /gm/{perfil.slug}
+            </Link>
+          </>
+        ) : (
+          'Con este perfil te presentas a quien busca mesa. Puedes cambiarlo cuando quieras.'
+        )}
+      </p>
 
       {/* Crear el perfil convierte al usuario en GM, pero publicar partidas
           exige ademas completar el alta de cobro. Se avisa desde el principio
           para que nadie rellene esto esperando poder publicar ya. */}
-      <section
-        className={`mt-6 rounded-xl border p-4 text-sm ${
-          gm?.payoutsEnabled
-            ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
-            : 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
-        }`}
-      >
-        {gm?.payoutsEnabled ? (
-          <p>Tu cuenta de cobro está verificada. Puedes publicar partidas.</p>
-        ) : (
-          <p>
-            Para <strong>publicar</strong> partidas tienes que configurar antes dónde
-            recibir los pagos.{' '}
-            {gm ? (
-              <Link href="/cuenta/cobros" className="font-medium underline">
-                Configurar cobros
-              </Link>
-            ) : (
-              'Podrás hacerlo en cuanto guardes este perfil.'
-            )}
-          </p>
-        )}
-      </section>
+      {gm?.payoutsEnabled ? (
+        <p className="border-border text-muted-foreground mt-6 flex flex-wrap items-center gap-2 rounded-sm border border-dashed px-4 py-2.5 text-sm">
+          <Estado tono="bien">Cuenta verificada</Estado>
+          Ya puedes publicar partidas y recibir transferencias.
+        </p>
+      ) : (
+        <Aviso tono="atencion" className="mt-6" titulo="Esto no basta para publicar">
+          Con este perfil ya eres game master, pero para <strong>publicar</strong>{' '}
+          partidas tienes que configurar antes dónde recibir los pagos.{' '}
+          {gm ? '' : 'Podrás hacerlo en cuanto guardes este perfil.'}
+        </Aviso>
+      )}
+
+      {gm && !gm.payoutsEnabled && (
+        <div className="mt-4">
+          <EnlaceBoton href="/cuenta/cobros" variante="perfil">
+            Configurar cobros
+          </EnlaceBoton>
+        </div>
+      )}
 
       <section className="mt-8">
         <PerfilGmForm
@@ -83,6 +82,26 @@ export default async function CuentaGmPage() {
           }
         />
       </section>
+
+      {gm && (
+        <section className="border-border mt-12 rounded-sm border border-dashed p-5">
+          <h2 className="font-heading text-foreground text-base font-bold">
+            Tus mesas y tu dinero
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Esta página es solo cómo te presentas. Lo que diriges y lo que ganas está
+            aparte.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <EnlaceBoton href="/cuenta/partidas" variante="perfil" tamano="sm">
+              Mis partidas
+            </EnlaceBoton>
+            <EnlaceBoton href="/cuenta/cobros" variante="perfil" tamano="sm">
+              Mis ingresos
+            </EnlaceBoton>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
