@@ -33,9 +33,9 @@ export default async function CuentaPage() {
         Mi perfil
       </h1>
       <p className="text-muted-foreground mt-2">
-        Así te ven los demás en{' '}
+        Así te ven los demás.{' '}
         <Link href={`/u/${perfil.slug}`} className="text-primary hover:underline">
-          /u/{perfil.slug}
+          Ver mi perfil público
         </Link>
       </p>
 

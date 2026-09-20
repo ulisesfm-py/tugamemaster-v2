@@ -32,9 +32,9 @@ export default async function CuentaGmPage() {
       <p className="text-muted-foreground mt-2">
         {gm ? (
           <>
-            Público en{' '}
+            Así te ven quienes buscan mesa.{' '}
             <Link href={`/gm/${perfil.slug}`} className="text-primary hover:underline">
-              /gm/{perfil.slug}
+              Ver mi perfil de game master
             </Link>
           </>
         ) : (

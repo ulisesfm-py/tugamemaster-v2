@@ -50,9 +50,9 @@ export default async function EditarPostPage({ params }: Props) {
       <p className="text-muted-foreground mt-2 text-sm">
         {publicado ? (
           <>
-            Publicado en{' '}
+            Cualquiera puede leerlo.{' '}
             <Link href={`/blog/${post.slug}`} className="text-primary hover:underline">
-              /blog/{post.slug}
+              Verlo en el blog
             </Link>
           </>
         ) : (

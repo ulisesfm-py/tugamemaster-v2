@@ -1244,3 +1244,34 @@ La que comprueba que desde entrar se vuelve a la portada daba por buena la
 navegación porque **el `<h1>` de la propia pantalla de entrar sigue visible
 hasta que llega la otra página**. Tercera vez que aparece el mismo patrón en
 este trabajo; lleva ya su `waitForURL`.
+
+## Dos cosas que solo se ven usando la web
+
+### Las direcciones no son texto
+
+Cuatro pantallas enseñaban la URL literal como texto del enlace: «Público en
+`/gm/laura-vega`», «Está publicada en `/partidas/el-faro-de-finisterre`». Es la
+tripa del sistema asomando: a quien dirige una partida no le importa cómo se
+llama su fila en la base de datos.
+
+Ahora el enlace lo dicen palabras: «Verla como la ven los jugadores», «Ver mi
+perfil de game master», «Verlo en el blog».
+
+**Y no «aquí».** Es la tentación obvia, pero quien navega con lector de
+pantalla suele pedir la lista de enlaces de la página, y una lista de cinco
+«aquí» no dice nada. El texto de un enlace tiene que funcionar solo, fuera de
+su frase.
+
+### La lámina no se veía
+
+Se podía subir una imagen para la partida, pero al volver a entrar **nada
+indicaba que ya hubiera una**: solo el formulario de subida otra vez. Quien
+dudaba no tenía manera de distinguir «no tiene» de «sí tiene y aquí no se ve».
+
+Ahora la lámina se enseña siempre, tenga imagen propia o no. Sin ella aparece
+la compuesta con el nombre del sistema —que es exactamente lo que están viendo
+los jugadores—, y el pie lo dice: «tu lámina, tal como se ve en el portal» o
+«sin imagen propia se compone esta; cumple, pero no llama».
+
+Es el mismo criterio que el avatar en `/cuenta`, que sí lo hacía bien desde el
+principio: **enseñar el estado actual antes de ofrecer cambiarlo.**

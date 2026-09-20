@@ -41,9 +41,12 @@ test('un borrador no se ve en el portal hasta que su autor lo publica', async ({
   // Se espera a que aparezca el enlace publico, que solo existe una vez
   // publicada: mirar si el boton sigue ahi no vale, porque mientras la accion
   // corre su texto cambia y la comprobacion se cumpliria a mitad de faena.
-  await expect(
-    page.getByRole('link', { name: `/partidas/${partida.slug}` }),
-  ).toBeVisible();
+  const enlacePublico = page.getByRole('link', {
+    name: 'Verla como la ven los jugadores',
+  });
+
+  await expect(enlacePublico).toBeVisible();
+  await expect(enlacePublico).toHaveAttribute('href', `/partidas/${partida.slug}`);
 
   await page.goto('/partidas');
   await expect(page.getByRole('link', { name: partida.title })).toBeVisible();

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { ImagenForm } from '@/components/imagen-form';
+import { Lamina } from '@/components/lamina';
 import { NotaSesion } from '@/components/nota-sesion';
 import { PartidaForm } from '@/components/partida-form';
 import { ReservarBoton } from '@/components/reservar-boton';
@@ -128,9 +129,12 @@ export default async function GestionarPartidaPage({ params }: Props) {
 
       {partida.status === 'PUBLISHED' && (
         <p className="border-border text-muted-foreground mt-6 flex flex-wrap items-center gap-2 rounded-sm border border-dashed px-4 py-2.5 text-sm">
-          Está publicada en{' '}
-          <Link href={`/partidas/${partida.slug}`} className="text-primary underline">
-            /partidas/{partida.slug}
+          Está publicada y admite reservas.{' '}
+          <Link
+            href={`/partidas/${partida.slug}`}
+            className="text-primary hover:underline"
+          >
+            Verla como la ven los jugadores
           </Link>
         </p>
       )}
@@ -223,14 +227,38 @@ export default async function GestionarPartidaPage({ params }: Props) {
         <>
           <Bloque
             titulo="Lámina"
-            nota="Es lo primero que se ve de tu partida en el portal. Sin ella se compone una con el nombre del sistema, que cumple pero no llama."
+            nota="Es lo primero que se ve de tu partida en el portal."
           >
-            <ImagenForm
-              accion={subirLaminaAction}
-              campo="lamina"
-              campos={{ gameId: partida.id, slug: partida.slug }}
-              textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
-            />
+            {/* Se ensena siempre, tenga imagen o no: es la unica forma de
+                saber si ya se subio una. Con el formulario solo, quien volvia
+                a entrar no tenia manera de distinguir «no tiene» de «si tiene
+                y no se ve aqui». Y sin imagen propia se ve la compuesta, que
+                es justo lo que estan viendo los jugadores. */}
+            <figure>
+              <div className="from-accent/20 to-background relative grid aspect-[16/9] place-items-center overflow-hidden rounded-sm bg-gradient-to-br sm:aspect-[3/1]">
+                <Lamina
+                  src={partida.imageUrl}
+                  system={partida.system}
+                  sizes="(max-width: 672px) 100vw, 42rem"
+                  claseTexto="text-2xl sm:text-4xl"
+                />
+              </div>
+
+              <figcaption className="text-muted-foreground mt-2 text-sm">
+                {partida.imageUrl
+                  ? 'Tu lámina, tal como se ve en el portal.'
+                  : 'Sin imagen propia se compone esta con el nombre del sistema. Cumple, pero no llama.'}
+              </figcaption>
+            </figure>
+
+            <div className="mt-4">
+              <ImagenForm
+                accion={subirLaminaAction}
+                campo="lamina"
+                campos={{ gameId: partida.id, slug: partida.slug }}
+                textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
+              />
+            </div>
           </Bloque>
 
           <Bloque titulo="Editar">
