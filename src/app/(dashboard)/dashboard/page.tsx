@@ -187,12 +187,7 @@ export default async function DashboardPage() {
             <Acceso href="/cuenta/gm" texto="Empezar a dirigir" />
           )}
 
-          {user.isAdmin && (
-            <>
-              <Acceso href="/admin/incidencias" texto="Revisar incidencias" />
-              <Acceso href="/admin/blog" texto="Escribir en el blog" />
-            </>
-          )}
+          {user.isAdmin && <Acceso href="/admin" texto="Administración" />}
         </div>
       </section>
 

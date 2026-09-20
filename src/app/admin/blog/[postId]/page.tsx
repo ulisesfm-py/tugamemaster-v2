@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { ImagenForm } from '@/components/imagen-form';
 import { PostForm } from '@/components/post-form';
 import { ReservarBoton } from '@/components/reservar-boton';
+import { Estado } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import {
   actualizarPostAction,
@@ -32,77 +33,56 @@ export default async function EditarPostPage({ params }: Props) {
   const publicado = post.status === 'PUBLISHED';
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <Link
-        href="/admin/blog"
-        className="text-sm text-slate-500 hover:underline dark:text-slate-400"
-      >
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <Link href="/admin/blog" className="text-muted-foreground text-sm hover:underline">
         ← Artículos
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-        {post.title}
-      </h1>
+      <div className="mt-4 flex flex-wrap items-start gap-x-3 gap-y-2">
+        <h1 className="font-heading text-foreground min-w-0 flex-1 text-3xl font-extrabold text-balance">
+          {post.title}
+        </h1>
+        <Estado tono={publicado ? 'bien' : 'apagado'} className="mt-1.5">
+          {publicado ? 'Publicado' : 'Borrador'}
+        </Estado>
+      </div>
 
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-2 text-sm">
         {publicado ? (
           <>
             Publicado en{' '}
-            <Link href={`/blog/${post.slug}`} className="text-indigo-600 hover:underline">
+            <Link href={`/blog/${post.slug}`} className="text-primary hover:underline">
               /blog/{post.slug}
             </Link>
           </>
         ) : (
           <>
-            Borrador.{' '}
-            <Link href={`/blog/${post.slug}`} className="text-indigo-600 hover:underline">
+            Nadie lo ve todavía.{' '}
+            <Link href={`/blog/${post.slug}`} className="text-primary hover:underline">
               Verlo como quedará
             </Link>
           </>
         )}
       </p>
 
-      <section className="mt-6 flex flex-wrap gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-        {publicado ? (
-          <ReservarBoton
-            accion={despublicarPostAction}
-            texto="Retirar del blog"
-            destructivo
-            campos={{ postId: post.id, slug: post.slug }}
-          />
-        ) : (
-          <ReservarBoton
-            accion={publicarPostAction}
-            texto="Publicar"
-            campos={{ postId: post.id, slug: post.slug }}
-          />
-        )}
-
-        {/* Borrar solo se ofrece sobre borradores: lo publicado se retira, no
-            se destruye, porque se lleva por delante lo que escribio otra gente. */}
-        {!publicado && (
-          <div>
+      {!publicado && (
+        <section className="border-border bg-card mt-6 rounded-sm border p-5">
+          <p className="text-foreground font-medium">Listo para publicar</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Podrás retirarlo después si hace falta. La dirección ya no cambia.
+          </p>
+          <div className="mt-4">
             <ReservarBoton
-              accion={borrarPostAction}
-              texto="Borrar"
-              destructivo
-              campos={{ postId: post.id }}
+              accion={publicarPostAction}
+              texto="Publicar"
+              campos={{ postId: post.id, slug: post.slug }}
             />
-            {post._count.comments > 0 && (
-              <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                Se borrarán también {post._count.comments}{' '}
-                {post._count.comments === 1 ? 'comentario' : 'comentarios'}. No se puede
-                deshacer.
-              </p>
-            )}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Portada
-        </h2>
+        <h2 className="font-heading text-foreground text-xl font-bold">Portada</h2>
 
         {post.coverUrl && (
           <Image
@@ -110,7 +90,8 @@ export default async function EditarPostPage({ params }: Props) {
             alt=""
             width={640}
             height={260}
-            className="mt-3 h-40 w-full rounded-xl object-cover"
+            sizes="(max-width: 672px) 100vw, 42rem"
+            className="mt-4 h-40 w-full rounded-sm object-cover"
           />
         )}
 
@@ -119,15 +100,13 @@ export default async function EditarPostPage({ params }: Props) {
             accion={subirPortadaAction}
             campo="portada"
             campos={{ postId: post.id, slug: post.slug }}
-            textoBoton="Subir portada"
+            textoBoton={post.coverUrl ? 'Cambiar portada' : 'Subir portada'}
           />
         </div>
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Contenido
-        </h2>
+        <h2 className="font-heading text-foreground text-xl font-bold">Contenido</h2>
         <div className="mt-4">
           <PostForm
             accion={actualizarPostAction}
@@ -135,6 +114,60 @@ export default async function EditarPostPage({ params }: Props) {
             valores={post}
           />
         </div>
+      </section>
+
+      {/* Lo que no tiene vuelta atras, al final y aparte. */}
+      <section
+        aria-labelledby="zona-de-riesgo"
+        className="border-destructive/30 mt-12 rounded-sm border border-dashed p-5"
+      >
+        {/* Una palabra: el detalle lo lleva el boton, y repetir "retirar del
+            blog" dos veces seguidas no aclara nada. */}
+        <h2
+          id="zona-de-riesgo"
+          className="font-heading text-foreground text-base font-bold"
+        >
+          {publicado ? 'Retirar' : 'Borrar'}
+        </h2>
+
+        {publicado ? (
+          <div className="mt-4">
+            <ReservarBoton
+              accion={despublicarPostAction}
+              texto="Retirar del blog"
+              destructivo
+              tamano="sm"
+              campos={{ postId: post.id, slug: post.slug }}
+            />
+            <p className="text-muted-foreground mt-2 text-xs">
+              Vuelve a borrador y deja de verse. Los comentarios se conservan.
+            </p>
+          </div>
+        ) : (
+          /* Borrar solo se ofrece sobre borradores: lo publicado se retira, no
+             se destruye, porque se lleva por delante lo que escribio otra
+             gente. */
+          <div className="mt-4">
+            <ReservarBoton
+              accion={borrarPostAction}
+              texto="Borrar"
+              destructivo
+              tamano="sm"
+              campos={{ postId: post.id }}
+            />
+            <p className="text-muted-foreground mt-2 text-xs">
+              {post._count.comments > 0 ? (
+                <>
+                  Se borrarán también {post._count.comments}{' '}
+                  {post._count.comments === 1 ? 'comentario' : 'comentarios'}. No se puede
+                  deshacer.
+                </>
+              ) : (
+                'No se puede deshacer.'
+              )}
+            </p>
+          </div>
+        )}
       </section>
     </main>
   );

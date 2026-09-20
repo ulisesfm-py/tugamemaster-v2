@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Aviso, Button, CLASE_CONTROL } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
@@ -11,17 +12,9 @@ function Boton({ texto, destructivo }: { texto: string; destructivo?: boolean })
   const { pending } = useFormStatus();
 
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={
-        destructivo
-          ? 'rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
-          : 'rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-60'
-      }
-    >
-      {pending ? 'Un momento...' : texto}
-    </button>
+    <Button type="submit" variante={destructivo ? 'perfil' : 'solido'} disabled={pending}>
+      {pending ? 'Un momento…' : texto}
+    </Button>
   );
 }
 
@@ -54,10 +47,10 @@ export function ResolverIncidencia({
   const estado = estadoAprobar ?? estadoRechazar;
 
   return (
-    <div className="mt-5 space-y-3">
+    <div className="border-border mt-5 flex flex-col gap-3 border-t pt-5">
       <label
         htmlFor={`nota-${incidentId}`}
-        className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+        className="text-foreground block text-sm font-medium"
       >
         Nota de resolución
       </label>
@@ -66,7 +59,7 @@ export function ResolverIncidencia({
         value={nota}
         onChange={(e) => setNota(e.target.value)}
         rows={2}
-        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        className={CLASE_CONTROL}
         placeholder="Obligatoria al desestimar: el jugador tiene derecho a saber por qué."
       />
 
@@ -84,22 +77,9 @@ export function ResolverIncidencia({
         </form>
       </div>
 
-      {estado && 'error' in estado && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
-          {estado.error}
-        </p>
-      )}
-
+      {estado && 'error' in estado && <Aviso tono="error">{estado.error}</Aviso>}
       {estado && 'ok' in estado && (
-        <p
-          role="status"
-          className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-        >
-          {estado.mensaje ?? 'Hecho.'}
-        </p>
+        <Aviso tono="exito">{estado.mensaje ?? 'Hecho.'}</Aviso>
       )}
     </div>
   );

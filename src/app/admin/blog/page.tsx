@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Fecha } from '@/components/ui';
+import { EnlaceBoton, Estado, Fecha, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { postsParaAdmin } from '@/modules/blog/queries';
 
@@ -16,37 +16,49 @@ export default async function AdminBlogPage() {
   if (!session?.user?.isAdmin) notFound();
 
   const posts = await postsParaAdmin();
+  const borradores = posts.filter((p) => p.status !== 'PUBLISHED').length;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
-          Artículos
-        </h1>
-        <Link
-          href="/admin/blog/nuevo"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-        >
-          Escribir artículo
-        </Link>
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <Link href="/admin" className="text-muted-foreground text-sm hover:underline">
+        ← Administración
+      </Link>
+
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-foreground text-3xl font-extrabold sm:text-4xl">
+            Artículos
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {posts.length === 0
+              ? 'Todavía no hay ninguno.'
+              : `${posts.length} en total${borradores > 0 ? `, ${borradores} sin publicar` : ''}.`}
+          </p>
+        </div>
+
+        <EnlaceBoton href="/admin/blog/nuevo">Escribir artículo</EnlaceBoton>
       </div>
 
       {posts.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          Todavía no has escrito ninguno.
-        </p>
+        <Vacio
+          className="mt-8"
+          titulo="Todavía no has escrito ninguno"
+          accion={<EnlaceBoton href="/admin/blog/nuevo">Escribir el primero</EnlaceBoton>}
+        >
+          Nace como borrador: podrás verlo como quedará antes de publicarlo.
+        </Vacio>
       ) : (
-        <ul className="mt-8 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+        <ul className="border-border divide-border mt-8 divide-y rounded-sm border">
           {posts.map((post) => (
             <li key={post.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <Link
                   href={`/admin/blog/${post.id}`}
-                  className="font-medium text-slate-900 hover:underline dark:text-slate-100"
+                  className="text-foreground text-sm font-medium hover:underline"
                 >
                   {post.title}
                 </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-muted-foreground text-xs">
                   {post.publishedAt ? (
                     <>
                       Publicado el <Fecha valor={post.publishedAt} />
@@ -61,15 +73,9 @@ export default async function AdminBlogPage() {
                 </p>
               </div>
 
-              <span
-                className={`ml-auto rounded-full px-2.5 py-1 text-xs font-medium ${
-                  post.status === 'PUBLISHED'
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                }`}
-              >
+              <Estado tono={post.status === 'PUBLISHED' ? 'bien' : 'apagado'}>
                 {post.status === 'PUBLISHED' ? 'Publicado' : 'Borrador'}
-              </span>
+              </Estado>
             </li>
           ))}
         </ul>

@@ -1161,3 +1161,45 @@ vista**: el formulario se envía, la acción responde «guardado» y el dato se
 pierde por el camino. Ahora hay una prueba que escribe, guarda y lo comprueba
 donde de verdad cuenta —en el perfil público— y devuelve al usuario del seed lo
 que tenía.
+
+## Administración
+
+Dos pantallas y un índice que no existía.
+
+**`/admin` era un 404.** Se llegaba a incidencias y al blog por enlaces sueltos
+desde el panel; quien escribía la dirección a mano no encontraba nada. Ahora es
+un índice con las dos puertas, cada una con lo que tiene pendiente detrás, y
+con un bloque de **dinero en el aire**.
+
+### Un número que se calculaba y no veía nadie
+
+`saldoPendienteTotal()` existía desde la fase 7, con un comentario que decía
+exactamente para qué: «es dinero nuestro que debemos, conviene poder compararlo
+con lo que realmente retenemos en Stripe». No lo llamaba ninguna pantalla. Ya
+está en el índice, junto al recuento de transferencias bloqueadas o fallidas
+que el cron sigue reintentando. Si el saldo de los usuarios y lo retenido en
+Stripe se separan, hay un apunte de monedero mal puesto.
+
+### Incidencias
+
+Es donde se aprueban devoluciones, así que lo que dice quien reclama va en su
+propia caja —es lo que hay que leer antes de decidir, no una nota al pie— y el
+importe pagado se desglosa entre saldo y tarjeta, porque **solo la parte que
+entró por tarjeta se puede devolver a la tarjeta**.
+
+Los estados salen ya de la tabla única. Antes esta pantalla traducía `OPEN` a
+«Abierta» y `/mis-reservas` lo traducía a «En revisión», con colores distintos,
+para el mismo hecho.
+
+### Blog
+
+Publicar arriba cuando es borrador, y retirar o borrar al final en su propio
+recuadro, igual que en la ficha de partida. Se mantiene la regla: **borrar solo
+se ofrece sobre borradores**; lo publicado se retira, porque borrar se lleva
+por delante lo que escribió otra gente.
+
+### La puerta, antes que lo que hay detrás
+
+La prueba nueva comprueba primero **quién no entra**: desde `/admin` se mueven
+devoluciones, así que un usuario normal recibe un 404 en las tres rutas. Luego,
+que un administrador ve el índice y llega a las dos pantallas.

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { ReservarBoton } from '@/components/reservar-boton';
 import { ResolverIncidencia } from '@/components/resolver-incidencia';
-import { Fecha } from '@/components/ui';
+import { Estado, ESTADO_DE_INCIDENCIA, Fecha, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import {
   aprobarIncidenciaAction,
@@ -15,21 +15,6 @@ import { incidenciasParaAdmin } from '@/modules/incidents/queries';
 import { formatearImporte } from '@/modules/payments/dinero';
 
 export const metadata: Metadata = { title: 'Incidencias · Admin' };
-
-const ESTADO = {
-  OPEN: {
-    texto: 'Abierta',
-    clase: 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  },
-  APPROVED: {
-    texto: 'Aprobada',
-    clase: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
-  },
-  REJECTED: {
-    texto: 'Desestimada',
-    clase: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-  },
-} as const;
 
 export default async function IncidenciasPage() {
   const session = await auth();
@@ -42,70 +27,72 @@ export default async function IncidenciasPage() {
   const abiertas = incidencias.filter((i) => i.status === 'OPEN');
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <Link href="/admin" className="text-muted-foreground text-sm hover:underline">
+        ← Administración
+      </Link>
+
+      <h1 className="font-heading text-foreground mt-4 text-3xl font-extrabold sm:text-4xl">
         Incidencias
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="text-muted-foreground mt-2">
         {abiertas.length === 0
           ? 'No hay ninguna pendiente.'
           : `${abiertas.length} pendiente${abiertas.length === 1 ? '' : 's'} de revisar. Cada una detiene el pago al game master de su partida.`}
       </p>
 
       {incidencias.length === 0 ? (
-        <p className="mt-10 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          Todavía no se ha reportado ninguna incidencia.
-        </p>
+        <Vacio className="mt-8" titulo="Todavía no se ha reportado ninguna incidencia">
+          Aparecerán aquí en cuanto alguien reclame sobre una partida ya jugada.
+        </Vacio>
       ) : (
-        <ul className="mt-8 space-y-5">
+        <ul className="mt-8 flex flex-col gap-5">
           {incidencias.map((i) => {
-            const estado = ESTADO[i.status];
+            const estado = ESTADO_DE_INCIDENCIA[i.status];
             const pagadoConTarjeta = i.booking.amountCents - i.booking.creditCents;
 
             return (
-              <li
-                key={i.id}
-                className="rounded-xl border border-slate-200 p-5 dark:border-slate-800"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
+              <li key={i.id} className="border-border bg-card rounded-sm border p-5">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={`/partidas/${i.booking.game.slug}`}
-                      className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
+                      className="font-heading text-foreground font-bold hover:underline"
                     >
                       {i.booking.game.title}
                     </Link>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    <p className="text-muted-foreground mt-0.5 text-sm">
                       Dirigía {i.booking.game.gm.user.name} · terminó{' '}
                       <Fecha valor={i.booking.game.endsAt} />
                     </p>
                   </div>
 
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${estado.clase}`}
-                  >
-                    {estado.texto}
-                  </span>
+                  <Estado tono={estado.tono}>{estado.texto}</Estado>
                 </div>
 
-                <div className="mt-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                {/* Lo que dice quien reclama, en su propia caja: es lo que hay
+                    que leer antes de decidir, no una nota al pie. */}
+                <div className="bg-secondary mt-4 rounded-sm p-4">
+                  <p className="text-muted-foreground text-xs">
                     Reclama{' '}
                     <Link
                       href={`/u/${i.reportedBy.slug}`}
-                      className="text-indigo-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {i.reportedBy.name}
                     </Link>{' '}
                     · <Fecha valor={i.createdAt} />
                   </p>
-                  <p className="mt-2 text-sm whitespace-pre-line text-slate-800 dark:text-slate-200">
+                  <p className="text-foreground mt-2 text-sm whitespace-pre-line">
                     {i.reason}
                   </p>
                 </div>
 
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                  Pagó {formatearImporte(i.booking.amountCents, i.booking.currency)}
+                <p className="text-muted-foreground mt-3 text-sm">
+                  Pagó{' '}
+                  <strong className="text-foreground">
+                    {formatearImporte(i.booking.amountCents, i.booking.currency)}
+                  </strong>
                   {i.booking.creditCents > 0 && (
                     <>
                       {' '}
@@ -123,8 +110,8 @@ export default async function IncidenciasPage() {
                     accionRechazar={rechazarIncidenciaAction}
                   />
                 ) : (
-                  <div className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="border-border mt-4 border-t pt-4">
+                    <p className="text-muted-foreground text-xs">
                       Resuelta por {i.resolvedBy?.name ?? 'un admin'}
                       {i.resolvedAt && (
                         <>
@@ -134,20 +121,23 @@ export default async function IncidenciasPage() {
                       )}
                     </p>
                     {i.resolutionNote && (
-                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                      <p className="text-muted-foreground mt-1 text-sm">
                         {i.resolutionNote}
                       </p>
                     )}
 
+                    {/* Convertir saldo en dinero real solo puede hacerlo un
+                        admin, y solo por la parte que entro por tarjeta. */}
                     {i.status === 'APPROVED' && pagadoConTarjeta > 0 && (
                       <div className="mt-4">
-                        <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-muted-foreground mb-2 text-xs">
                           Si el jugador reclama su dinero en vez de saldo:
                         </p>
                         <ReservarBoton
                           accion={devolverADineroAction}
                           texto={`Devolver ${formatearImporte(pagadoConTarjeta, i.booking.currency)} a su tarjeta`}
                           destructivo
+                          tamano="sm"
                           campos={{ bookingId: i.booking.id }}
                         />
                       </div>
