@@ -133,3 +133,38 @@ test('un jugador libera su plaza y deja de ocuparla', async ({ page }) => {
   await page.goto(`/partidas/${partida.slug}`);
   await expect(page.getByText('4 de 4 plazas libres')).toBeVisible();
 });
+
+test('mis reservas dice qué pasa si liberas la plaza, antes de pulsar', async ({
+  page,
+}) => {
+  // Una fuera del plazo de 48 h y otra dentro: la respuesta es distinta y es
+  // dinero, asi que conviene que este escrita y no que haya que deducirla.
+  const conDevolucion = await escenario.crearPartida('La de dentro de plazo', {
+    empiezaEnHoras: 96,
+    precioCents: 2000,
+  });
+  await escenario.crearReserva(conDevolucion.id, USUARIOS.ana, 'PAID', 2000);
+
+  const sinDevolucion = await escenario.crearPartida('La de ultima hora', {
+    empiezaEnHoras: 10,
+    precioCents: 2000,
+  });
+  await escenario.crearReserva(sinDevolucion.id, USUARIOS.ana, 'PAID', 2000);
+
+  await entrarComo(page, USUARIOS.ana);
+  await page.goto('/mis-reservas');
+
+  const dentro = page.getByRole('listitem').filter({ hasText: conDevolucion.title });
+  const fuera = page.getByRole('listitem').filter({ hasText: sinDevolucion.title });
+
+  // El 90% de 20,00 €, calculado por la misma politica que ejecuta la
+  // devolucion de verdad. El importe se busca como cadena y no dentro de una
+  // expresion regular: `Intl` mete un espacio fino inquebrantable antes del €,
+  // y una regex con un espacio normal no casa. Como cadena, Playwright
+  // normaliza los espacios y da igual cual sea.
+  await expect(dentro.getByText(/te devolvemos/)).toBeVisible();
+  await expect(dentro.getByText('18,00 €')).toBeVisible();
+  await expect(dentro.getByText(/Tienes de plazo hasta el/)).toBeVisible();
+
+  await expect(fuera.getByText(/Ya no hay devolución/)).toBeVisible();
+});

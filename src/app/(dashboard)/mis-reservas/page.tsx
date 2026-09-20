@@ -5,25 +5,73 @@ import { redirect } from 'next/navigation';
 import { ReportarIncidencia } from '@/components/reportar-incidencia';
 import { ResenaForm } from '@/components/resena-form';
 import { ReservarBoton } from '@/components/reservar-boton';
-import { Fecha } from '@/components/ui';
+import {
+  EnlaceBoton,
+  Estado,
+  ESTADO_DE_INCIDENCIA,
+  ESTADO_DE_RESERVA,
+  Fecha,
+  Vacio,
+} from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction } from '@/modules/bookings/actions';
+import { HORAS_CANCELACION_CON_DEVOLUCION } from '@/modules/bookings/politica';
 import { misReservas } from '@/modules/bookings/queries';
 import { reportarIncidenciaAction } from '@/modules/incidents/actions';
 import { misIncidencias } from '@/modules/incidents/queries';
+import { formatearImporte } from '@/modules/payments/dinero';
 import { dejarResenaAction, editarResenaAction } from '@/modules/reviews/actions';
 import { misResenas } from '@/modules/reviews/queries';
 
 export const metadata: Metadata = { title: 'Mis reservas · TuGameMaster' };
 
-const ESTADO = {
-  PENDING: 'Reservada',
-  PAID: 'Pagada',
-  COMPLETED: 'Jugada',
-  CANCELLED: 'Cancelada',
-  REFUNDED: 'Reembolsada',
-  FAILED: 'Pago fallido',
-} as const;
+/**
+ * Lo que pasa si libera la plaza ahora mismo.
+ *
+ * Es la pregunta que se hace cualquiera antes de pulsar, y hasta ahora habia
+ * que irse a las condiciones a averiguarlo, justo en el momento en que menos
+ * ganas se tienen de leer nada. El importe y el limite los calcula la consulta
+ * con `politica.ts`, que es la misma que ejecuta la devolucion de verdad.
+ *
+ * El plazo se da como **fecha y no como cuenta atras**: «te quedan 2 dias»
+ * cuando faltan 71 horas se queda corto por casi un dia entero, y para decidir
+ * si cancelar o no, un plazo que miente es peor que ninguno.
+ */
+function Plazo({
+  reserva,
+}: {
+  reserva: {
+    conDevolucion: boolean;
+    limiteDevolucion: Date;
+    devolucionCents: number;
+    amountCents: number;
+    currency: string;
+  };
+}) {
+  if (reserva.amountCents === 0) {
+    return <>Era gratuita: puedes liberar la plaza cuando quieras.</>;
+  }
+
+  if (!reserva.conDevolucion) {
+    return (
+      <>
+        Ya no hay devolución: el plazo se cerró {HORAS_CANCELACION_CON_DEVOLUCION} horas
+        antes de empezar. Puedes liberar la plaza igualmente para que la ocupe otra
+        persona.
+      </>
+    );
+  }
+
+  return (
+    <>
+      Si la liberas te devolvemos{' '}
+      <strong className="text-foreground">
+        {formatearImporte(reserva.devolucionCents, reserva.currency)}
+      </strong>{' '}
+      en saldo. Tienes de plazo hasta el <Fecha valor={reserva.limiteDevolucion} />.
+    </>
+  );
+}
 
 export default async function MisReservasPage() {
   const session = await auth();
@@ -39,48 +87,64 @@ export default async function MisReservasPage() {
   const resenaDe = new Map(resenas.map((r) => [r.bookingId, r]));
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <h1 className="font-heading text-foreground text-3xl font-extrabold sm:text-4xl">
         Mis reservas
       </h1>
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Próximas
-        </h2>
+        <h2 className="font-heading text-foreground text-xl font-bold">Próximas</h2>
 
         {proximas.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-            No tienes ninguna partida próxima.{' '}
-            <Link href="/partidas" className="text-indigo-600 hover:underline">
-              Busca una mesa
-            </Link>
-          </p>
+          <Vacio
+            className="mt-4"
+            titulo="No tienes ninguna mesa reservada"
+            accion={<EnlaceBoton href="/partidas">Buscar mesa</EnlaceBoton>}
+          >
+            Cuando reserves una plaza, aparecerá aquí con su fecha y su plazo de
+            cancelación.
+          </Vacio>
         ) : (
-          <ul className="mt-3 space-y-3">
+          <ul className="mt-4 flex flex-col gap-4">
             {proximas.map((r) => (
-              <li
-                key={r.id}
-                className="rounded-xl border border-slate-200 p-5 dark:border-slate-800"
-              >
-                <Link
-                  href={`/partidas/${r.game.slug}`}
-                  className="font-medium text-slate-900 hover:underline dark:text-slate-100"
-                >
-                  {r.game.title}
-                </Link>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  {r.game.system} · <Fecha valor={r.game.startsAt} />
-                </p>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  Dirige {r.game.gm.user.name}
+              <li key={r.id} className="border-border bg-card rounded-sm border p-5">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/partidas/${r.game.slug}`}
+                      className="font-heading text-foreground font-bold hover:underline"
+                    >
+                      {r.game.title}
+                    </Link>
+                    <p className="text-muted-foreground mt-0.5 text-sm">
+                      {r.game.system} · <Fecha valor={r.game.startsAt} />
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Dirige{' '}
+                      <Link
+                        href={`/gm/${r.game.gm.user.slug}`}
+                        className="hover:underline"
+                      >
+                        {r.game.gm.user.name}
+                      </Link>
+                    </p>
+                  </div>
+
+                  <Estado tono={ESTADO_DE_RESERVA[r.status].tono}>
+                    {ESTADO_DE_RESERVA[r.status].texto}
+                  </Estado>
+                </div>
+
+                <p className="border-border text-muted-foreground mt-4 border-t pt-3 text-sm">
+                  <Plazo reserva={r} />
                 </p>
 
-                <div className="mt-4">
+                <div className="mt-3">
                   <ReservarBoton
                     accion={cancelarReservaAction}
                     texto="Liberar mi plaza"
                     destructivo
+                    tamano="sm"
                     campos={{ bookingId: r.id, slug: r.game.slug }}
                   />
                 </div>
@@ -92,46 +156,45 @@ export default async function MisReservasPage() {
 
       {pasadas.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Historial
-          </h2>
+          <h2 className="font-heading text-foreground text-xl font-bold">Historial</h2>
 
-          <ul className="mt-3 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+          <ul className="mt-4 flex flex-col gap-3">
             {pasadas.map((r) => {
               const resena = resenaDe.get(r.id);
+              const incidencia = porReserva.get(r.id);
 
               return (
-                <li key={r.id} className="flex flex-wrap gap-2 px-4 py-3">
-                  <div className="min-w-0">
-                    <Link
-                      href={`/partidas/${r.game.slug}`}
-                      className="text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
-                    >
-                      {r.game.title}
-                    </Link>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      <Fecha valor={r.game.startsAt} />
-                    </p>
+                <li key={r.id} className="border-border bg-card rounded-sm border p-4">
+                  <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/partidas/${r.game.slug}`}
+                        className="text-foreground text-sm font-medium hover:underline"
+                      >
+                        {r.game.title}
+                      </Link>
+                      <p className="text-muted-foreground text-xs">
+                        <Fecha valor={r.game.startsAt} /> · {r.game.gm.user.name}
+                      </p>
+                    </div>
+
+                    <Estado tono={ESTADO_DE_RESERVA[r.status].tono}>
+                      {ESTADO_DE_RESERVA[r.status].texto}
+                    </Estado>
                   </div>
-                  <span className="ml-auto self-center text-xs text-slate-500 dark:text-slate-400">
-                    {ESTADO[r.status]}
-                  </span>
 
                   {/* Solo tiene sentido reclamar sobre una partida ya jugada y
-                    pagada, y mientras no haya otra incidencia en curso. */}
+                      pagada, y mientras no haya otra incidencia en curso. */}
                   {r.reclamable && (
-                    <div className="w-full pt-2">
-                      {porReserva.has(r.id) ? (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Incidencia{' '}
-                          {porReserva.get(r.id)?.status === 'OPEN'
-                            ? 'en revisión'
-                            : porReserva.get(r.id)?.status === 'APPROVED'
-                              ? 'aprobada: se te abonó el importe en saldo'
-                              : 'desestimada'}
-                          {porReserva.get(r.id)?.resolutionNote && (
-                            <> · {porReserva.get(r.id)?.resolutionNote}</>
-                          )}
+                    <div className="mt-3">
+                      {incidencia ? (
+                        <p className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+                          <Estado tono={ESTADO_DE_INCIDENCIA[incidencia.status].tono}>
+                            {ESTADO_DE_INCIDENCIA[incidencia.status].texto}
+                          </Estado>
+                          {incidencia.status === 'APPROVED' &&
+                            'Se te abonó el importe en saldo.'}
+                          {incidencia.resolutionNote && <>{incidencia.resolutionNote}</>}
                         </p>
                       ) : (
                         <ReportarIncidencia
@@ -143,21 +206,24 @@ export default async function MisReservasPage() {
                   )}
 
                   {/* Valorar al GM. `valorable` ya excluye las reservas
-                    reembolsadas: una incidencia aprobada tiene su cauce y no
-                    debe ademas puntuar. */}
+                      reembolsadas: una incidencia aprobada tiene su cauce y no
+                      debe ademas puntuar. */}
                   {(r.valorable || resena) && (
-                    <div className="w-full pt-2">
+                    <div className="border-border mt-3 border-t pt-3">
                       {resena ? (
-                        <div className="space-y-2">
+                        <div className="flex flex-col gap-2">
                           <p className="text-sm">
-                            <span aria-hidden className="text-amber-500">
+                            <span aria-hidden className="text-accent">
                               {'★'.repeat(resena.rating)}
+                              <span className="text-border">
+                                {'★'.repeat(5 - resena.rating)}
+                              </span>
                             </span>
                             <span className="sr-only">
                               Le pusiste {resena.rating} de 5
                             </span>
                             {resena.comment && (
-                              <span className="ml-2 text-slate-600 dark:text-slate-400">
+                              <span className="text-muted-foreground ml-2">
                                 {resena.comment}
                               </span>
                             )}

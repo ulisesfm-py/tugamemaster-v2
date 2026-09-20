@@ -3,6 +3,13 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { puedeValorar } from '@/modules/reviews/politica';
 
+import {
+  hayDerechoADevolucion,
+  importeDevolucionCents,
+  limiteDeDevolucion,
+  PORCENTAJE_DEVOLUCION,
+} from './politica';
+
 /** Reservas de un jugador, separadas en proximas e historial. */
 export async function misReservas(userId: string) {
   const reservas = await db.booking.findMany({
@@ -33,16 +40,32 @@ export async function misReservas(userId: string) {
   const fecha = new Date(ahora);
   const activa = (estado: string) => estado === 'PENDING' || estado === 'PAID';
 
-  // `reclamable` y `valorable` se deciden aqui y no en la pagina: dependen de
-  // la hora actual, y leer el reloj durante el render de un componente es
-  // impuro.
-  const conReclamable = reservas.map((r) => ({
-    ...r,
-    reclamable:
-      r.game.startsAt.getTime() <= ahora &&
-      (r.status === 'PAID' || r.status === 'COMPLETED'),
-    valorable: puedeValorar({ estado: r.status, finPartida: r.game.endsAt }, fecha).ok,
-  }));
+  // `reclamable`, `valorable` y el plazo de cancelacion se deciden aqui y no en
+  // la pagina: dependen de la hora actual, y leer el reloj durante el render de
+  // un componente es impuro.
+  const conReclamable = reservas.map((r) => {
+    const conDevolucion = hayDerechoADevolucion(r.game.startsAt, fecha);
+
+    return {
+      ...r,
+      reclamable:
+        r.game.startsAt.getTime() <= ahora &&
+        (r.status === 'PAID' || r.status === 'COMPLETED'),
+      valorable: puedeValorar({ estado: r.status, finPartida: r.game.endsAt }, fecha).ok,
+
+      // Lo que pasa si libera la plaza ahora mismo. Hasta ahora el jugador
+      // tenia que irse a las condiciones a averiguarlo, justo en el momento en
+      // que menos ganas tiene de leer nada.
+      conDevolucion,
+      // El instante exacto, no una cuenta atras: «te quedan 2 dias» cuando
+      // faltan 71 horas se queda corto por casi un dia entero, y un plazo que
+      // miente es peor que no ensenarlo.
+      limiteDevolucion: limiteDeDevolucion(r.game.startsAt),
+      devolucionCents: conDevolucion
+        ? importeDevolucionCents(r.amountCents, PORCENTAJE_DEVOLUCION)
+        : 0,
+    };
+  });
 
   return {
     proximas: conReclamable.filter(

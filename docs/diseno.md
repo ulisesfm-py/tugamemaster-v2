@@ -1054,3 +1054,41 @@ toca el HTML»— y no tiene arreglo desde el código de la página.
 Lleva `suppressHydrationWarning` en `<body>`, que silencia **solo los atributos
 de esa etiqueta, un nivel**: cualquier discrepancia de verdad dentro de la
 página sigue avisando.
+
+## Mis reservas `/mis-reservas`
+
+Lo que faltaba no era estilo: **el jugador no sabía qué pasaba si liberaba la
+plaza.** El botón estaba ahí, sin más, y para averiguar si había devolución
+había que irse a las condiciones justo en el momento en que menos ganas se
+tienen de leer nada.
+
+Ahora cada reserva próxima lo dice antes de pulsar: «si la liberas te
+devolvemos 18,00 € en saldo, tienes de plazo hasta el 23 de septiembre a las
+15:41». El importe y el límite los calcula la consulta con `politica.ts`, que
+es la misma que ejecuta la devolución de verdad.
+
+**El plazo se da como fecha, no como cuenta atrás.** La primera versión decía
+«te quedan 2 días» cuando faltaban 71 horas: casi un día entero de menos, por
+redondear hacia abajo. Para decidir si cancelas, un plazo que miente es peor
+que ninguno — y una fecha no necesita redondeo.
+
+El historial usa ya la tabla única de estados, y las incidencias se enseñan con
+su distintivo en vez de con tres frases encadenadas por ternarios.
+
+## Mis partidas `/cuenta/partidas`
+
+Una sola lista ordenada por fecha lo mezclaba todo. Ahora son **tres grupos,
+porque son tres cosas distintas que hacer**: las abiertas se vigilan, los
+borradores se terminan y las ya jugadas se cierran —nota de sesión,
+continuación—. Un grupo sin nada dentro no se pinta.
+
+Usa `estadoVisible()`, así que una publicada cuya hora ya pasó aparece como
+jugada aunque el cron no haya corrido todavía.
+
+## Un espacio que no era un espacio
+
+La prueba del importe devuelto fallaba con `/te devolvemos 18,00 €/`. El
+culpable: `Intl.NumberFormat` mete un **espacio fino inquebrantable** antes del
+€, y una expresión regular con un espacio normal no casa. Como cadena sí,
+porque Playwright normaliza los espacios. Conviene recordarlo: cualquier
+aserción sobre un importe formateado tiene esa trampa.

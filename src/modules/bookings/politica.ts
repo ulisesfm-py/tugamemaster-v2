@@ -42,10 +42,17 @@ export function importeDevolucionCents(precioCents: number, porcentaje: number):
   return Math.floor((precioCents * porcentaje) / 100);
 }
 
+/** Instante exacto en que se cierra el plazo de cancelacion con devolucion. */
+export function limiteDeDevolucion(inicio: Date): Date {
+  return new Date(inicio.getTime() - HORAS_CANCELACION_CON_DEVOLUCION * 3_600_000);
+}
+
 /** Cuanto falta para que se acabe el plazo de cancelacion con devolucion. */
 export function horasHastaFinDePlazo(inicio: Date, ahora = new Date()): number {
-  const limite = inicio.getTime() - HORAS_CANCELACION_CON_DEVOLUCION * 3_600_000;
-  return Math.max(0, (limite - ahora.getTime()) / 3_600_000);
+  return Math.max(
+    0,
+    (limiteDeDevolucion(inicio).getTime() - ahora.getTime()) / 3_600_000,
+  );
 }
 
 /** Texto de las condiciones, en un unico sitio para no contradecirse. */
