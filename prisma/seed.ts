@@ -358,6 +358,34 @@ async function main() {
     },
   });
 
+  // --- Pago al GM ---------------------------------------------------------
+  //
+  // Lo que habria dejado el cron 48 h despues de jugarse la sesion 1. Sin esto
+  // el panel de ingresos sale en blanco en local y no hay forma de ver como se
+  // comporta con dinero ya transferido.
+
+  const totalPagado = (reservaAna.payoutCents ?? 0) + (reservaBruno.payoutCents ?? 0);
+
+  await db.payout.upsert({
+    where: { gameId: sesion1.id },
+    update: {},
+    create: {
+      gmId: gmLaura.id,
+      gameId: sesion1.id,
+      amountCents: totalPagado,
+      status: 'PAID',
+      stripeTransferId: 'tr_test_sesion1',
+      scheduledFor: dias(-8),
+      paidAt: dias(-8),
+      items: {
+        create: [
+          { bookingId: reservaAna.id, amountCents: reservaAna.payoutCents ?? 0 },
+          { bookingId: reservaBruno.id, amountCents: reservaBruno.payoutCents ?? 0 },
+        ],
+      },
+    },
+  });
+
   // --- Reviews ------------------------------------------------------------
 
   await db.review.upsert({

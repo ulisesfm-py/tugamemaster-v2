@@ -952,3 +952,73 @@ del panel del GM no.
 La página de condiciones gana una línea que dice lo que es: «lo que pasa con tu
 dinero si algo sale mal, es corto a propósito». El cuerpo lo sigue escribiendo
 `politica.ts`.
+
+---
+
+# D6 · El dinero, a la vista
+
+El hueco más grave de la auditoría: **el game master cobraba sin poder ver
+nunca cuánto ni por qué**. El modelo lo guardaba todo —`Payout` cuelga de
+`PayoutItem`, que cuelga de `Booking`, que cuelga de la partida y del
+jugador— pero no había ninguna consulta que lo leyera.
+
+## El libro de ingresos `/cuenta/cobros`
+
+La página era solo el estado del alta de Stripe. Ahora es el dinero, y el alta
+queda reducida a una línea cuando ya está hecha.
+
+**Se agrupa por partida** porque así es como se mueve: una transferencia por
+mesa, 48 horas después de jugarla. Dentro de cada una, una fila por asiento con
+el jugador, lo que pagó, la comisión, lo que se llevó la pasarela y lo que
+queda. Ese es el único nivel donde existe «el jugador que pagó».
+
+Cuatro cifras arriba, **excluyentes a propósito**: cobrado, en camino,
+retenido y por jugarse. Cada euro está en una y solo una, así que sumarlas da
+todo lo vendido. Si se solaparan, un GM podría sumar mentalmente dos veces el
+mismo dinero y creer que se le debe el doble.
+
+### El estado del dinero no se guarda: se deduce
+
+Un `Payout` solo existe cuando el cron lo crea. Antes de eso el dinero está
+igual de comprometido, pero no hay fila que lo diga. Una página que se limitara
+a listar `Payout` le enseñaría **cero euros a un GM con tres mesas vendidas**.
+
+`estadoDelDinero()` lo deduce de la fecha de la partida y de lo que diga el
+`Payout` si existe, con una regla de precedencia: **lo que ya afirma una fila
+manda sobre cualquier deducción por reloj**. Es lógica pura, así que está
+cubierta con pruebas sin montar nada.
+
+El plazo de 48 horas vive ahora en un único sitio y lo importan tanto el cron
+como la página. Con una copia en cada lado, cambiarlo dejaría a la web
+mintiéndole al game master.
+
+## El saldo, donde se ve
+
+- **En la cabecera**, junto a la campanita, **solo cuando hay saldo**. Un «0,00
+  €» permanente compite con lo que sí importa; quien tiene dinero devuelto
+  necesita verlo sin buscarlo, porque es justo lo que le hace volver.
+- **En el panel**, siempre, con su enlace a los movimientos.
+- **En los movimientos**, cada apunte enlaza con la partida que lo originó. Un
+  abono sin saber de dónde viene es un número, no una explicación.
+
+Gastarlo al reservar ya funcionaba desde la fase 7 —se descuenta primero del
+saldo y solo se cobra a la tarjeta lo que falte— pero no estaba cubierto de
+punta a punta. Ahora hay una prueba que recorre el círculo entero: el GM
+cancela, Ana ve el saldo en la cabecera, entra en los movimientos, reserva otra
+mesa y la plaza queda confirmada sin pasar por la pantalla de pago.
+
+## El panel `/dashboard`
+
+Decía «aquí irá tu panel». Ahora tiene lo que hace falta: **te toca hacer**
+—alimentado por la misma lista derivada que la campanita—, saldo, ingresos si
+diriges, las próximas mesas y los accesos. El bloque de pendientes **no existe
+cuando no hay nada pendiente**, en vez de decir «no tienes nada».
+
+## Verificación
+
+Contra la base de datos real, con un game master fabricado a medida y cinco
+partidas en los cinco estados posibles, incluidas las dos trampas: una mesa
+jugada sin `Payout` todavía y un asiento devuelto que se enseña pero no suma.
+Las veintiuna cifras salen exactas, y el resumen ligero del panel coincide con
+el libro completo —comparten el cálculo justamente para que no puedan decir
+cosas distintas.

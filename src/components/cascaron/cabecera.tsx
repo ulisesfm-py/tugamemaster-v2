@@ -3,8 +3,10 @@ import Link from 'next/link';
 import { Avatar } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { avisosDe } from '@/modules/notifications/avisos';
+import { saldoDe } from '@/modules/wallet/service';
 
 import { Campana } from './campana';
+import { Saldo } from './saldo';
 
 /**
  * La cabecera de la web.
@@ -25,7 +27,10 @@ const MENU = [
 export async function Cabecera() {
   const session = await auth();
   const usuario = session?.user;
-  const avisos = usuario ? await avisosDe(usuario.id) : [];
+
+  const [avisos, saldo] = usuario
+    ? await Promise.all([avisosDe(usuario.id), saldoDe(usuario.id)])
+    : [[], 0];
 
   return (
     <header className="border-border bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-40 border-b backdrop-blur">
@@ -54,6 +59,7 @@ export async function Cabecera() {
         <div className="ml-auto flex items-center gap-2">
           {usuario ? (
             <>
+              <Saldo cents={saldo} />
               <Campana avisos={avisos} />
               <Link
                 href="/dashboard"

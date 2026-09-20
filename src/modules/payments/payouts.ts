@@ -4,15 +4,16 @@ import { db } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
 import { avisarPagoEnviado } from '@/modules/notifications/service';
 
+import { HORAS_DE_RETENCION } from './libro';
+
+export { HORAS_DE_RETENCION };
+
 /**
  * Cierre de partidas y pago a los game masters.
  *
  * Ambas tareas las ejecuta el job diario. Son idempotentes: correrlas dos
  * veces no cierra nada dos veces ni paga dos veces.
  */
-
-/** Horas que el dinero se retiene tras terminar la partida. */
-export const HORAS_DE_RETENCION = 48;
 
 /** Tope de partidas por ejecucion, para no agotar el tiempo de la funcion. */
 const LOTE = 50;
