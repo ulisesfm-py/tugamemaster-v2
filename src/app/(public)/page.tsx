@@ -2,7 +2,8 @@ import Link from 'next/link';
 
 import { PartidaCard } from '@/components/partida-card';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
-import { COMISION_PUNTOS_BASICOS, formatearImporte } from '@/modules/payments/dinero';
+import { RepartoEjemplo } from '@/components/reparto-ejemplo';
+import { COMISION_PUNTOS_BASICOS } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
 import { resumenDe } from '@/modules/blog/politica';
 import { listarPartidas } from '@/modules/games/queries';
@@ -288,40 +289,15 @@ export default async function Portada() {
               </li>
             </ul>
 
-            <div className="mt-7">
+            <div className="mt-7 flex flex-wrap gap-3">
               <EnlaceBoton href="/cuenta/gm">Abrir mi mesa</EnlaceBoton>
+              <EnlaceBoton href="/para-game-masters" variante="perfil">
+                Cómo funciona para el GM
+              </EnlaceBoton>
             </div>
           </div>
 
-          <div className="border-border bg-card rounded-sm border p-6">
-            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              Ejemplo
-            </p>
-            <p className="text-muted-foreground mt-3 text-sm">
-              Una mesa de 5 plazas a {formatearImporte(1500)} cada una:
-            </p>
-            <dl className="mt-4 flex flex-col gap-2 text-sm">
-              {[
-                ['Cobras', formatearImporte(7500)],
-                [`Comisión (${comision}%)`, `− ${formatearImporte(375)}`],
-                ['Coste de la pasarela', `− ${formatearImporte(285)}`],
-              ].map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="text-foreground tabular-nums">{v}</dd>
-                </div>
-              ))}
-              <div className="border-border mt-1 flex justify-between gap-4 border-t pt-3">
-                <dt className="text-foreground font-semibold">Te llevas</dt>
-                <dd className="font-heading text-primary text-lg font-bold tabular-nums">
-                  {formatearImporte(6840)}
-                </dd>
-              </div>
-            </dl>
-            <p className="text-muted-foreground mt-3 text-xs">
-              El coste de la pasarela es el real que nos cobra Stripe, no una estimación.
-            </p>
-          </div>
+          <RepartoEjemplo />
         </div>
       </section>
 

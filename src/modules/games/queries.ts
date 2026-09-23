@@ -5,6 +5,7 @@ import { ESTADOS_PAGADOS, filtroPlazaOcupada } from '@/modules/bookings/service'
 
 import { PLAZAS_POCAS } from './ficha';
 import type { Filtros } from './schema';
+import { agrupaSistemas, type Sistema } from './sistemas';
 
 /**
  * Consultas de lectura de partidas.
@@ -224,4 +225,49 @@ export async function miPartida(userId: string, gameId: string) {
   if (!partida || partida.gm.userId !== userId) return null;
 
   return partida;
+}
+
+/**
+ * Los sistemas que se juegan aqui, con cuantas mesas abiertas tiene cada uno.
+ *
+ * Se agrupan por slug: «D&D 5e» y «D&D 5E» son el mismo sistema escrito de dos
+ * maneras, y quien busca uno espera encontrar las dos. Ver `sistemas.ts`.
+ */
+export async function catalogoDeSistemas(): Promise<Sistema[]> {
+  const filas = await db.game.groupBy({
+    by: ['system'],
+    where: { status: 'PUBLISHED', startsAt: { gte: new Date() } },
+    _count: { _all: true },
+  });
+
+  return agrupaSistemas(
+    filas.map((f) => ({ system: f.system, partidas: f._count._all })),
+  );
+}
+
+/**
+ * Un sistema y sus mesas abiertas, o null si nadie dirige nada de eso.
+ *
+ * Devolver null y no una lista vacia es deliberado: una direccion inventada
+ * tiene que dar 404, no una pagina en blanco con cara de sistema real.
+ */
+export async function sistemaPorSlug(slug: string) {
+  const sistema = (await catalogoDeSistemas()).find((s) => s.slug === slug);
+  if (!sistema) return null;
+
+  const partidas = await db.game.findMany({
+    where: {
+      status: 'PUBLISHED',
+      startsAt: { gte: new Date() },
+      system: { in: sistema.variantes },
+    },
+    orderBy: { startsAt: 'asc' },
+    take: 24,
+    select: seleccionTarjeta(),
+  });
+
+  // Quien lo dirige, sin repetir: es la otra razon para entrar aqui.
+  const gms = [...new Map(partidas.map((p) => [p.gm.id, p.gm])).values()];
+
+  return { sistema, partidas, gms };
 }

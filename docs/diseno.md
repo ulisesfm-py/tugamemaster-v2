@@ -1371,3 +1371,50 @@ La interfaz tiene transiciones por todas partes y las tarjetas se levantan al
 pasar por encima. Para quien marca «reducir movimiento» en su sistema —por
 vértigo o migraña— eso no es un adorno. Se apaga en una sola regla y no clase a
 clase: así no se olvida en la próxima pantalla que se escriba.
+
+## Las tres páginas que faltaban
+
+Estaban en la estructura propuesta desde D1c y nunca se habían escrito.
+
+### `/como-funciona` y `/para-game-masters`
+
+Las dos páginas de confianza: una para quien duda antes de pagar, otra para
+quien se plantea dirigir. **Todos sus números salen de `politica.ts` y de
+`dinero.ts`**, que es el código que los aplica. Una página de confianza que se
+contradiga con el sistema es peor que no tenerla.
+
+Al escribir la de game masters salió que el desglose de ingresos de la portada
+—75 €, 3,75 de comisión, 2,85 de pasarela, 68,40 para ti— estaba **escrito a
+mano**. Ahora lo calcula `calcularReparto`, la misma función que reparte el
+dinero al cobrar, y la pieza la comparten las dos páginas. Los números salen
+idénticos, que es lo que confirma que estaban bien; lo que cambia es que ya no
+pueden dejar de estarlo.
+
+### `/sistemas/[nombre]`, sin una tabla de sistemas
+
+`Game.system` es texto libre: lo escribe cada game master. No hay tabla que
+consultar, y «D&D 5e», «D&D 5E» y «D&D 5e» son la misma cosa escrita de tres
+maneras.
+
+La solución es no guardar nada y **agrupar por slug**: dos grafías que dan el
+mismo slug son el mismo sistema. Así la página reúne las partidas de todos los
+que lo escribieron parecido, sin obligar a nadie a elegir de una lista cerrada
+ni tener que limpiar la base a mano.
+
+Del nombre se queda la grafía más usada. A igualdad de uso gana la que tenga
+más mayúsculas: un sistema es un nombre propio, y dejarlo al orden alfabético
+daba justo lo contrario, porque en español la minúscula va antes. Lo descubrió
+una prueba que esperaba «Vaesen» y recibía «vaesen» — y la regla correcta no
+era retocar la prueba, era decir en el código por qué gana la mayúscula.
+
+Una dirección inventada da **404**, no una página en blanco con cara de sistema
+real. Cubierto de punta a punta, junto al viaje de ida y vuelta del nombre: se
+escribe «D&D 5e», se convierte en `d-d-5e`, y esa dirección tiene que volver a
+encontrar sus partidas. Si la conversión cambiara, la página se quedaría vacía
+sin que nada fallara.
+
+### Y dejan de ser islas
+
+Las tres cuelgan del pie, el sistema de una partida enlaza a su página, y la
+portada manda a `/para-game-masters`. Una página nueva a la que no se llega
+desde ningún sitio no existe.

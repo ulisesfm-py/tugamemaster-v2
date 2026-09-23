@@ -24,6 +24,7 @@ import {
   tipoDeMesa,
 } from '@/modules/games/ficha';
 import { detallePartida } from '@/modules/games/queries';
+import { slugDeSistema } from '@/modules/games/sistemas';
 import { formatearImporte } from '@/modules/payments/dinero';
 import { reputacionGm } from '@/modules/profiles/queries';
 import { saldoDe } from '@/modules/wallet/service';
@@ -134,7 +135,16 @@ export default async function PartidaPage({ params, searchParams }: Props) {
         {/* Solo el sistema: que clase de mesa es lo dice la ficha, y en una
             sesion de campana el enlace de abajo ya nombra la campana. Decirlo
             tres veces no lo hace mas claro. */}
-        <p className="text-accent text-sm font-semibold">{partida.system}</p>
+        {/* El sistema lleva a su pagina: desde una mesa concreta, lo natural
+            es querer ver que mas hay de lo mismo. */}
+        <p className="text-sm font-semibold">
+          <Link
+            href={`/sistemas/${slugDeSistema(partida.system)}`}
+            className="text-accent hover:underline"
+          >
+            {partida.system}
+          </Link>
+        </p>
 
         <h1 className="font-heading text-foreground mt-2 text-3xl font-extrabold text-balance sm:text-4xl">
           {partida.title}

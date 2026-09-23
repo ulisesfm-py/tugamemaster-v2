@@ -13,13 +13,15 @@ const COLUMNAS = [
     titulo: 'Jugar',
     enlaces: [
       { href: '/partidas', texto: 'Buscar partida' },
+      { href: '/sistemas', texto: 'Qué se juega' },
       { href: '/gm', texto: 'Game masters' },
-      { href: '/condiciones', texto: 'La garantía' },
+      { href: '/como-funciona', texto: 'Cómo funciona' },
     ],
   },
   {
     titulo: 'Dirigir',
     enlaces: [
+      { href: '/para-game-masters', texto: 'Cobrar por dirigir' },
       { href: '/cuenta/gm', texto: 'Crear perfil de game master' },
       { href: '/cuenta/partidas/nueva', texto: 'Crear una partida' },
     ],
