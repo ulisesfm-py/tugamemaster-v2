@@ -1275,3 +1275,99 @@ los jugadores—, y el pie lo dice: «tu lámina, tal como se ve en el portal» 
 
 Es el mismo criterio que el avatar en `/cuenta`, que sí lo hacía bien desde el
 principio: **enseñar el estado actual antes de ofrecer cambiarlo.**
+
+---
+
+# D6 · Lo que pasa cuando no es el camino feliz
+
+## En el móvil no se podía navegar
+
+Los enlaces de la cabecera estaban ocultos por debajo de 640 px, así que en un
+teléfono **no había forma de llegar a Partidas, Game masters ni Blog** desde
+arriba: solo desde el pie, al final de todo el scroll. Ahora hay un menú de
+secciones, que comparte con la campanita y el menú de cuenta el cerrarse al
+pulsar fuera y con Escape.
+
+De paso, «Entrar» y «Crear cuenta» partían en dos líneas a 375 px y se salían
+de la barra.
+
+## Saltar al contenido
+
+Quien navega con teclado recorría la cabecera entera —menú, campanita, saldo,
+cuenta— en **cada página** antes de llegar a lo que venía a leer. Ahora el
+primer elemento enfocable del documento es un enlace que salta al contenido,
+invisible hasta que se tabula.
+
+Lleva `tabIndex={-1}` en el destino: sin eso el navegador mueve la vista pero
+el foco se queda donde estaba, y el siguiente tabulador vuelve al principio.
+
+## Las pantallas que no existían
+
+No había **ninguna**: `not-found`, `error` ni `global-error`. Un 404 salía con
+el diseño por defecto de Next —fondo blanco, tipografía del sistema, ni rastro
+de la web— y es de las pantallas que más gente ve, porque llega por un enlace
+viejo o por una partida cancelada.
+
+El error no enseña el mensaje del fallo. Nunca es útil —quien lo lee no puede
+hacer nada con «prisma connection timeout»— y puede arrastrar datos de otra
+persona. Se enseña el `digest`, que es la referencia con la que buscarlo.
+
+El `global-error` se escribe con los colores puestos a mano y no con los
+tokens: si lo que se rompió fue la hoja de estilos, un token sin resolver deja
+texto negro sobre negro.
+
+### El 404 se pinta en dos sitios, y por poco sale duplicado
+
+El primer intento metía el armazón en el `not-found.tsx` de la raíz. Pero ese
+fichero también cubre los `notFound()` que se llaman desde dentro de un grupo
+de rutas, cuyo layout **ya monta cabecera y pie**: el resultado eran dos
+cabeceras. Ahora el contenido va suelto en un componente, la raíz le pone el
+armazón y cada grupo no.
+
+### Y un `loading.tsx` que rompía los 404
+
+Puse un esqueleto de carga por grupo de rutas. Efecto secundario: **un
+`loading.tsx` convierte la respuesta en streaming, y el 200 se manda antes de
+que la página llegue a llamar a `notFound()`**. Con él puesto,
+`/partidas/no-existe` contestaba **200** en vez de 404 — y esas direcciones se
+indexan.
+
+Lo encontró la prueba de administración, que comprobaba que un usuario normal
+recibe 404 en `/admin`. Sin esa prueba habría pasado sin que nadie lo notara,
+porque la página _se ve_ como un 404.
+
+La solución no es renunciar al esqueleto, es ponerlo donde no hace daño:
+`<Suspense>` **dentro** de `/partidas`, alrededor de lo único que espera a la
+base de datos. El título, los atajos y los filtros salen enseguida; la lista
+llega después con su esqueleto. Y el efecto se queda en esa página, que nunca
+da 404.
+
+Hay una prueba nueva que fija los seis 404 de la web.
+
+## Contraste, con números
+
+Medido en lugar de mirado, porque los tonos semánticos se pintan sobre su
+propio color al 10-15 %: comparar el texto contra el token de fondo a secas da
+un número que nadie ve.
+
+| Pareja                                | Antes    | Ahora |
+| ------------------------------------- | -------- | ----- |
+| `destructive` sobre `destructive/15`  | **2,87** | 4,61  |
+| `destructive` sobre `destructive/10`  | **3,24** | 5,44  |
+| `success` sobre `success/15`          | **4,47** | 5,32  |
+| `input` (borde de campo) sobre `card` | **1,21** | 3,10  |
+
+El rojo era el peor, y es justo el texto que más importa leer: los errores. Los
+dos colores estaban elegidos como para un tema claro. Al aclararse pasan a
+funcionar como fondo sólido con texto oscuro encima, así que sus `-foreground`
+cambian de claros a oscuros.
+
+El borde se parte en dos: el de una tarjeta es decoración y puede ser discreto;
+el de un campo de formulario **dice dónde se escribe**, y necesita verse.
+
+## Movimiento reducido
+
+La interfaz tiene transiciones por todas partes y las tarjetas se levantan al
+pasar por encima. Para quien marca «reducir movimiento» en su sistema —por
+vértigo o migraña— eso no es un adorno. Se apaga en una sola regla y no clase a
+clase: así no se olvida en la próxima pantalla que se escriba.

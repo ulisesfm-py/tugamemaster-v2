@@ -7,6 +7,7 @@ import { salirAction } from '@/modules/users/actions';
 import { saldoDe } from '@/modules/wallet/service';
 
 import { Campana } from './campana';
+import { MenuPrincipal } from './menu-principal';
 import { MenuUsuario } from './menu-usuario';
 import { Saldo } from './saldo';
 
@@ -45,22 +46,25 @@ export async function Cabecera() {
 
   return (
     <header className="border-border bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:gap-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-6">
+        {/* En pantallas estrechas las secciones viven detras de este boton; a
+            partir de `sm` se ensenan en fila. Antes se ocultaban sin mas, y en
+            un telefono no habia forma de llegar a ninguna desde arriba. */}
+        <MenuPrincipal enlaces={MENU} />
+
         <Link
           href="/"
-          className="font-heading text-foreground hover:text-primary text-lg font-extrabold tracking-tight transition"
+          className="font-heading text-foreground hover:text-primary focus-visible:ring-ring shrink-0 rounded-sm text-base font-extrabold tracking-tight whitespace-nowrap transition focus-visible:ring-2 focus-visible:outline-none sm:text-lg"
         >
           TuGameMaster
         </Link>
 
-        {/* El menu se oculta en pantallas estrechas; el recorrido principal
-            sigue disponible desde la portada y desde el pie. */}
         <nav aria-label="Principal" className="hidden gap-5 text-sm sm:flex">
           {MENU.map((e) => (
             <Link
               key={e.href}
               href={e.href}
-              className="text-muted-foreground hover:text-foreground transition"
+              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm transition focus-visible:ring-2 focus-visible:outline-none"
             >
               {e.texto}
             </Link>
@@ -83,15 +87,17 @@ export async function Cabecera() {
             </>
           ) : (
             <>
+              {/* Sin `whitespace-nowrap` los dos botones parten en dos lineas
+                  a 375 px y se salen de la barra. */}
               <Link
                 href="/login"
-                className="text-muted-foreground hover:text-foreground rounded-sm px-3 py-2 text-sm font-medium transition"
+                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm px-2 py-2 text-sm font-medium whitespace-nowrap transition focus-visible:ring-2 focus-visible:outline-none sm:px-3"
               >
                 Entrar
               </Link>
               <Link
                 href="/registro"
-                className="bg-primary text-primary-foreground rounded-sm px-3.5 py-2 text-sm font-semibold shadow-[0_2px_0_#9c3d16] transition hover:-translate-y-px hover:shadow-[0_3px_0_#9c3d16] active:translate-y-px active:shadow-[0_1px_0_#9c3d16]"
+                className="bg-primary text-primary-foreground focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm px-2.5 py-2 text-sm font-semibold whitespace-nowrap shadow-[0_2px_0_#9c3d16] transition hover:-translate-y-px hover:shadow-[0_3px_0_#9c3d16] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-px active:shadow-[0_1px_0_#9c3d16] sm:px-3.5"
               >
                 Crear cuenta
               </Link>

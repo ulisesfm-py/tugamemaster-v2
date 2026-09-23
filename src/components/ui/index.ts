@@ -7,6 +7,7 @@
 export { Avatar, Estrellas, Etiqueta, Fecha, Precio } from './basicos';
 export { Button, EnlaceBoton, variantesDeBoton } from './button';
 export { Aviso } from './aviso';
+export { Cargando } from './cargando';
 export { Campo, CLASE_CONTROL } from './campo';
 export {
   Estado,

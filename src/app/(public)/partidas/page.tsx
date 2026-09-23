@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { PartidaCard } from '@/components/partida-card';
-import { Button, CLASE_CONTROL, EnlaceBoton, Vacio } from '@/components/ui';
+import { Button, Cargando, CLASE_CONTROL, EnlaceBoton, Vacio } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { ETIQUETAS } from '@/modules/games/ficha';
 import { listarPartidas, sistemasDisponibles } from '@/modules/games/queries';
@@ -91,6 +92,58 @@ function textoVacio(filtros: Filtros): string {
   return 'No hay partidas que encajen con lo que buscas';
 }
 
+/**
+ * Las mesas, que es lo unico de esta pagina que espera a la base de datos.
+ *
+ * Va en su propio componente para poder envolverlo en `<Suspense>`: asi el
+ * titulo, los atajos y los filtros se pintan enseguida y solo la lista llega
+ * despues, con su esqueleto mientras tanto.
+ *
+ * **No se usa un `loading.tsx` de ruta**, que seria lo obvio: un fichero de
+ * carga en este segmento convierte la respuesta en streaming, y entonces el
+ * 200 se envia antes de que `/partidas/[slug]` pueda llamar a `notFound()`.
+ * Una partida inexistente pasaba a contestar 200 en vez de 404. Con Suspense
+ * dentro de la pagina, el efecto se queda en esta pagina, que nunca da 404.
+ */
+async function Mesas({ filtros }: { filtros: Filtros }) {
+  const partidas = await listarPartidas(filtros);
+  const etiquetaPuesta = ETIQUETAS.find((e) => e.id === filtros.etiqueta);
+  const hayFiltro = Object.keys(filtros).length > 0;
+
+  return (
+    <>
+      <p className="text-muted-foreground mt-6 text-sm" aria-live="polite">
+        {partidas.length === 1 ? '1 mesa' : `${partidas.length} mesas`}
+        {etiquetaPuesta && ` de ${etiquetaPuesta.texto.toLowerCase()}`}
+        {filtros.cuando === 'semana' && ' esta semana'}
+      </p>
+
+      {partidas.length === 0 ? (
+        <Vacio
+          className="mt-4"
+          titulo={textoVacio(filtros)}
+          accion={
+            hayFiltro ? (
+              <EnlaceBoton href="/partidas" variante="perfil">
+                Ver todas
+              </EnlaceBoton>
+            ) : undefined
+          }
+        >
+          Prueba a quitar algún filtro, o mira qué game masters dirigen aquí para no
+          perderte su próxima mesa.
+        </Vacio>
+      ) : (
+        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {partidas.map((p) => (
+            <PartidaCard key={p.id} partida={p} />
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 export default async function PartidasPage({ searchParams }: Props) {
   const params = await searchParams;
 
@@ -115,10 +168,7 @@ export default async function PartidasPage({ searchParams }: Props) {
 
   const filtros = parsed.success ? parsed.data : {};
 
-  const [partidas, sistemas] = await Promise.all([
-    listarPartidas(filtros),
-    sistemasDisponibles(),
-  ]);
+  const sistemas = await sistemasDisponibles();
 
   // Para saber que atajo esta puesto, se mira la URL tal cual y no los filtros
   // ya validados: «sin coste» es maxPrecio=0, y un 0 validado no se distingue
@@ -130,7 +180,6 @@ export default async function PartidasPage({ searchParams }: Props) {
   );
 
   const hayFiltro = [...actuales.keys()].length > 0;
-  const etiquetaPuesta = ETIQUETAS.find((e) => e.id === filtros.etiqueta);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -248,34 +297,15 @@ export default async function PartidasPage({ searchParams }: Props) {
         </Button>
       </form>
 
-      <p className="text-muted-foreground mt-6 text-sm" aria-live="polite">
-        {partidas.length === 1 ? '1 mesa' : `${partidas.length} mesas`}
-        {etiquetaPuesta && ` de ${etiquetaPuesta.texto.toLowerCase()}`}
-        {filtros.cuando === 'semana' && ' esta semana'}
-      </p>
-
-      {partidas.length === 0 ? (
-        <Vacio
-          className="mt-4"
-          titulo={textoVacio(filtros)}
-          accion={
-            hayFiltro ? (
-              <EnlaceBoton href="/partidas" variante="perfil">
-                Ver todas
-              </EnlaceBoton>
-            ) : undefined
-          }
-        >
-          Prueba a quitar algún filtro, o mira qué game masters dirigen aquí para no
-          perderte su próxima mesa.
-        </Vacio>
-      ) : (
-        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {partidas.map((p) => (
-            <PartidaCard key={p.id} partida={p} />
-          ))}
-        </ul>
-      )}
+      {/* La `key` cambia con los filtros para que al filtrar vuelva a
+          suspenderse: sin ella, React conserva la lista anterior y parece que
+          el filtro no ha hecho nada. */}
+      <Suspense
+        key={JSON.stringify(filtros)}
+        fallback={<Cargando className="mt-10" titular={false} />}
+      >
+        <Mesas filtros={filtros} />
+      </Suspense>
     </main>
   );
 }

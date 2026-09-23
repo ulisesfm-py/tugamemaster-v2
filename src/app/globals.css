@@ -85,16 +85,24 @@
 
   /* Estados. Son semanticos y no comparten tono con el acento:
      si "peligro" y "reservar" se parecen, uno de los dos miente. */
-  --destructive: #c2383f;
-  --destructive-foreground: #fdecec;
-  --success: #6f9f5b;
+  /* Rojo y verde aclarados para que se lean sobre su propio tinte.
+     Los de antes estaban pensados como para un tema claro: el rojo daba 2,87
+     de contraste sobre `destructive/15`, y es justo el texto que mas importa
+     leer. Al aclararse pasan a funcionar como fondo solido con texto oscuro
+     encima, de ahi que sus `-foreground` cambien de claros a oscuros. */
+  --destructive: #ef6a72;
+  --destructive-foreground: #2a0a0c;
+  --success: #7fb069;
   --success-foreground: #0f1509;
   --warning: #d99b2b;
   --warning-foreground: #1a1204;
 
   /* Filos */
+  /* El borde de una tarjeta es decoracion y puede ser discreto; el de un campo
+     de formulario dice donde se escribe, asi que necesita verse (3:1). Por eso
+     dejan de ser el mismo color. */
   --border: #33291f;
-  --input: #33291f;
+  --input: #7c644b;
   --ring: #e2622a;
 
   /* Brasa es de esquinas cortas: el cartel, no la pegatina */
@@ -125,5 +133,34 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Movimiento reducido.
+ *
+ * La interfaz tiene transiciones por todas partes y las tarjetas se levantan
+ * al pasar por encima. Para quien marca «reducir movimiento» en su sistema
+ * —por vertigo, migrana o mareo— eso no es un adorno, es un sintoma. Se apaga
+ * todo de una vez aqui y no clase a clase: una sola regla no se olvida en la
+ * proxima pantalla que se escriba.
+ *
+ * No se pone `animation: none`, que romperia cualquier animacion que sirva de
+ * senal; se deja en un fotograma instantaneo, asi que lo que tenia que cambiar
+ * cambia, pero sin recorrido.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* El relieve del boton y el levantarse de las tarjetas: se quedan quietos. */
+  *:hover {
+    transform: none !important;
   }
 }
