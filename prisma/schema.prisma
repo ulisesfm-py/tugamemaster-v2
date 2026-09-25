@@ -67,6 +67,11 @@ model User {
   walletEntries     WalletEntry[]  @relation("MonederoDe")
   walletEntriesMade WalletEntry[]  @relation("MonederoCreadoPor")
 
+  threadMessages         ThreadMessage[] @relation("MensajeAutor")
+  threadMessagesReported ThreadMessage[] @relation("MensajeDenunciado")
+  threadMessagesRemoved  ThreadMessage[] @relation("MensajeRetirado")
+  threadReads            ThreadRead[]
+
   @@index([createdAt])
 }
 
@@ -254,6 +259,9 @@ model Game {
   reviews     Review[]
   payout      Payout?
   sessionNote SessionNote?
+
+  threadMessages ThreadMessage[]
+  threadReads    ThreadRead[]
 
   @@index([status, startsAt])
   @@index([gmId])
@@ -573,6 +581,70 @@ model Review {
   gm      GmProfile @relation("ReviewTarget", fields: [gmId], references: [id], onDelete: Cascade)
 
   @@index([gmId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Hilo de mesa
+// ---------------------------------------------------------------------------
+
+/// Un mensaje del hilo de una partida.
+///
+/// El hilo NO tiene tabla propia: es la conversacion de una partida y se
+/// deriva de ella. Asi "el GM borra el hilo" es vaciarlo, no cerrarlo, y no
+/// hay un tercer estado que mantener ni que sincronizar con el de la partida.
+///
+/// Es asincrono a proposito: nada de conexiones abiertas. La duda llega tres
+/// dias antes y el recordatorio la vispera.
+model ThreadMessage {
+  id       String @id @default(cuid())
+  gameId   String
+  authorId String
+
+  /// Texto plano. Se respetan los saltos de linea y no se interpreta ni HTML
+  /// ni Markdown, mismo criterio que el blog: lo que no se interpreta no hay
+  /// que sanearlo.
+  body String
+
+  /// Retirado por su autor o por un administrador. Se marca, no se borra: la
+  /// fila que desaparece deja un hueco en una conversacion que otros ya
+  /// leyeron.
+  removedAt   DateTime?
+  removedById String?
+
+  /// Denuncia. Va en columnas del mensaje y no en `Incident` porque una
+  /// incidencia esta atada a una reserva y retiene el pago al GM: un mensaje
+  /// fuera de tono no puede bloquear dinero.
+  reportedById String?
+  reportedAt   DateTime?
+  reportReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game       Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  author     User  @relation("MensajeAutor", fields: [authorId], references: [id], onDelete: Restrict)
+  reportedBy User? @relation("MensajeDenunciado", fields: [reportedById], references: [id], onDelete: SetNull)
+  removedBy  User? @relation("MensajeRetirado", fields: [removedById], references: [id], onDelete: SetNull)
+
+  @@index([gameId, createdAt])
+  @@index([reportedAt])
+}
+
+/// Hasta donde ha leido alguien el hilo de una partida.
+///
+/// Es lo unico que hace falta para avisar de mensajes nuevos: un contador
+/// aparte acabaria desincronizado y mostrando avisos de algo ya leido.
+model ThreadRead {
+  gameId String
+  userId String
+
+  readAt DateTime @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, userId])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
