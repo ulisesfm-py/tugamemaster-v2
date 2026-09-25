@@ -2,6 +2,7 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { puedeValorar } from '@/modules/reviews/politica';
+import { accesoAlHilo } from '@/modules/threads/politica';
 
 import {
   hayDerechoADevolucion,
@@ -52,6 +53,14 @@ export async function misReservas(userId: string) {
         r.game.startsAt.getTime() <= ahora &&
         (r.status === 'PAID' || r.status === 'COMPLETED'),
       valorable: puedeValorar({ estado: r.status, finPartida: r.game.endsAt }, fecha).ok,
+
+      // Si el hilo de esa mesa sigue abierto para el. Se decide aqui por lo
+      // mismo que lo demas: depende de la hora, y la pagina no lee el reloj.
+      hilo: accesoAlHilo(
+        { esGm: false, reserva: r.status },
+        { finPartida: r.game.endsAt },
+        fecha,
+      ).ok,
 
       // Lo que pasa si libera la plaza ahora mismo. Hasta ahora el jugador
       // tenia que irse a las condiciones a averiguarlo, justo en el momento en

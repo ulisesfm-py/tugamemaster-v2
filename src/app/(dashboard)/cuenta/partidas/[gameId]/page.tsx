@@ -30,6 +30,7 @@ import {
 } from '@/modules/games/actions';
 import { estadoVisible } from '@/modules/games/ficha';
 import { miPartida } from '@/modules/games/queries';
+import { accesoAlHilo, DIAS_DE_VIDA } from '@/modules/threads/politica';
 
 export const metadata: Metadata = { title: 'Gestionar partida · TuGameMaster' };
 
@@ -73,6 +74,12 @@ export default async function GestionarPartidaPage({ params }: Props) {
   const pagadas = partida._count.bookings;
 
   const visible = estadoVisible(partida.status, partida.startsAt);
+
+  // El hilo existe mientras la mesa exista. En borrador no se ofrece: no hay
+  // con quien hablar hasta que alguien pueda reservar.
+  const hiloAbierto =
+    partida.status !== 'DRAFT' &&
+    accesoAlHilo({ esGm: true, reserva: null }, { finPartida: partida.endsAt }).ok;
   const estado = ESTADO_DE_PARTIDA[visible];
 
   return (
@@ -185,6 +192,18 @@ export default async function GestionarPartidaPage({ params }: Props) {
               </>
             )}
           </div>
+        </Bloque>
+      )}
+
+      {/* ── Hablar con la mesa ──────────────────────────────────── */}
+      {hiloAbierto && (
+        <Bloque
+          titulo="Hilo de mesa"
+          nota={`Donde hablas con quien tiene plaza. Se cierra ${DIAS_DE_VIDA} días después de la partida y no manda correos: los avisos van a la campana.`}
+        >
+          <EnlaceBoton href={`/partidas/${partida.slug}/hilo`} variante="perfil">
+            Abrir el hilo
+          </EnlaceBoton>
         </Bloque>
       )}
 

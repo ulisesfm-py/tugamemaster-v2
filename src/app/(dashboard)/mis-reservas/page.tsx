@@ -139,7 +139,20 @@ export default async function MisReservasPage() {
                   <Plazo reserva={r} />
                 </p>
 
-                <div className="mt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {/* Lo de hablar con la mesa va antes que lo de irse de
+                      ella: casi siempre se cancela por algo que se podia
+                      haber preguntado. */}
+                  {r.hilo && (
+                    <EnlaceBoton
+                      href={`/partidas/${r.game.slug}/hilo`}
+                      variante="perfil"
+                      tamano="sm"
+                    >
+                      Hilo de mesa
+                    </EnlaceBoton>
+                  )}
+
                   <ReservarBoton
                     accion={cancelarReservaAction}
                     texto="Liberar mi plaza"
@@ -203,6 +216,19 @@ export default async function MisReservasPage() {
                         />
                       )}
                     </div>
+                  )}
+
+                  {/* El hilo sigue abierto un tiempo despues de jugar: es
+                      donde se cuadra la siguiente sesion. */}
+                  {r.hilo && (
+                    <p className="mt-3">
+                      <Link
+                        href={`/partidas/${r.game.slug}/hilo`}
+                        className="text-primary text-xs hover:underline"
+                      >
+                        Hilo de mesa
+                      </Link>
+                    </p>
                   )}
 
                   {/* Valorar al GM. `valorable` ya excluye las reservas

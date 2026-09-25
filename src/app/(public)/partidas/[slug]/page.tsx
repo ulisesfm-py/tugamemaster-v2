@@ -27,6 +27,7 @@ import { detallePartida } from '@/modules/games/queries';
 import { slugDeSistema } from '@/modules/games/sistemas';
 import { formatearImporte } from '@/modules/payments/dinero';
 import { reputacionGm } from '@/modules/profiles/queries';
+import { accesoAlHilo } from '@/modules/threads/politica';
 import { saldoDe } from '@/modules/wallet/service';
 
 type Props = {
@@ -87,6 +88,14 @@ export default async function PartidaPage({ params, searchParams }: Props) {
   // Lo que se ensena no es siempre lo guardado: el cron cierra las partidas de
   // madrugada, y hasta que pasa una ya jugada sigue diciendo «publicada».
   const visible = estadoVisible(partida.status, partida.startsAt);
+
+  // El hilo se ofrece a quien puede entrar, con la misma regla que decide si
+  // entra: ensenar un enlace que lleva a una puerta cerrada es peor que no
+  // ensenarlo.
+  const hiloAbierto = accesoAlHilo(
+    { esGm: partida.esMia, reserva: partida.miReserva?.status ?? null },
+    { finPartida: partida.endsAt },
+  ).ok;
 
   const tipo = tipoDeMesa(partida);
   const experiencia = EXPERIENCIA[partida.experience];
@@ -198,13 +207,24 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 «inicia sesion para reservar» en una mesa ya jugada. */}
             <div className="mt-5">
               {partida.esMia ? (
-                <EnlaceBoton
-                  href={`/cuenta/partidas/${partida.id}`}
-                  variante="perfil"
-                  className="w-full"
-                >
-                  Gestionar mi partida
-                </EnlaceBoton>
+                <>
+                  <EnlaceBoton
+                    href={`/cuenta/partidas/${partida.id}`}
+                    variante="perfil"
+                    className="w-full"
+                  >
+                    Gestionar mi partida
+                  </EnlaceBoton>
+                  {hiloAbierto && partida.status !== 'DRAFT' && (
+                    <EnlaceBoton
+                      href={`/partidas/${partida.slug}/hilo`}
+                      variante="fantasma"
+                      className="mt-2 w-full"
+                    >
+                      Hilo de mesa
+                    </EnlaceBoton>
+                  )}
+                </>
               ) : visible !== 'PUBLISHED' ? (
                 <p className="text-muted-foreground text-sm">
                   {visible === 'COMPLETED'
@@ -222,6 +242,15 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                   <Aviso tono="exito" className="mb-3">
                     Tienes una plaza reservada.
                   </Aviso>
+                  {hiloAbierto && (
+                    <EnlaceBoton
+                      href={`/partidas/${partida.slug}/hilo`}
+                      variante="perfil"
+                      className="mb-3 w-full"
+                    >
+                      Hilo de mesa
+                    </EnlaceBoton>
+                  )}
                   <ReservarBoton
                     accion={cancelarReservaAction}
                     texto="Liberar mi plaza"
