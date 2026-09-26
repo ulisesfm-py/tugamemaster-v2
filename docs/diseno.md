@@ -1418,3 +1418,103 @@ sin que nada fallara.
 Las tres cuelgan del pie, el sistema de una partida enlaza a su página, y la
 portada manda a `/para-game-masters`. Una página nueva a la que no se llega
 desde ningún sitio no existe.
+
+---
+
+# H · El hilo de mesa, construido
+
+Lo especificado en D1d, ya en pie. La forma acordada se sostuvo entera; lo que
+cambió fue cómo se guarda y qué se cuenta.
+
+## El hilo no tiene tabla
+
+D1d hablaba de dos tablas nuevas y son dos, pero ninguna es «el hilo». El hilo
+es la conversación de una partida y **se deriva de ella**: `ThreadMessage`
+cuelga de `Game`, y `ThreadRead` guarda hasta dónde ha leído cada uno.
+
+Esto resuelve gratis la pregunta incómoda de «el GM borra el hilo». Si el hilo
+fuera una fila con estado, borrarlo dejaría un tercer estado que mantener —
+¿existe y está vacío, o no existe?— y habría que decidir qué pasa si alguien
+escribe después. Sin fila, vaciar es vaciar: se borran los mensajes, y si
+alguien vuelve a escribir, el hilo vuelve a existir. **Vaciar no es cerrar.**
+
+## La denuncia no es una incidencia
+
+La tentación era reutilizar `Incident`, que ya tiene panel de administración y
+flujo de resolución. Se descartó: una incidencia está atada a una reserva y
+**retiene el pago al game master**. Un mensaje fuera de tono no puede bloquear
+dinero de nadie.
+
+Así que la denuncia vive en columnas del propio mensaje —quién, cuándo, por
+qué— y tiene su panel aparte en `/admin/hilos`. Descartarla limpia la marca en
+vez de guardar «revisada y desestimada»: existía para que alguien mirara, y ya
+se ha mirado. Si vuelve a hacer falta, se vuelve a denunciar.
+
+## Retirar marca; vaciar borra
+
+Parecen la misma operación y no lo son.
+
+Retirar un mensaje **no borra la fila**: se queda en su sitio con un «mensaje
+retirado». Quitarla dejaría un hueco en una conversación que otros ya leyeron,
+y el hueco se nota más que el aviso. El texto retirado, eso sí, no se sirve:
+esconderlo por CSS y mandarlo en el HTML sería no haberlo quitado.
+
+Vaciar el hilo **sí borra**, porque no queda conversación en la que dejar
+huecos. Va en dos pasos y apartado del resto, como toda acción que se lleva por
+delante lo que han escrito otros.
+
+## La campanita cuenta lo que falta por leer
+
+El primer intento contaba todos los mensajes ajenos del hilo, que es fácil con
+un `groupBy`. Pero eso le dice «4 mensajes nuevos» a quien ya leyó tres, y un
+aviso que exagera enseña a no mirar la campanita. Ahora se cuenta desde la
+marca de lectura de cada uno, con una consulta por mesa con novedades — que son
+pocas y están acotadas a cinco.
+
+Lo que uno mismo escribe no cuenta como novedad para uno mismo. Y no hay
+correo: **la campanita es todo el aviso del hilo**, como se decidió en D1d.
+
+## Quién no entra, y qué se le dice
+
+Quien no es de la mesa recibe **404**. No «no autorizado»: confirmar que el
+hilo existe ya es contar algo de una partida que no es suya.
+
+La excepción son los tres casos que se explican solos y se arreglan solos — el
+cobro sin confirmar, la plaza liberada, el hilo cerrado. Ahí callarse sería
+dejar a alguien de la mesa delante de una pared. `PENDING` se distingue a
+propósito de «no eres de la mesa»: no es que no tenga plaza, es que todavía no
+lo sabemos.
+
+El plazo se da como **fecha exacta** y no como cuenta atrás, por lo mismo que
+el plazo de cancelación.
+
+## El administrador no entra al hilo
+
+Lo enseñó una prueba de punta a punta que fallaba en el último paso: tras
+retirar un mensaje desde el panel, comprobaba el hilo **con la sesión del
+admin**, y recibía un 404. No era un fallo del panel, era el diseño
+funcionando: un admin ve el mensaje denunciado en `/admin/hilos`, con su
+contexto, y no necesita sentarse en la mesa para eso. La prueba volvió a la
+mesa a comprobarlo.
+
+## Y una prueba que medía la carrera, no el resultado
+
+La marca de lectura la pone el hilo al abrirse, con una acción aparte. La
+prueba navegaba y comprobaba la campanita inmediatamente, así que a veces
+ganaba la navegación y a veces la marca: lo que medía era quién llegaba
+primero. Ahora espera la respuesta de la acción antes de mirar. Es el tercer
+sitio donde aparece el mismo error nuestro — comprobar antes de que haya pasado
+lo que se comprueba.
+
+## Una página sin encabezado
+
+La pantalla de «aquí no puedes entrar» era un aviso suelto dentro de un `main`,
+sin un solo encabezado. Para quien navega con lector de pantalla, una página
+cuyo único contenido es un párrafo no ofrece nada a lo que saltar. Ahora el
+motivo va bajo un `h1` de verdad.
+
+## Dónde se llega desde
+
+Ficha de la partida, Mis reservas y ficha de gestión. El enlace se enseña con
+**la misma regla que decide si se entra**: un enlace que lleva a una puerta
+cerrada es peor que no tener enlace.
