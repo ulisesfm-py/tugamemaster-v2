@@ -26,6 +26,11 @@ test('un error de credenciales se explica sin sacarte del formulario', async ({
     'Email o contraseña incorrectos',
   );
   await expect(page).toHaveURL(/\/login/);
+
+  // El email se queda escrito y la contrasena no: equivocarse de contrasena no
+  // deberia costar tambien el email, y la contrasena no vuelve del servidor.
+  await expect(page.getByLabel('Email')).toHaveValue(USUARIOS.ana);
+  await expect(page.getByLabel('Contraseña')).toHaveValue('');
 });
 
 test('el registro dice la longitud mínima antes de enviar nada', async ({ page }) => {

@@ -51,7 +51,7 @@ export async function crearContinuacionAction(
     },
   );
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath('/cuenta/partidas');
 

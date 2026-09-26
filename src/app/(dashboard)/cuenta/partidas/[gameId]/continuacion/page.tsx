@@ -3,13 +3,11 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { PartidaForm } from '@/components/partida-form';
-import { Campo, CLASE_CONTROL } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { crearContinuacionAction } from '@/modules/campaigns/actions';
 import {
   numeroSiguiente,
   partidaTerminada,
-  RESUMEN_MAXIMO,
   tituloDeContinuacion,
 } from '@/modules/campaigns/politica';
 import { miPartida } from '@/modules/games/queries';
@@ -99,28 +97,12 @@ export default async function ContinuacionPage({ params }: Props) {
           accion={crearContinuacionAction}
           textoBoton="Crear la sesión"
           valores={valores}
-          extra={
-            <Campo
-              id="campaignSummary"
-              etiqueta="Sobre la campaña"
-              opcional
-              ayuda={
-                anterior.campaign
-                  ? 'Actualiza la descripción de la campaña. En blanco, se queda la que ya tenía.'
-                  : 'Esta es la primera continuación, así que aquí nace la campaña.'
-              }
-            >
-              <textarea
-                id="campaignSummary"
-                name="campaignSummary"
-                rows={3}
-                maxLength={RESUMEN_MAXIMO}
-                defaultValue={anterior.campaign?.summary ?? ''}
-                className={CLASE_CONTROL}
-                placeholder="De qué va la campaña en dos líneas. Es lo que se ve en su página pública."
-              />
-            </Campo>
-          }
+          campana={{
+            ayuda: anterior.campaign
+              ? 'Actualiza la descripción de la campaña. En blanco, se queda la que ya tenía.'
+              : 'Esta es la primera continuación, así que aquí nace la campaña.',
+            resumen: anterior.campaign?.summary ?? '',
+          }}
         />
       </div>
     </main>

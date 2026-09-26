@@ -1518,3 +1518,54 @@ motivo va bajo un `h1` de verdad.
 Ficha de la partida, Mis reservas y ficha de gestión. El enlace se enseña con
 **la misma regla que decide si se entra**: un enlace que lleva a una puerta
 cerrada es peor que no tener enlace.
+
+---
+
+# El formulario que perdía lo escrito
+
+Rellenas la ficha de una partida entera —doce campos—, pones una fecha pasada,
+y al enviar el formulario aparece el error… y los doce campos vacíos. A rellenar
+otra vez.
+
+**La causa no es nuestra validación, es React**: un formulario no controlado se
+vacía en cuanto termina su acción, tanto si fue bien como si no. Con el envío
+correcto no se nota, porque se navega a otra página. Con el envío rechazado se
+nota todo.
+
+La solución no es dejar de vaciarlo —eso exigiría renunciar a `action={}` y con
+ella a que el formulario funcione sin JavaScript—, sino **cambiar a qué se
+vacía**. La acción devuelve el `FormData` que acaba de recibir, cada campo lo
+toma como su nuevo valor por defecto, y cuando React vacía, vacía a lo que la
+persona había escrito. Funciona igual sin JavaScript, donde el envío es una
+petición normal y la página se vuelve a pintar con ese mismo estado.
+
+Vive en `loEscrito(estado)`, en `lib/acciones.ts`, y lo usan los cuatro
+formularios donde perder lo escrito dolía: la ficha de partida, el perfil, los
+artículos del blog y el acceso.
+
+## El desplegable necesitaba algo más
+
+Con lo anterior sobrevivían los campos de texto y las casillas, pero no el
+`select` de experiencia: mostraba la primera opción mientras la ayuda de debajo
+explicaba otra. React actualiza el valor por defecto de un `input` al
+repintarlo, pero en un `select` **no mueve el `selected` de la opción**, así que
+al vaciar volvía a la primera. Se arregla con un `key` que cambia con el valor:
+el desplegable se monta de nuevo y ya toma la opción elegida.
+
+Lo encontró una comprobación de los valores del formulario en el navegador, no
+la vista: en pantalla el error salía y los campos estaban llenos. Faltaba mirar
+el único que mentía.
+
+## La contraseña no vuelve
+
+En el formulario de acceso el eco es a mano y deja fuera la contraseña: no tiene
+por qué viajar de vuelta del servidor ni quedarse escrita en el HTML de la
+página, y el navegador ya la rellena solo. Se conservan el email y el nombre,
+que es lo que fastidia volver a escribir.
+
+## Y un campo que estaba en el sitio equivocado
+
+El resumen de campaña lo pintaba la página de continuación y se lo pasaba al
+formulario como `extra`. Así no podía recuperar lo escrito, porque quien conoce
+el estado de la acción es el formulario. Ahora es una propiedad suya, `campana`,
+y se comporta como los demás.

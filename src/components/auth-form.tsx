@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
+import { loEscrito } from '@/lib/acciones';
 import type { EstadoFormulario } from '@/modules/users/actions';
 
 /**
@@ -49,6 +50,11 @@ export function AuthForm({
 
   const esRegistro = modo === 'registro';
 
+  // Lo que se acababa de escribir. React vacia el formulario en cuanto termina
+  // la accion, y equivocarse de contrasena no deberia costar tambien el email.
+  // La accion devuelve el email y el nombre, nunca la contrasena.
+  const { texto } = loEscrito(estado);
+
   return (
     <div className="border-border bg-card rounded-sm border p-6 sm:p-8">
       <h1 className="font-heading text-foreground text-2xl font-extrabold">
@@ -67,6 +73,7 @@ export function AuthForm({
               id="name"
               name="name"
               type="text"
+              defaultValue={texto('name')}
               autoComplete="name"
               required
               className={CLASE_CONTROL}
@@ -79,6 +86,7 @@ export function AuthForm({
             id="email"
             name="email"
             type="email"
+            defaultValue={texto('email')}
             autoComplete="email"
             required
             className={CLASE_CONTROL}

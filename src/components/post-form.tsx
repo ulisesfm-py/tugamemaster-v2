@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
-import type { EstadoAccion } from '@/lib/acciones';
+import { loEscrito, type EstadoAccion } from '@/lib/acciones';
 import {
   CONTENIDO_MAXIMO,
   RESUMEN_MAXIMO,
@@ -41,6 +41,10 @@ export function PostForm({
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
+  // Un articulo son parrafos, no un campo: perderlos por un titulo corto es
+  // perder el trabajo de una tarde.
+  const { texto } = loEscrito(estado);
+
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {valores && <input type="hidden" name="postId" value={valores.id} />}
@@ -57,7 +61,7 @@ export function PostForm({
         <input
           id="title"
           name="title"
-          defaultValue={valores?.title ?? ''}
+          defaultValue={texto('title', valores?.title ?? '')}
           required
           minLength={TITULO_MINIMO}
           maxLength={TITULO_MAXIMO}
@@ -72,7 +76,7 @@ export function PostForm({
           name="excerpt"
           rows={2}
           maxLength={RESUMEN_MAXIMO}
-          defaultValue={valores?.excerpt ?? ''}
+          defaultValue={texto('excerpt', valores?.excerpt ?? '')}
           className={CLASE_CONTROL}
           placeholder="Lo que se lee en el listado. Si lo dejas en blanco, se usan las primeras líneas."
         />
@@ -89,7 +93,7 @@ export function PostForm({
           rows={18}
           required
           maxLength={CONTENIDO_MAXIMO}
-          defaultValue={valores?.content ?? ''}
+          defaultValue={texto('content', valores?.content ?? '')}
           className={`${CLASE_CONTROL} font-mono`}
         />
       </Campo>

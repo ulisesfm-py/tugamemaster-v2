@@ -33,7 +33,7 @@ export async function guardarPerfilJugadorAction(
     preferredStyles: listaDesdeTexto(formData.get('preferredStyles')),
   });
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath('/cuenta');
   revalidatePath(`/u/${session.user.slug}`);
@@ -57,7 +57,7 @@ export async function guardarPerfilGmAction(
     systems: listaDesdeTexto(formData.get('systems')),
   });
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath('/cuenta/gm');
   revalidatePath(`/gm/${session.user.slug}`);

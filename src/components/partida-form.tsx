@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
-import type { EstadoAccion } from '@/lib/acciones';
+import { loEscrito, type EstadoAccion } from '@/lib/acciones';
 import {
   ETIQUETAS,
   EXPERIENCIA,
@@ -15,6 +15,7 @@ import {
   type Experiencia,
   type Grupo,
 } from '@/modules/games/ficha';
+import { RESUMEN_MAXIMO } from '@/modules/campaigns/politica';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
@@ -88,7 +89,7 @@ export function PartidaForm({
   textoBoton,
   valores,
   idiomasPorDefecto = [],
-  extra,
+  campana,
 }: {
   accion: Accion;
   textoBoton: string;
@@ -98,23 +99,42 @@ export function PartidaForm({
    * ahi mandan los de la mesa, que es justo el dato que se quiso separar.
    */
   idiomasPorDefecto?: string[];
-  /** Campos propios de quien usa el formulario, antes del boton de guardar. */
-  extra?: React.ReactNode;
+  /**
+   * Campo de campana, solo al continuar una partida.
+   *
+   * Vive aqui y no lo pinta la pagina porque tiene que recuperar lo escrito
+   * igual que los demas, y eso solo puede hacerlo quien conoce el estado de la
+   * accion.
+   */
+  campana?: { ayuda: string; resumen: string };
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
+
+  // React vacia un formulario no controlado en cuanto termina su accion, asi
+  // que cada campo toma su valor por defecto de lo que se acababa de enviar:
+  // cuando React vacie, vaciara a lo que la persona habia escrito.
+  const { texto, marcadas } = loEscrito(estado);
 
   const duracion = valores
     ? Math.round((valores.endsAt.getTime() - valores.startsAt.getTime()) / 3_600_000)
     : 4;
 
-  const idiomas = valores
-    ? valores.languages
-    : idiomasPorDefecto.length > 0
-      ? idiomasPorDefecto
-      : ['es'];
+  const idiomas = marcadas(
+    'languages',
+    valores
+      ? valores.languages
+      : idiomasPorDefecto.length > 0
+        ? idiomasPorDefecto
+        : ['es'],
+  );
 
-  const experiencia: Experiencia = valores?.experience ?? 'ABIERTA';
-  const etiquetas = valores?.tags ?? [];
+  const enviada = texto('experience');
+  const experiencia: Experiencia =
+    enviada in EXPERIENCIA
+      ? (enviada as Experiencia)
+      : (valores?.experience ?? 'ABIERTA');
+
+  const etiquetas = marcadas('tags', valores?.tags ?? []);
 
   return (
     <form action={formAction} className="flex flex-col gap-8">
@@ -129,7 +149,7 @@ export function PartidaForm({
           <input
             id="title"
             name="title"
-            defaultValue={valores?.title ?? ''}
+            defaultValue={texto('title', valores?.title ?? '')}
             required
             className={CLASE_CONTROL}
             placeholder="El faro de Finisterre"
@@ -140,7 +160,7 @@ export function PartidaForm({
           <input
             id="system"
             name="system"
-            defaultValue={valores?.system ?? ''}
+            defaultValue={texto('system', valores?.system ?? '')}
             required
             className={CLASE_CONTROL}
             placeholder="D&D 5e"
@@ -156,7 +176,7 @@ export function PartidaForm({
             id="description"
             name="description"
             rows={7}
-            defaultValue={valores?.description ?? ''}
+            defaultValue={texto('description', valores?.description ?? '')}
             required
             className={CLASE_CONTROL}
           />
@@ -177,7 +197,14 @@ export function PartidaForm({
           etiqueta="Experiencia que se presupone"
           ayuda={EXPERIENCIA[experiencia].explicacion}
         >
+          {/* El `key` no es decoracion. React actualiza el valor por defecto de
+              un `input` al repintarlo, pero en un `select` no mueve el
+              `selected` de la opcion: al recuperar lo enviado, el desplegable
+              se quedaba en la primera opcion mientras la ayuda de debajo
+              explicaba otra. Cambiar la clave lo monta de nuevo, y entonces si
+              toma la opcion que la persona habia elegido. */}
           <select
+            key={experiencia}
             id="experience"
             name="experience"
             defaultValue={experiencia}
@@ -222,7 +249,10 @@ export function PartidaForm({
             min="6"
             max="99"
             step="1"
-            defaultValue={valores?.minAge ?? ''}
+            defaultValue={texto(
+              'minAge',
+              valores?.minAge == null ? '' : String(valores.minAge),
+            )}
             className={`${CLASE_CONTROL} w-32`}
             placeholder="16"
           />
@@ -262,7 +292,7 @@ export function PartidaForm({
               id="startsAt"
               name="startsAt"
               type="datetime-local"
-              defaultValue={valores ? paraInput(valores.startsAt) : ''}
+              defaultValue={texto('startsAt', valores ? paraInput(valores.startsAt) : '')}
               required
               className={CLASE_CONTROL}
             />
@@ -276,7 +306,7 @@ export function PartidaForm({
               min="1"
               max="12"
               step="1"
-              defaultValue={duracion}
+              defaultValue={texto('durationHours', String(duracion))}
               required
               className={CLASE_CONTROL}
             />
@@ -290,7 +320,7 @@ export function PartidaForm({
               min="1"
               max="12"
               step="1"
-              defaultValue={valores?.seatsTotal ?? 4}
+              defaultValue={texto('seatsTotal', String(valores?.seatsTotal ?? 4))}
               required
               className={CLASE_CONTROL}
             />
@@ -301,7 +331,10 @@ export function PartidaForm({
               id="price"
               name="price"
               inputMode="decimal"
-              defaultValue={valores ? (valores.priceCents / 100).toFixed(2) : ''}
+              defaultValue={texto(
+                'price',
+                valores ? (valores.priceCents / 100).toFixed(2) : '',
+              )}
               required
               className={CLASE_CONTROL}
               placeholder="15"
@@ -310,7 +343,24 @@ export function PartidaForm({
         </div>
       </fieldset>
 
-      {extra}
+      {campana && (
+        <Campo
+          id="campaignSummary"
+          etiqueta="Sobre la campaña"
+          opcional
+          ayuda={campana.ayuda}
+        >
+          <textarea
+            id="campaignSummary"
+            name="campaignSummary"
+            rows={3}
+            maxLength={RESUMEN_MAXIMO}
+            defaultValue={texto('campaignSummary', campana.resumen)}
+            className={CLASE_CONTROL}
+            placeholder="De qué va la campaña en dos líneas. Es lo que se ve en su página pública."
+          />
+        </Campo>
+      )}
 
       {estado && 'error' in estado && <Aviso tono="error">{estado.error}</Aviso>}
       {estado && 'ok' in estado && <Aviso tono="exito">Guardado.</Aviso>}

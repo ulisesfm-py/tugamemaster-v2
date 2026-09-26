@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
-import type { EstadoAccion } from '@/lib/acciones';
+import { loEscrito, type EstadoAccion } from '@/lib/acciones';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
@@ -40,13 +40,17 @@ export function PerfilJugadorForm({
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
+  // React vacia el formulario al terminar la accion: cada campo toma su valor
+  // por defecto de lo enviado para no perder lo escrito cuando algo falla.
+  const { texto } = loEscrito(estado);
+
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <Campo id="name" etiqueta="Nombre">
         <input
           id="name"
           name="name"
-          defaultValue={valores.name}
+          defaultValue={texto('name', valores.name)}
           required
           className={CLASE_CONTROL}
         />
@@ -62,7 +66,7 @@ export function PerfilJugadorForm({
           id="bio"
           name="bio"
           rows={4}
-          defaultValue={valores.bio ?? ''}
+          defaultValue={texto('bio', valores.bio ?? '')}
           className={CLASE_CONTROL}
         />
       </Campo>
@@ -76,7 +80,7 @@ export function PerfilJugadorForm({
         <input
           id="preferredSystems"
           name="preferredSystems"
-          defaultValue={valores.preferredSystems.join(', ')}
+          defaultValue={texto('preferredSystems', valores.preferredSystems.join(', '))}
           className={CLASE_CONTROL}
         />
       </Campo>
@@ -90,7 +94,7 @@ export function PerfilJugadorForm({
         <input
           id="preferredStyles"
           name="preferredStyles"
-          defaultValue={valores.preferredStyles.join(', ')}
+          defaultValue={texto('preferredStyles', valores.preferredStyles.join(', '))}
           className={CLASE_CONTROL}
         />
       </Campo>
@@ -119,6 +123,10 @@ export function PerfilGmForm({
 }) {
   const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
 
+  // React vacia el formulario al terminar la accion: cada campo toma su valor
+  // por defecto de lo enviado para no perder lo escrito cuando algo falla.
+  const { texto } = loEscrito(estado);
+
   return (
     <form action={formAction} className="flex flex-col gap-8">
       <fieldset className="flex flex-col gap-4">
@@ -134,7 +142,7 @@ export function PerfilGmForm({
           <input
             id="headline"
             name="headline"
-            defaultValue={valores?.headline ?? ''}
+            defaultValue={texto('headline', valores?.headline ?? '')}
             required
             minLength={10}
             maxLength={120}
@@ -153,7 +161,7 @@ export function PerfilGmForm({
             id="about"
             name="about"
             rows={6}
-            defaultValue={valores?.about ?? ''}
+            defaultValue={texto('about', valores?.about ?? '')}
             className={CLASE_CONTROL}
           />
         </Campo>
@@ -166,7 +174,7 @@ export function PerfilGmForm({
           <input
             id="languages"
             name="languages"
-            defaultValue={valores?.languages.join(', ') ?? 'es'}
+            defaultValue={texto('languages', valores?.languages.join(', ') ?? 'es')}
             required
             className={CLASE_CONTROL}
           />
@@ -194,7 +202,10 @@ export function PerfilGmForm({
             min="0"
             max="60"
             step="1"
-            defaultValue={valores?.yearsExperience ?? ''}
+            defaultValue={texto(
+              'yearsExperience',
+              valores?.yearsExperience == null ? '' : String(valores.yearsExperience),
+            )}
             className={`${CLASE_CONTROL} sm:w-32`}
           />
         </Campo>
@@ -208,7 +219,7 @@ export function PerfilGmForm({
           <input
             id="systems"
             name="systems"
-            defaultValue={valores?.systems.join(', ') ?? ''}
+            defaultValue={texto('systems', valores?.systems.join(', ') ?? '')}
             className={CLASE_CONTROL}
           />
         </Campo>

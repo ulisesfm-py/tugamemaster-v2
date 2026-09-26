@@ -52,7 +52,7 @@ export async function crearPostAction(
   if (!admin) return { error: 'No tienes permiso' };
 
   const resultado = await crearPost(admin.id, datosDelPost(formData));
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidar();
   redirect(`/admin/blog/${resultado.postId}`);
@@ -68,7 +68,7 @@ export async function actualizarPostAction(
   const postId = String(formData.get('postId') ?? '');
   const resultado = await actualizarPost(admin.id, postId, datosDelPost(formData));
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidar(resultado.slug);
   revalidatePath(`/admin/blog/${postId}`);

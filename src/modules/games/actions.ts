@@ -44,7 +44,9 @@ export async function crearPartidaAction(
 
   const resultado = await crearPartida(session.user.id, datosDelFormulario(formData));
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  // Se devuelve lo enviado: una ficha de partida tiene doce campos y perderlos
+  // todos por una fecha mal puesta es motivo de abandonar a la mitad.
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath('/cuenta/partidas');
   redirect(`/cuenta/partidas/${resultado.gameId}`);
@@ -65,7 +67,7 @@ export async function actualizarPartidaAction(
     datosDelFormulario(formData),
   );
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath('/cuenta/partidas');
   revalidatePath(`/cuenta/partidas/${gameId}`);

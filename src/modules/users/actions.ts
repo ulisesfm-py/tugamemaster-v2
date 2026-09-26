@@ -15,7 +15,24 @@ import { registrarUsuario } from './service';
  * pueda mostrarlo conservando lo que el usuario habia escrito.
  */
 
-export type EstadoFormulario = { error: string } | null;
+export type EstadoFormulario = { error: string; enviado?: FormData } | null;
+
+/**
+ * Lo que puede volver al formulario cuando algo falla.
+ *
+ * **La contrasena no.** No tiene por que viajar de vuelta ni quedarse escrita
+ * en el HTML de la pagina, y el navegador ya la rellena solo.
+ */
+function sinContrasena(formData: FormData): FormData {
+  const eco = new FormData();
+
+  for (const campo of ['name', 'email']) {
+    const valor = formData.get(campo);
+    if (typeof valor === 'string') eco.set(campo, valor);
+  }
+
+  return eco;
+}
 
 const DESTINO_TRAS_ENTRAR = '/dashboard';
 
@@ -30,13 +47,16 @@ export async function registrarAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'Revisa los datos' };
+    return {
+      error: parsed.error.issues[0]?.message ?? 'Revisa los datos',
+      enviado: sinContrasena(formData),
+    };
   }
 
   const resultado = await registrarUsuario(parsed.data);
 
   if (!resultado.ok) {
-    return { error: resultado.mensaje };
+    return { error: resultado.mensaje, enviado: sinContrasena(formData) };
   }
 
   // Alta correcta: se inicia sesion directamente, sin pedir las credenciales
@@ -69,7 +89,7 @@ export async function entrarAction(
   const password = formData.get('password');
 
   if (typeof email !== 'string' || typeof password !== 'string') {
-    return { error: 'Rellena los dos campos' };
+    return { error: 'Rellena los dos campos', enviado: sinContrasena(formData) };
   }
 
   try {
@@ -84,7 +104,10 @@ export async function entrarAction(
     if (error instanceof AuthError) {
       // Mensaje deliberadamente ambiguo: decir cual de los dos campos falla
       // permitiria averiguar que emails tienen cuenta.
-      return { error: 'Email o contraseña incorrectos' };
+      return {
+        error: 'Email o contraseña incorrectos',
+        enviado: sinContrasena(formData),
+      };
     }
 
     throw error;
