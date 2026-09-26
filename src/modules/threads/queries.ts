@@ -15,6 +15,9 @@ import { accesoDe } from './service';
 
 const DIA_MS = 86_400_000;
 
+/** Cuantas mesas con novedades se cuentan. La campanita no es una bandeja. */
+const MAXIMO_HILOS = 5;
+
 export type MensajeDelHilo = {
   id: string;
   body: string;
@@ -129,6 +132,9 @@ export async function hilosConNovedades(
         { bookings: { some: { userId, status: { in: ['PAID', 'COMPLETED'] } } } },
       ],
     },
+    // La mesa mas cercana primero: si hay varias con mensajes, la de pasado
+    // manana importa mas que la del mes que viene.
+    orderBy: { startsAt: 'asc' },
     select: { id: true, slug: true, title: true },
   });
 
@@ -164,20 +170,48 @@ export async function hilosConNovedades(
 
   if (conNovedad.size === 0) return [];
 
-  // Cuantos hay sin leer, para poder decir "3 mensajes" y no solo "hay algo".
-  const cuentas = await db.threadMessage.groupBy({
-    by: ['gameId'],
-    where: {
-      gameId: { in: [...conNovedad] },
-      authorId: { not: userId },
-      removedAt: null,
+  // Cuantos hay **sin leer**, no cuantos hay: decir "4 mensajes nuevos" a quien
+  // ya leyo tres es la clase de aviso que ensena a no mirar la campanita.
+  return Promise.all(
+    partidas
+      .filter((p) => conNovedad.has(p.id))
+      .slice(0, MAXIMO_HILOS)
+      .map(async (p) => {
+        const leido = leidoHasta.get(p.id);
+
+        return {
+          slug: p.slug,
+          title: p.title,
+          mensajes: await db.threadMessage.count({
+            where: {
+              gameId: p.id,
+              authorId: { not: userId },
+              removedAt: null,
+              ...(leido ? { createdAt: { gt: leido } } : {}),
+            },
+          }),
+        };
+      }),
+  );
+}
+
+/** Mensajes denunciados, para que un administrador los mire. */
+export async function denunciasParaAdmin() {
+  return db.threadMessage.findMany({
+    // Los mas antiguos primero: una denuncia que lleva dos dias esperando
+    // importa mas que la que acaba de entrar.
+    where: { reportedAt: { not: null }, removedAt: null },
+    orderBy: { reportedAt: 'asc' },
+    take: 50,
+    select: {
+      id: true,
+      body: true,
+      createdAt: true,
+      reportedAt: true,
+      reportReason: true,
+      author: { select: { name: true, slug: true } },
+      reportedBy: { select: { name: true, slug: true } },
+      game: { select: { title: true, slug: true } },
     },
-    _count: { _all: true },
   });
-
-  const sinLeer = new Map(cuentas.map((c) => [c.gameId, c._count._all]));
-
-  return partidas
-    .filter((p) => conNovedad.has(p.id))
-    .map((p) => ({ slug: p.slug, title: p.title, mensajes: sinLeer.get(p.id) ?? 1 }));
 }

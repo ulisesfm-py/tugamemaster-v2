@@ -2,6 +2,7 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { DIAS_PARA_VALORAR } from '@/modules/reviews/politica';
+import { hilosConNovedades } from '@/modules/threads/queries';
 
 /**
  * Centro de avisos.
@@ -166,19 +167,41 @@ async function avisosDeGm(userId: string, ahora: Date): Promise<Aviso[]> {
 }
 
 /**
+ * Mensajes sin leer en los hilos de mesa.
+ *
+ * No distingue entre jugar y dirigir porque el hilo tampoco: en una mesa se
+ * habla, y da igual desde que lado. Es ademas el unico aviso del hilo, que
+ * por decision de diseno no manda correos.
+ */
+async function avisosDeHilos(userId: string, ahora: Date): Promise<Aviso[]> {
+  const hilos = await hilosConNovedades(userId, ahora);
+
+  return hilos.map((h) => ({
+    id: `hilo:${h.slug}`,
+    texto:
+      h.mensajes === 1
+        ? `Un mensaje nuevo en ${h.title}`
+        : `${h.mensajes} mensajes nuevos en ${h.title}`,
+    href: `/partidas/${h.slug}/hilo`,
+    tono: 'accion' as const,
+  }));
+}
+
+/**
  * Todo lo que le espera a un usuario, en un solo sitio.
  *
  * Un mismo usuario puede ser jugador y game master: se juntan las dos listas,
  * que es mas util que obligarle a elegir con que sombrero mira.
  */
 export async function avisosDe(userId: string, ahora = new Date()): Promise<Aviso[]> {
-  const [jugador, gm] = await Promise.all([
+  const [jugador, gm, hilos] = await Promise.all([
     avisosDeJugador(userId, ahora),
     avisosDeGm(userId, ahora),
+    avisosDeHilos(userId, ahora),
   ]);
 
   // Las alertas primero: son las que cuestan dinero si se ignoran.
   const peso = { alerta: 0, accion: 1, aviso: 2 };
 
-  return [...gm, ...jugador].sort((a, b) => peso[a.tono] - peso[b.tono]);
+  return [...gm, ...jugador, ...hilos].sort((a, b) => peso[a.tono] - peso[b.tono]);
 }

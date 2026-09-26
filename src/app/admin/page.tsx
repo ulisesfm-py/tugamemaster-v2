@@ -51,12 +51,13 @@ export default async function AdminPage() {
   // puede depender de una sola capa.
   if (!session?.user?.isAdmin) notFound();
 
-  const [incidenciasAbiertas, borradores, pagosBloqueados, saldoPendiente] =
+  const [incidenciasAbiertas, borradores, pagosBloqueados, saldoPendiente, denuncias] =
     await Promise.all([
       db.incident.count({ where: { status: 'OPEN' } }),
       db.post.count({ where: { status: { not: 'PUBLISHED' } } }),
       db.payout.count({ where: { status: { in: ['BLOCKED', 'FAILED'] } } }),
       saldoPendienteTotal(),
+      db.threadMessage.count({ where: { reportedAt: { not: null }, removedAt: null } }),
     ]);
 
   return (
@@ -76,6 +77,17 @@ export default async function AdminPage() {
           distintivo={
             incidenciasAbiertas > 0 ? (
               <Estado tono="espera">{incidenciasAbiertas} sin resolver</Estado>
+            ) : undefined
+          }
+        />
+
+        <Atajo
+          href="/admin/hilos"
+          titulo="Mensajes denunciados"
+          descripcion="Lo que alguien ha marcado en el hilo de una partida. El game master no expulsa: decide un admin."
+          distintivo={
+            denuncias > 0 ? (
+              <Estado tono="espera">{denuncias} sin revisar</Estado>
             ) : undefined
           }
         />

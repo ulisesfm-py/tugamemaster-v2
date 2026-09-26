@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 
 import {
   denunciarMensaje,
+  descartarDenuncia,
   escribirMensaje,
   marcarLeido,
   retirarMensaje,
@@ -84,6 +85,24 @@ export async function denunciarMensajeAction(
   revalidatePath('/admin/hilos');
 
   return { ok: true, mensaje: 'Lo revisará un administrador.' };
+}
+
+export async function descartarDenunciaAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
+
+  const resultado = await descartarDenuncia(String(formData.get('messageId') ?? ''), {
+    esAdmin: session.user.isAdmin === true,
+  });
+
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  revalidatePath('/admin/hilos');
+
+  return { ok: true, mensaje: 'Denuncia descartada.' };
 }
 
 export async function vaciarHiloAction(

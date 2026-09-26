@@ -133,3 +133,90 @@ test('el game master vacía el hilo y el hilo sigue existiendo', async ({ page }
   await page.getByRole('button', { name: 'Enviar' }).click();
   await expect(page.getByText('Empezamos de cero.')).toBeVisible();
 });
+
+test('un mensaje nuevo avisa en la campanita y deja de avisar al leerlo', async ({
+  page,
+}) => {
+  const partida = await escenario.crearPartida('La del aviso');
+  await escenario.crearReserva(partida.id, USUARIOS.ana, 'PAID');
+
+  await entrarComo(page, USUARIOS.gm);
+  await page.goto(`/partidas/${partida.slug}/hilo`);
+  await page.getByLabel('Escribe en el hilo').fill('Cambio de hora: media hora antes.');
+  await page.getByRole('button', { name: 'Enviar' }).click();
+  await expect(page.getByText('Cambio de hora: media hora antes.')).toBeVisible();
+
+  await salir(page);
+  await entrarComo(page, USUARIOS.ana);
+  await page.goto('/dashboard');
+
+  // El hilo no manda correos: este es todo su aviso.
+  await page.getByRole('button', { name: /^Avisos/ }).click();
+
+  // La marca de lectura la pone el hilo al abrirse, con una accion aparte.
+  // Se espera a que llegue: si no, lo que se comprobaria despues es quien
+  // gana la carrera, no que el aviso se apague.
+  const marcado = page.waitForResponse(
+    (r) =>
+      r.request().method() === 'POST' &&
+      r.url().includes(`/partidas/${partida.slug}/hilo`),
+  );
+
+  await page
+    .getByRole('menuitem', { name: `Un mensaje nuevo en ${partida.title}` })
+    .click();
+  await page.waitForURL((url) => url.pathname === `/partidas/${partida.slug}/hilo`);
+  await marcado;
+
+  // Leer el hilo apaga el aviso; si siguiera encendido, la campanita
+  // ensenaria a no mirarla.
+  await page.goto('/dashboard');
+  await page.getByRole('button', { name: /^Avisos/ }).click();
+  await expect(
+    page.getByRole('menuitem', { name: new RegExp(partida.title) }),
+  ).toHaveCount(0);
+});
+
+test('una denuncia llega al panel de administración y allí se retira', async ({
+  page,
+}) => {
+  const partida = await escenario.crearPartida('La del mensaje denunciado');
+  await escenario.crearReserva(partida.id, USUARIOS.ana, 'PAID');
+
+  await entrarComo(page, USUARIOS.ana);
+  await page.goto(`/partidas/${partida.slug}/hilo`);
+  await page.getByLabel('Escribe en el hilo').fill('Un mensaje fuera de tono.');
+  await page.getByRole('button', { name: 'Enviar' }).click();
+  await expect(page.getByText('Un mensaje fuera de tono.')).toBeVisible();
+
+  // El GM no expulsa ni borra: denuncia, como todo el mundo.
+  await salir(page);
+  await entrarComo(page, USUARIOS.gm);
+  await page.goto(`/partidas/${partida.slug}/hilo`);
+  await page.getByRole('button', { name: 'Denunciar' }).click();
+  await page
+    .getByLabel('¿Qué pasa con este mensaje?')
+    .fill('Se pasa de tono con la mesa.');
+  await page.getByRole('button', { name: 'Enviar denuncia' }).click();
+
+  // El acuse de la accion no sobrevive a la revalidacion, asi que se comprueba
+  // el estado ya guardado: el mensaje aparece marcado para todo el que lo lea.
+  await expect(page.getByText('Denunciado. Lo revisa un administrador.')).toBeVisible();
+
+  await salir(page);
+  await entrarComo(page, USUARIOS.admin);
+  await page.goto('/admin/hilos');
+
+  const caso = page.getByRole('listitem').filter({ hasText: partida.title });
+  await expect(caso.getByText('Se pasa de tono con la mesa.')).toBeVisible();
+  await caso.getByRole('button', { name: 'Retirar el mensaje' }).click();
+
+  // La comprobacion vuelve a la mesa, porque un administrador no entra en el
+  // hilo: modera desde el panel, donde ve el mensaje sin ser de la partida.
+  await salir(page);
+  await entrarComo(page, USUARIOS.gm);
+  await page.goto(`/partidas/${partida.slug}/hilo`);
+
+  await expect(page.getByText('Un mensaje fuera de tono.')).toHaveCount(0);
+  await expect(page.getByText('Mensaje retirado.')).toBeVisible();
+});

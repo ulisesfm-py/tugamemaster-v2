@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { pedirResenas, recordarPartidas } from '@/modules/notifications/tareas';
 import { cerrarPartidas, pagarGms } from '@/modules/payments/payouts';
+import { limpiarHilos } from '@/modules/threads/tareas';
 
 /**
  * Tareas diarias.
@@ -27,6 +28,9 @@ const TAREAS = [
   { nombre: 'pagar-gms', ejecutar: pagarGms },
   { nombre: 'recordar-partidas', ejecutar: recordarPartidas },
   { nombre: 'pedir-resenas', ejecutar: pedirResenas },
+  // La ultima porque no la necesita nadie: solo recoge hilos que ya estaban
+  // cerrados para sus mesas, asi que puede esperar a que pase lo que importa.
+  { nombre: 'limpiar-hilos', ejecutar: limpiarHilos },
 ] as const;
 
 async function ejecutarTareas(): Promise<Response> {

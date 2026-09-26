@@ -181,6 +181,27 @@ export async function denunciarMensaje(
 }
 
 /**
+ * Un administrador descarta una denuncia sin retirar el mensaje.
+ *
+ * Se limpia la marca en vez de guardar un "revisada y desestimada": la
+ * denuncia existe para que alguien mire, y una vez mirada no aporta nada
+ * seguir colgada del mensaje. Si vuelve a hacer falta, se vuelve a denunciar.
+ */
+export async function descartarDenuncia(
+  messageId: string,
+  quien: { esAdmin: boolean },
+): Promise<Resultado> {
+  if (!quien.esAdmin) return { ok: false, mensaje: 'Esto lo revisa un administrador' };
+
+  await db.threadMessage.update({
+    where: { id: messageId },
+    data: { reportedById: null, reportedAt: null, reportReason: null },
+  });
+
+  return { ok: true };
+}
+
+/**
  * El game master vacia el hilo.
  *
  * Vaciar no es cerrar: si alguien vuelve a escribir, el hilo vuelve a existir.
