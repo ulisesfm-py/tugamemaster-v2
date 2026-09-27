@@ -1,6 +1,8 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { PartidaCard } from '@/components/partida-card';
+import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
 import { RepartoEjemplo } from '@/components/reparto-ejemplo';
 import { COMISION_PUNTOS_BASICOS } from '@/modules/payments/dinero';
@@ -60,7 +62,34 @@ export default async function Portada() {
   return (
     <main>
       {/* ── Titular ───────────────────────────────────────────── */}
-      <section className="border-border from-accent/10 to-background border-b bg-gradient-to-b">
+      {/* Sin lamina queda el degradado; con lamina, la foto a sangre bajo un
+          velo oscuro. El velo no es decoracion: el titular tiene que leerse
+          sobre cualquier imagen que se ponga aqui, y una foto clara sin velo
+          deja el texto ilegible. */}
+      <section
+        className={`border-border relative isolate border-b ${
+          PORTADA ? 'bg-background' : 'from-accent/10 to-background bg-gradient-to-b'
+        }`}
+      >
+        {PORTADA && (
+          <>
+            <Image
+              src={PORTADA.src}
+              // Decorativa: lo que cuenta la portada lo dice el titular.
+              alt=""
+              fill
+              sizes="100vw"
+              priority
+              className="-z-10 object-cover"
+              style={{ objectPosition: PORTADA.posicion ?? 'center' }}
+            />
+            <div
+              aria-hidden
+              className="from-background/95 via-background/75 to-background/45 absolute inset-0 -z-10 bg-gradient-to-r"
+            />
+          </>
+        )}
+
         <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
           <h1 className="font-heading text-foreground max-w-3xl text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-6xl">
             Una silla libre en una buena mesa

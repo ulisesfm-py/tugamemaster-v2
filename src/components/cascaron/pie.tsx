@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { Logotipo } from '@/components/marca/logotipo';
+
 /**
  * El pie.
  *
@@ -42,8 +44,8 @@ export function PieDePagina() {
       <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="flex flex-wrap gap-x-12 gap-y-8">
           <div className="min-w-[14rem] flex-1">
-            <p className="font-heading text-foreground text-base font-extrabold">
-              TuGameMaster
+            <p className="text-foreground">
+              <Logotipo tamano={24} />
             </p>
             <p className="text-muted-foreground mt-2 max-w-xs text-sm">
               Mesas de rol dirigidas por game masters, con tu plaza pagada y garantizada.

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { Logotipo } from '@/components/marca/logotipo';
+
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { avisosDe } from '@/modules/notifications/avisos';
@@ -54,9 +56,9 @@ export async function Cabecera() {
 
         <Link
           href="/"
-          className="font-heading text-foreground hover:text-primary focus-visible:ring-ring shrink-0 rounded-sm text-base font-extrabold tracking-tight whitespace-nowrap transition focus-visible:ring-2 focus-visible:outline-none sm:text-lg"
+          className="text-foreground hover:text-primary focus-visible:ring-ring shrink-0 rounded-sm transition focus-visible:ring-2 focus-visible:outline-none"
         >
-          TuGameMaster
+          <Logotipo compacto />
         </Link>
 
         <nav aria-label="Principal" className="hidden gap-5 text-sm sm:flex">

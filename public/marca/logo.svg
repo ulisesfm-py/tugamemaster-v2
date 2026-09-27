@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="TuGameMaster">
+  <!--
+    El emblema de la casa: un d20 visto de frente.
+
+    Va con colores fijos y no con `currentColor` porque se sirve como fichero y
+    se carga como imagen, donde no hay color heredado del que tirar. Son los
+    tokens `primary` (#e2622a) y `background` (#17120e) de la paleta Brasa.
+    Ojo al tocar este comentario: dos guiones seguidos dentro de un comentario
+    de XML invalidan el fichero entero y el navegador no pinta nada.
+
+    Para cambiarlo, sustituye este fichero. Ver docs/marca.md.
+  -->
+  <path
+    d="M16 1.5 28.6 8.75v14.5L16 30.5 3.4 23.25V8.75z"
+    fill="#e2622a"
+  />
+  <g fill="none" stroke="#17120e" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M16 9 23 21.5H9z" stroke-width="2.2" />
+    <path d="M16 9V2.2M23 21.5l5.2 2.6M9 21.5l-5.2 2.6" stroke-width="1.6" />
+  </g>
+</svg>

@@ -1569,3 +1569,47 @@ El resumen de campaña lo pintaba la página de continuación y se lo pasaba al
 formulario como `extra`. Así no podía recuperar lo escrito, porque quien conoce
 el estado de la acción es el formulario. Ahora es una propiedad suya, `campana`,
 y se comporta como los demás.
+
+---
+
+# La marca: logotipo y lámina
+
+La web no tenía ni logotipo ni imagen en la portada, y el icono de la pestaña
+seguía siendo el de Next. Ahora hay un sitio para las tres cosas y cambiarlas es
+sustituir un fichero. Las instrucciones están en `docs/marca.md`.
+
+**Van en `public/marca/`, no en el Blob.** Al Blob suben los usuarios lo suyo
+—avatares, láminas de partida, portadas del blog—, que cambia solo y no es
+nuestro. La marca cambia una vez al año, así que conviene que viaje con el
+código: versionada, sin depender de que responda un servicio externo y sin
+posibilidad de que alguien la borre desde un panel.
+
+`src/lib/marca.ts` declara las dos y **las dos admiten `null`**, que además era
+el estado anterior: sin logotipo se escribe el nombre con la tipografía de la
+casa, y sin lámina la portada usa el degradado. El caso sin imagen no es un
+hueco a la espera de arte, es un caso terminado.
+
+## El velo no es decoración
+
+Una foto en la portada es lo más fácil de estropear: el titular tiene que leerse
+encima, y no se sabe qué foto pondrá alguien dentro de un año. Por eso la lámina
+va siempre bajo un degradado oscuro que protege el lado del texto. Se construyó
+con la lámina puesta, no en abstracto, para poder mirar el contraste real.
+
+## Dos cosas que solo se ven mirando
+
+**El logotipo no se pintaba.** El comentario del SVG explicaba de dónde salían
+los colores y nombraba los tokens `--primary` y `--background`. Dos guiones
+seguidos dentro de un comentario de XML invalidan el fichero entero, así que el
+navegador no pintaba nada. En la cabecera quedaba un cuadrito roto que a tamaño
+pequeño pasaba por un logotipo.
+
+**Y dejaba la cabecera sin sitio.** Con el emblema al lado del nombre, en un
+teléfono ya no cabía el botón de crear cuenta y se salía de la pantalla. En
+pantalla estrecha se queda solo el emblema; el nombre sigue ahí en `sr-only`,
+porque quien escucha la página necesita saber a dónde lleva ese enlace.
+
+## De paso
+
+Fuera el favicon de Next y los cinco SVG de ejemplo que dejó
+`create-next-app` en `public/`. No los usaba nadie.
