@@ -1,21 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="TuGameMaster">
   <!--
-    El emblema de la casa: un d20 visto de frente.
+    El emblema de la casa: un d20 con una brasa dentro.
 
     Va con colores fijos y no con `currentColor` porque se sirve como fichero y
     se carga como imagen, donde no hay color heredado del que tirar. Son los
-    tokens `primary` (#e2622a) y `background` (#17120e) de la paleta Brasa.
+    tokens `primary` (#e2622a), `accent` (#c9973f) y `background` (#17120e) de
+    la paleta Brasa.
+
     Ojo al tocar este comentario: dos guiones seguidos dentro de un comentario
     de XML invalidan el fichero entero y el navegador no pinta nada.
 
     Para cambiarlo, sustituye este fichero. Ver docs/marca.md.
   -->
+  <path d="M16 1.5 28.6 8.75v14.5L16 30.5 3.4 23.25V8.75z" fill="#e2622a" />
+
+  <!--
+    La llama, en hueco sobre el dado: una lengua de fuego con la punta
+    inclinada, que es lo que la distingue de una gota a tamaño pequeño.
+  -->
   <path
-    d="M16 1.5 28.6 8.75v14.5L16 30.5 3.4 23.25V8.75z"
-    fill="#e2622a"
+    d="M16 6.4c3.1 3.3 6.6 6 6.6 10.4a6.6 6.6 0 0 1-13.2 0c0-2.2 1-4 2.3-5.7.3 1.2.9 2.2 1.8 2.8.5-3 1.3-5.3 2.5-7.5z"
+    fill="#17120e"
   />
-  <g fill="none" stroke="#17120e" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M16 9 23 21.5H9z" stroke-width="2.2" />
-    <path d="M16 9V2.2M23 21.5l5.2 2.6M9 21.5l-5.2 2.6" stroke-width="1.6" />
-  </g>
+  <path
+    d="M16 13.2c1.5 1.8 2.8 3.2 2.8 5.2a2.8 2.8 0 0 1-5.6 0c0-1.5.9-2.7 1.7-3.8.2.7.5 1.2.9 1.5.1-1.1.5-2 1.2-2.9z"
+    fill="#c9973f"
+  />
 </svg>

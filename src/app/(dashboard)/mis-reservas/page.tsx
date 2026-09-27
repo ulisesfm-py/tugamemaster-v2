@@ -130,37 +130,64 @@ export default async function MisReservasPage() {
                     </p>
                   </div>
 
-                  <Estado tono={ESTADO_DE_RESERVA[r.status].tono}>
-                    {ESTADO_DE_RESERVA[r.status].texto}
-                  </Estado>
-                </div>
-
-                <p className="border-border text-muted-foreground mt-4 border-t pt-3 text-sm">
-                  <Plazo reserva={r} />
-                </p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  {/* Lo de hablar con la mesa va antes que lo de irse de
-                      ella: casi siempre se cancela por algo que se podia
-                      haber preguntado. */}
-                  {r.hilo && (
-                    <EnlaceBoton
-                      href={`/partidas/${r.game.slug}/hilo`}
-                      variante="perfil"
-                      tamano="sm"
-                    >
-                      Hilo de mesa
-                    </EnlaceBoton>
+                  {r.caducada ? (
+                    <Estado tono="apagado">Sin completar</Estado>
+                  ) : (
+                    <Estado tono={ESTADO_DE_RESERVA[r.status].tono}>
+                      {ESTADO_DE_RESERVA[r.status].texto}
+                    </Estado>
                   )}
-
-                  <ReservarBoton
-                    accion={cancelarReservaAction}
-                    texto="Liberar mi plaza"
-                    destructivo
-                    tamano="sm"
-                    campos={{ bookingId: r.id, slug: r.game.slug }}
-                  />
                 </div>
+
+                {/* Una reserva que se quedo a medias de pagar ya no ocupa
+                    plaza, asi que no toca hablar de plazos de cancelacion:
+                    toca decir que paso y como volver a intentarlo. */}
+                {r.caducada ? (
+                  <div className="border-border mt-4 border-t pt-3">
+                    <p className="text-muted-foreground text-sm">
+                      No llegaste a completar el pago, así que la plaza volvió a quedar
+                      libre. Si sigue habiendo sitio, puedes reservarla otra vez.
+                    </p>
+                    <div className="mt-3">
+                      <EnlaceBoton
+                        href={`/partidas/${r.game.slug}`}
+                        variante="perfil"
+                        tamano="sm"
+                      >
+                        Volver a la partida
+                      </EnlaceBoton>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="border-border text-muted-foreground mt-4 border-t pt-3 text-sm">
+                    <Plazo reserva={r} />
+                  </p>
+                )}
+
+                {!r.caducada && (
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {/* Lo de hablar con la mesa va antes que lo de irse de
+                        ella: casi siempre se cancela por algo que se podia
+                        haber preguntado. */}
+                    {r.hilo && (
+                      <EnlaceBoton
+                        href={`/partidas/${r.game.slug}/hilo`}
+                        variante="perfil"
+                        tamano="sm"
+                      >
+                        Hilo de mesa
+                      </EnlaceBoton>
+                    )}
+
+                    <ReservarBoton
+                      accion={cancelarReservaAction}
+                      texto="Liberar mi plaza"
+                      destructivo
+                      tamano="sm"
+                      campos={{ bookingId: r.id, slug: r.game.slug }}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

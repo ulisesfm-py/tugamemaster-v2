@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { USUARIOS } from './apoyo/datos';
+import { Escenario, USUARIOS } from './apoyo/datos';
 import { entrarComo } from './apoyo/sesion';
 
 /**
@@ -55,4 +55,30 @@ test('quien no dirige ve la invitación a hacerlo, y quien dirige sus atajos', a
 
   await expect(menu.getByRole('menuitem', { name: 'Mis ingresos' })).toBeVisible();
   await expect(menu.getByRole('menuitem', { name: 'Empezar a dirigir' })).toHaveCount(0);
+});
+
+test('el game master se entera por la campanita de que alguien ha reservado', async ({
+  page,
+}) => {
+  const escenario = new Escenario();
+
+  try {
+    const partida = await escenario.crearPartida('La que se llenó');
+    await escenario.crearReserva(partida.id, USUARIOS.ana, 'PAID');
+
+    await entrarComo(page, USUARIOS.gm);
+
+    const cabecera = page.getByRole('banner');
+    await cabecera.getByRole('button', { name: /^Avisos/ }).click();
+
+    // La unica noticia buena de la campanita, y la que faltaba: el GM se
+    // enteraba de que alguien habia reservado mirando el aforo de la ficha.
+    await expect(
+      cabecera.getByRole('menuitem', {
+        name: `Alguien se ha apuntado a ${partida.title}`,
+      }),
+    ).toBeVisible();
+  } finally {
+    await escenario.limpiar();
+  }
 });

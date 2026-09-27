@@ -14,12 +14,13 @@ import {
 import { auth } from '@/lib/auth';
 import { estadoVisible, type EstadoDePartida } from '@/modules/games/ficha';
 import { misPartidas } from '@/modules/games/queries';
+import { accesoAlHilo } from '@/modules/threads/politica';
 
 export const metadata: Metadata = { title: 'Mis partidas · TuGameMaster' };
 
 /** Una partida de la consulta, con el estado que se le ensena al GM. */
 type Datos = NonNullable<Awaited<ReturnType<typeof misPartidas>>>;
-type Partida = Datos['partidas'][number] & { visible: EstadoDePartida };
+type Partida = Datos['partidas'][number] & { visible: EstadoDePartida; hilo: boolean };
 
 /** Una mesa en la lista del game master. */
 function Fila({ partida }: { partida: Partida }) {
@@ -57,6 +58,21 @@ function Fila({ partida }: { partida: Partida }) {
           </span>
         </p>
       </Link>
+
+      {/* Fuera de la tarjeta porque la tarjeta entera es un enlace, y un
+          enlace dentro de otro no es HTML valido. Va aqui y no solo dentro de
+          la ficha: el hilo es de lo que mas se visita de una mesa viva, y
+          tenerlo a dos clics lo escondia. */}
+      {partida.hilo && (
+        <p className="mt-1.5 pl-1">
+          <Link
+            href={`/partidas/${partida.slug}/hilo`}
+            className="text-primary text-xs hover:underline"
+          >
+            Hilo de mesa
+          </Link>
+        </p>
+      )}
     </li>
   );
 }
@@ -89,6 +105,11 @@ export default async function MisPartidasPage() {
   const partidas = datos.partidas.map((p) => ({
     ...p,
     visible: estadoVisible(p.status, p.startsAt),
+    // En borrador no hay hilo que ofrecer: no hay con quien hablar hasta que
+    // alguien pueda reservar.
+    hilo:
+      p.status !== 'DRAFT' &&
+      accesoAlHilo({ esGm: true, reserva: null }, { finPartida: p.endsAt }).ok,
   }));
 
   // Tres grupos, porque son tres cosas distintas que hacer: las abiertas se

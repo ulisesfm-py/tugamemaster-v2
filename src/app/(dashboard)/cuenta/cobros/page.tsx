@@ -91,8 +91,8 @@ export default async function CobrosPage({ searchParams }: Props) {
             titulo={empezado ? 'Alta empezada, sin terminar' : 'Aún no puedes cobrar'}
           >
             Hasta que Stripe verifique tus datos no podrás publicar partidas ni recibir
-            transferencias. El alta la gestiona Stripe, no nosotros: te pedirá tus datos
-            fiscales y un documento de identidad, y TuGameMaster no llega a verlos.
+            transferencias. El alta la gestiona Stripe, no nosotros: te pedirá tus datos y
+            una cuenta donde ingresar, y TuGameMaster no llega a verlos.
           </Aviso>
 
           {params['vuelta'] !== undefined && (

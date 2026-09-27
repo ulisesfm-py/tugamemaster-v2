@@ -33,15 +33,28 @@ export async function Cabecera() {
   const session = await auth();
   const usuario = session?.user;
 
-  const [avisos, saldo, perfilGm] = usuario
+  const [avisos, saldo, ficha] = usuario
     ? await Promise.all([
         avisosDe(usuario.id),
         saldoDe(usuario.id),
-        // Solo para saber que enlaces ensenar en el menu: la existencia de un
-        // perfil de GM es lo que convierte a alguien en game master.
-        db.gmProfile.findUnique({
-          where: { userId: usuario.id },
-          select: { id: true },
+        /**
+         * El avatar y el nombre salen de la base de datos, no de la sesion.
+         *
+         * La sesion es un JWT que se firma al entrar y no se vuelve a tocar:
+         * quien subia una foto de perfil seguia viendo la inicial arriba hasta
+         * que cerraba sesion y volvia a entrar. Aqui ya habia una consulta para
+         * saber si es game master, asi que leer tambien la foto no cuesta una
+         * ida y vuelta mas.
+         */
+        db.user.findUnique({
+          where: { id: usuario.id },
+          select: {
+            name: true,
+            image: true,
+            // La existencia de un perfil de GM es lo que convierte a alguien en
+            // game master; decide que enlaces se ensenan en el menu.
+            gmProfile: { select: { id: true } },
+          },
         }),
       ])
     : [[], 0, null];
@@ -79,10 +92,10 @@ export async function Cabecera() {
               <Saldo cents={saldo} />
               <Campana avisos={avisos} />
               <MenuUsuario
-                nombre={usuario.name ?? '?'}
-                imagen={usuario.image ?? null}
+                nombre={ficha?.name ?? usuario.name ?? '?'}
+                imagen={ficha?.image ?? null}
                 slug={usuario.slug}
-                esGm={perfilGm !== null}
+                esGm={ficha?.gmProfile != null}
                 esAdmin={usuario.isAdmin === true}
                 salir={salirAction}
               />

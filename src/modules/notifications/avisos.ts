@@ -100,7 +100,9 @@ async function avisosDeGm(userId: string, ahora: Date): Promise<Aviso[]> {
 
   if (!gm) return [];
 
-  const [incidencias, bloqueados, sinNota] = await Promise.all([
+  const desde = new Date(ahora.getTime() - DIAS_DE_NOVEDAD * DIA);
+
+  const [incidencias, bloqueados, sinNota, apuntados] = await Promise.all([
     db.incident.findMany({
       where: { status: 'OPEN', booking: { game: { gmId: gm.id } } },
       take: 5,
@@ -123,7 +125,34 @@ async function avisosDeGm(userId: string, ahora: Date): Promise<Aviso[]> {
       take: 5,
       select: { id: true, title: true },
     }),
+
+    // Quien se ha sentado en sus mesas ultimamente. Es la unica noticia buena
+    // de la lista, y la que mas se echaba en falta: un GM se enteraba de que
+    // alguien habia reservado por el aforo de la ficha, si se fijaba.
+    //
+    // Se cuentan las plazas pagadas, no las reservas: una reserva sin cobrar
+    // confirmar no es todavia una plaza ocupada, y anunciarla seria prometer
+    // un jugador que puede no llegar.
+    db.booking.groupBy({
+      by: ['gameId'],
+      where: {
+        status: 'PAID',
+        paidAt: { gte: desde },
+        game: { gmId: gm.id, startsAt: { gte: ahora } },
+      },
+      _count: { _all: true },
+    }),
   ]);
+
+  const partidasConPlaza =
+    apuntados.length > 0
+      ? await db.game.findMany({
+          where: { id: { in: apuntados.map((a) => a.gameId) } },
+          select: { id: true, title: true },
+        })
+      : [];
+
+  const tituloDe = new Map(partidasConPlaza.map((p) => [p.id, p.title]));
 
   const avisos: Aviso[] = [];
 
@@ -151,6 +180,21 @@ async function avisosDeGm(userId: string, ahora: Date): Promise<Aviso[]> {
       texto: `Tu pago de ${p.game.title} está retenido`,
       href: '/cuenta/cobros',
       tono: 'alerta',
+    });
+  }
+
+  for (const a of apuntados) {
+    const titulo = tituloDe.get(a.gameId);
+    if (!titulo) continue;
+
+    avisos.push({
+      id: `gm-apuntado:${a.gameId}`,
+      texto:
+        a._count._all === 1
+          ? `Alguien se ha apuntado a ${titulo}`
+          : `${a._count._all} plazas nuevas en ${titulo}`,
+      href: `/cuenta/partidas/${a.gameId}`,
+      tono: 'aviso',
     });
   }
 

@@ -1613,3 +1613,59 @@ porque quien escucha la página necesita saber a dónde lleva ese enlace.
 
 Fuera el favicon de Next y los cinco SVG de ejemplo que dejó
 `create-next-app` en `public/`. No los usaba nadie.
+
+---
+
+# Lo que salió de probar la web de punta a punta
+
+## El avatar no se actualizaba hasta volver a entrar
+
+Quien subía una foto de perfil seguía viendo su inicial en la barra de arriba.
+La causa: **la sesión es un JWT que se firma al entrar y no se vuelve a tocar**,
+así que el `image` que llevaba dentro era el del día que inició sesión.
+
+La cabecera ya consultaba la base de datos para saber si eres game master, así
+que ahora lee de ahí también el nombre y la foto. No cuesta una consulta más y
+deja de haber dos versiones de la misma persona.
+
+Comprobado al revés, que es como se ve de verdad: con la sesión abierta se
+cambió la foto en la base y la barra cambió al recargar, sin tocar la sesión.
+
+## «Te pedirá un documento de identidad»
+
+Lo decía el alta de cobros y la página de captación de game masters. Stripe, con
+la configuración que usamos, no lo pide. Un trámite que se anuncia más pesado de
+lo que es espanta a gente antes de empezarlo, así que fuera.
+
+## Al game master no le llegaba la mejor noticia
+
+La campanita avisaba de incidencias, de pagos retenidos y de notas sin escribir
+—todo lo que va mal— pero no de que alguien se hubiera sentado en su mesa. Era
+la única línea de la tabla de D1d que se había quedado sin implementar, y
+justamente la buena.
+
+Se cuentan **plazas pagadas, no reservas**: una reserva sin cobro confirmado no
+es todavía una plaza ocupada, y anunciarla sería prometer un jugador que puede
+no llegar. Las de una misma partida van juntas en una línea.
+
+## La reserva que se quedó a medias parecía viva
+
+Una reserva `PENDING` es alguien que está en la pantalla de pago. Si abandona,
+pasados veinte minutos su plaza deja de contar en el aforo —sin proceso de
+limpieza: simplemente deja de contar—. Pero en «Mis reservas» seguía viéndose
+igual que una reserva buena, con su plazo de cancelación y su botón de liberar
+la plaza, cuando ya no había plaza que liberar.
+
+Ahora se distingue: **«Sin completar»**, la explicación de qué pasó y un enlace
+para volver a la partida. Es estado derivado, no guardado, como el resto: la
+misma regla que decide el aforo decide lo que se enseña.
+
+Esto es lo que había detrás de «no encuentro el hilo de la partida». El hilo no
+estaba escondido: la reserva nunca llegó a ser una plaza.
+
+## Y el hilo estaba a dos clics
+
+Para el game master vivía solo dentro de la ficha de gestión. Ahora también
+cuelga de cada mesa en «Mis partidas», que es la pantalla desde la que se
+gobierna todo. Va fuera de la tarjeta porque la tarjeta entera es un enlace, y
+un enlace dentro de otro no es HTML válido.

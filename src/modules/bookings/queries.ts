@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { puedeValorar } from '@/modules/reviews/politica';
 import { accesoAlHilo } from '@/modules/threads/politica';
 
+import { MINUTOS_DE_GRACIA } from './service';
 import {
   hayDerechoADevolucion,
   importeDevolucionCents,
@@ -56,6 +57,18 @@ export async function misReservas(userId: string) {
 
       // Si el hilo de esa mesa sigue abierto para el. Se decide aqui por lo
       // mismo que lo demas: depende de la hora, y la pagina no lee el reloj.
+      /**
+       * Se quedo a medias de pagar y ya no ocupa plaza.
+       *
+       * No es un estado guardado: una reserva PENDING deja de contar en el
+       * aforo sola, pasados los minutos de gracia. Pero en la pantalla seguia
+       * apareciendo igual que una reserva viva, asi que quien abandonaba el
+       * pago creia tener sitio en una mesa donde ya no lo tenia.
+       */
+      caducada:
+        r.status === 'PENDING' &&
+        r.createdAt.getTime() < ahora - MINUTOS_DE_GRACIA * 60_000,
+
       hilo: accesoAlHilo(
         { esGm: false, reserva: r.status },
         { finPartida: r.game.endsAt },

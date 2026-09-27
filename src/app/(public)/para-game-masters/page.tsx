@@ -31,7 +31,7 @@ const PASOS = [
   {
     titulo: 'Das de alta dónde cobrar',
     texto:
-      'Lo gestiona Stripe, no nosotros: te pide tus datos fiscales y un documento. TuGameMaster no llega a verlos ni a guardarlos.',
+      'Lo gestiona Stripe, no nosotros: te pide tus datos y la cuenta donde ingresar. TuGameMaster no llega a verlos ni a guardarlos.',
     href: '/cuenta/cobros',
     boton: 'Configurar cobros',
   },

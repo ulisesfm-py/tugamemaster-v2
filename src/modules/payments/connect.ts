@@ -9,7 +9,7 @@ import { stripe, urlBase } from '@/lib/stripe';
  * Alta de los game masters en Stripe Connect.
  *
  * Se usan cuentas **Express**: Stripe se encarga del formulario de alta, de
- * pedir los datos fiscales y de la verificacion de identidad. Nosotros no
+ * pedir los datos y de comprobar lo que tenga que comprobar. Nosotros no
  * llegamos a tocar esos datos, que es exactamente lo que queremos.
  *
  * El modelo de cobro es *separate charges and transfers*: la plataforma cobra
