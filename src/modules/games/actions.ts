@@ -14,26 +14,9 @@ import {
   publicarPartida,
   subirLamina,
 } from './service';
+import { datosDelFormulario } from './schema';
 
 export type EstadoPartida = EstadoAccion;
-
-function datosDelFormulario(formData: FormData) {
-  return {
-    title: String(formData.get('title') ?? ''),
-    description: String(formData.get('description') ?? ''),
-    system: String(formData.get('system') ?? ''),
-    startsAt: String(formData.get('startsAt') ?? ''),
-    durationHours: String(formData.get('durationHours') ?? ''),
-    seatsTotal: String(formData.get('seatsTotal') ?? ''),
-    priceCents: String(formData.get('price') ?? ''),
-    // Casillas: `getAll` porque el formulario manda una entrada por marcada y
-    // ninguna cuando no hay ninguna.
-    languages: formData.getAll('languages').map(String),
-    tags: formData.getAll('tags').map(String),
-    experience: String(formData.get('experience') ?? ''),
-    minAge: String(formData.get('minAge') ?? ''),
-  };
-}
 
 export async function crearPartidaAction(
   _previo: EstadoPartida,

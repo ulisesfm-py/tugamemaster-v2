@@ -71,6 +71,13 @@ Estándar o fundador. Es un plan y no un rol: decide la comisión, no lo que el
 GM puede hacer. Lo asigna un admin a mano; los porcentajes de cada plan viven
 en `modules/payments/dinero.ts` y no en la base de datos.
 
+### Partidas privadas
+
+`Game.visibility` (`PUBLICA` o `PRIVADA`) y `Game.accessPassword`, que solo
+existe en las privadas. La contraseña va en claro: la ve el GM en la gestión de
+la partida para pasársela a sus jugadores. Las consultas públicas seleccionan
+`visibility` y nunca `accessPassword`.
+
 ### Código de invitación
 
 `GmProfile.inviteCode` (8 caracteres, único, guardado sin guion) y

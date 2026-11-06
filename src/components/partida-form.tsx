@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
@@ -16,6 +16,7 @@ import {
   type Grupo,
 } from '@/modules/games/ficha';
 import { RESUMEN_MAXIMO } from '@/modules/campaigns/politica';
+import { CONTRASENA_MAXIMA, CONTRASENA_MINIMA } from '@/modules/games/schema';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
@@ -82,6 +83,8 @@ export type ValoresDePartida = {
   experience: Experiencia;
   minAge: number | null;
   tags: string[];
+  visibility: 'PUBLICA' | 'PRIVADA';
+  accessPassword: string | null;
 };
 
 export function PartidaForm({
@@ -135,6 +138,12 @@ export function PartidaForm({
       : (valores?.experience ?? 'ABIERTA');
 
   const etiquetas = marcadas('tags', valores?.tags ?? []);
+
+  // En estado para ensenar el campo de la contrasena solo cuando hace falta.
+  // Arranca de lo enviado si fallo la validacion, o de la ficha si se edita.
+  const [privada, setPrivada] = useState(
+    texto('visibility', valores?.visibility ?? 'PUBLICA') === 'PRIVADA',
+  );
 
   return (
     <form action={formAction} className="flex flex-col gap-8">
@@ -338,6 +347,72 @@ export function PartidaForm({
               required
               className={CLASE_CONTROL}
               placeholder="15"
+            />
+          </Campo>
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-4">
+        <legend className="font-heading text-foreground mb-3 text-lg font-bold">
+          Quién puede reservar
+        </legend>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(
+            [
+              {
+                valor: 'PUBLICA',
+                titulo: 'Pública',
+                texto: 'Cualquiera con cuenta puede reservar.',
+              },
+              {
+                valor: 'PRIVADA',
+                titulo: 'Privada',
+                texto:
+                  'Sale en el listado, pero para reservar hay que saber la contraseña que tú repartes.',
+              },
+            ] as const
+          ).map((opcion) => (
+            <label key={opcion.valor} className="cursor-pointer">
+              <input
+                type="radio"
+                name="visibility"
+                value={opcion.valor}
+                checked={privada === (opcion.valor === 'PRIVADA')}
+                onChange={() => setPrivada(opcion.valor === 'PRIVADA')}
+                className="peer sr-only"
+              />
+              <span className="border-border hover:border-muted-foreground peer-checked:border-primary peer-checked:bg-primary/8 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-background block h-full rounded-sm border p-4 transition peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+                <span className="text-foreground block font-semibold">
+                  {opcion.titulo}
+                </span>
+                <span className="text-muted-foreground mt-1 block text-sm">
+                  {opcion.texto}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+
+        {/* Se oculta y no se quita: si alguien vuelve a «Privada», la
+            contrasena que habia escrito sigue ahi. En una publica el servidor
+            no la guarda. */}
+        <div hidden={!privada}>
+          <Campo
+            id="accessPassword"
+            etiqueta="Contraseña para reservar"
+            ayuda={`Al menos ${CONTRASENA_MINIMA} caracteres. Pásasela a tus jugadores; la verás siempre en la gestión de la partida. No uses una contraseña tuya.`}
+          >
+            <input
+              id="accessPassword"
+              name="accessPassword"
+              type="text"
+              maxLength={CONTRASENA_MAXIMA}
+              autoComplete="off"
+              spellCheck={false}
+              defaultValue={texto('accessPassword', valores?.accessPassword ?? '')}
+              className={`${CLASE_CONTROL} max-w-xs font-mono`}
+              placeholder="12345678"
             />
           </Campo>
         </div>

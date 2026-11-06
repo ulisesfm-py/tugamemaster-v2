@@ -16,6 +16,12 @@ export const HORAS_MINIMAS_ANTELACION = 2;
 /** Tope de precio por asiento, en centimos. Red de seguridad ante un cero de mas. */
 export const PRECIO_MAXIMO_CENTS = 50_000;
 
+/** Longitud de la contrasena de una partida privada. */
+export const CONTRASENA_MINIMA = 4;
+export const CONTRASENA_MAXIMA = 40;
+
+export const VISIBILIDADES = ['PUBLICA', 'PRIVADA'] as const;
+
 const precioEnEuros = z
   .string()
   .trim()
@@ -88,7 +94,22 @@ export const partidaSchema = z
         .max(99, 'Esa edad mínima parece un error')
         .nullable(),
     ),
+    visibility: z.enum(VISIBILIDADES, {
+      message: 'Elige si la partida es pública o privada',
+    }),
+    // Se valida aparte, abajo, porque solo importa en una privada.
+    accessPassword: z
+      .string()
+      .trim()
+      .max(CONTRASENA_MAXIMA, 'La contraseña es demasiado larga'),
   })
+  .refine(
+    (d) => d.visibility === 'PUBLICA' || d.accessPassword.length >= CONTRASENA_MINIMA,
+    {
+      message: `Una partida privada necesita una contraseña de al menos ${CONTRASENA_MINIMA} caracteres`,
+      path: ['accessPassword'],
+    },
+  )
   .refine(
     (d) => d.startsAt.getTime() >= Date.now() + HORAS_MINIMAS_ANTELACION * 60 * 60 * 1000,
     {
@@ -98,6 +119,35 @@ export const partidaSchema = z
   );
 
 export type PartidaInput = z.infer<typeof partidaSchema>;
+
+/**
+ * Lo que manda el formulario de partida, tal cual, para `partidaSchema`.
+ *
+ * Vive aqui y no en cada accion porque son dos —crear o editar una partida, y
+ * continuar una campana— y usan el mismo formulario. Cuando cada una leia los
+ * campos por su cuenta, la de campanas se quedo sin los que se anadieron
+ * despues (idiomas, etiquetas, experiencia, edad) y no habia forma de crear
+ * una continuacion: la validacion la rechazaba siempre.
+ */
+export function datosDelFormulario(formData: FormData) {
+  return {
+    title: String(formData.get('title') ?? ''),
+    description: String(formData.get('description') ?? ''),
+    system: String(formData.get('system') ?? ''),
+    startsAt: String(formData.get('startsAt') ?? ''),
+    durationHours: String(formData.get('durationHours') ?? ''),
+    seatsTotal: String(formData.get('seatsTotal') ?? ''),
+    priceCents: String(formData.get('price') ?? ''),
+    // Casillas: `getAll` porque el formulario manda una entrada por marcada y
+    // ninguna cuando no hay ninguna.
+    languages: formData.getAll('languages').map(String),
+    tags: formData.getAll('tags').map(String),
+    experience: String(formData.get('experience') ?? ''),
+    minAge: String(formData.get('minAge') ?? ''),
+    visibility: String(formData.get('visibility') ?? 'PUBLICA'),
+    accessPassword: String(formData.get('accessPassword') ?? ''),
+  };
+}
 
 /**
  * Filtros del listado publico. Todos opcionales.

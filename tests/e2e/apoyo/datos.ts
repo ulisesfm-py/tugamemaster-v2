@@ -37,6 +37,8 @@ export type OpcionesPartida = {
   estado?: 'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED';
   /** Email del GM que la dirige. Por defecto, Laura. */
   gm?: string;
+  /** Si se da, la partida es privada y esta es su contrasena. */
+  contrasena?: string;
 };
 
 export type Partida = {
@@ -83,6 +85,7 @@ export class Escenario {
       plazas = 4,
       estado = 'PUBLISHED',
       gm = USUARIOS.gm,
+      contrasena,
     } = opciones;
 
     const perfil = await this.perfilGm(gm);
@@ -99,10 +102,10 @@ export class Escenario {
          ("id", "gmId", "title", "slug", "description", "system",
           "startsAt", "endsAt", "seatsTotal", "priceCents", "currency",
           "status", "languages", "experience", "tags", "minAge",
-          "createdAt", "updatedAt")
+          "visibility", "accessPassword", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'EUR', $11::"GameStatus",
                ARRAY['es'], 'ABIERTA'::"GameExperience", ARRAY['combate'], 14,
-               now(), now())`,
+               $12::"VisibilidadPartida", $13, now(), now())`,
       [
         id,
         perfil.id,
@@ -115,6 +118,8 @@ export class Escenario {
         plazas,
         precioCents,
         estado,
+        contrasena ? 'PRIVADA' : 'PUBLICA',
+        contrasena ?? null,
       ],
     );
 

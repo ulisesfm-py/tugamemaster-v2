@@ -36,6 +36,9 @@ export function seleccionTarjeta() {
     seatsTotal: true,
     priceCents: true,
     currency: true,
+    // Solo la visibilidad: la contrasena no sale nunca en una consulta
+    // publica. La lee la reserva, en el servidor, y la gestion del GM.
+    visibility: true,
     gm: {
       select: {
         id: true,
@@ -212,7 +215,10 @@ export async function miPartida(userId: string, gameId: string) {
       seatsTotal: true,
       priceCents: true,
       status: true,
+      visibility: true,
+      accessPassword: true,
       sessionNumber: true,
+      previousGameId: true,
       gm: { select: { userId: true } },
       campaign: { select: { title: true, slug: true, summary: true } },
       sessionNote: { select: { content: true } },

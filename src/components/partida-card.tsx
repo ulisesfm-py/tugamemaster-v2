@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 import { Lamina } from '@/components/lamina';
-import { Avatar, Fecha, Precio } from '@/components/ui';
-import type { PlanGm } from '@/generated/prisma/enums';
+import { Avatar, Fecha, Precio, Privada } from '@/components/ui';
+import type { PlanGm, VisibilidadPartida } from '@/generated/prisma/enums';
 import { etiquetasDe, PLAZAS_POCAS, type Experiencia } from '@/modules/games/ficha';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +38,8 @@ type Partida = {
   seatsTotal: number;
   priceCents: number;
   currency: string;
+  /** Opcional por la misma razon que el plan: el muestrario no la trae. */
+  visibility?: VisibilidadPartida;
   gm: {
     /** Opcional: el muestrario de `/estilo` pinta tarjetas sin plan. */
     plan?: PlanGm;
@@ -98,6 +100,10 @@ export function PartidaCard({
           >
             {aforo.texto}
           </span>
+
+          {partida.visibility === 'PRIVADA' && (
+            <Privada className="absolute top-2 right-2 backdrop-blur-sm" />
+          )}
         </div>
 
         <div className="flex flex-1 flex-col gap-2 p-4">

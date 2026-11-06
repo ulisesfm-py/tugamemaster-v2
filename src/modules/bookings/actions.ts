@@ -25,9 +25,15 @@ export async function reservarAction(
   const gameId = String(formData.get('gameId') ?? '');
   const slug = String(formData.get('slug') ?? '');
 
-  const resultado = await reservarAsiento(gameId, session.user.id);
+  const resultado = await reservarAsiento(
+    gameId,
+    session.user.id,
+    String(formData.get('contrasena') ?? ''),
+  );
 
-  if (!resultado.ok) return { error: resultado.mensaje };
+  // Lo escrito vuelve con el error: equivocarse en una letra de la contrasena
+  // no deberia obligar a escribirla entera otra vez.
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
 
   revalidatePath(`/partidas/${slug}`);
   revalidatePath('/partidas');

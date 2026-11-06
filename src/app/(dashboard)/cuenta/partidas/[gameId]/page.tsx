@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { ImagenForm } from '@/components/imagen-form';
 import { Lamina } from '@/components/lamina';
 import { NotaSesion } from '@/components/nota-sesion';
+import { CopiarBoton } from '@/components/copiar-boton';
 import { PartidaForm } from '@/components/partida-form';
 import { ReservarBoton } from '@/components/reservar-boton';
 import {
@@ -204,6 +205,28 @@ export default async function GestionarPartidaPage({ params }: Props) {
           <EnlaceBoton href={`/partidas/${partida.slug}/hilo`} variante="perfil">
             Abrir el hilo
           </EnlaceBoton>
+        </Bloque>
+      )}
+
+      {/* ── La contrasena de una privada ───────────────────────── */}
+      {partida.visibility === 'PRIVADA' && partida.accessPassword && (
+        <Bloque
+          titulo="Partida privada"
+          nota={
+            partida.previousGameId
+              ? 'Es una continuación: solo pueden reservar quienes jugaron la sesión anterior, y a ellos no se les pide la contraseña.'
+              : 'Sale en el listado con la etiqueta «Privada». Para reservar hay que escribir esta contraseña: pásasela a tus jugadores.'
+          }
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <code className="bg-secondary text-foreground rounded-sm px-3 py-1.5 font-mono text-lg">
+              {partida.accessPassword}
+            </code>
+            <CopiarBoton texto={partida.accessPassword} etiqueta="Copiar contraseña" />
+          </div>
+          <p className="text-muted-foreground mt-2 text-xs">
+            Puedes cambiarla en «Editar». Quien ya tiene plaza la conserva.
+          </p>
         </Bloque>
       )}
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ETIQUETAS, MAXIMO_ETIQUETAS } from '@/modules/games/ficha';
-import { filtrosSchema, partidaSchema } from '@/modules/games/schema';
+import { datosDelFormulario, filtrosSchema, partidaSchema } from '@/modules/games/schema';
 
 /** Una fecha suficientemente lejana para pasar la antelacion minima. */
 function dentroDeDias(n: number): string {
@@ -21,6 +21,8 @@ const base = {
   experience: 'ABIERTA',
   tags: ['terror', 'investigacion'],
   minAge: '',
+  visibility: 'PUBLICA',
+  accessPassword: '',
 };
 
 describe('partidaSchema: precio', () => {
@@ -176,5 +178,78 @@ describe('partidaSchema: edad minima', () => {
 
   it('rechaza una edad absurda', () => {
     expect(partidaSchema.safeParse({ ...base, minAge: '120' }).success).toBe(false);
+  });
+});
+
+describe('partidaSchema: visibilidad', () => {
+  it('una partida publica no necesita contrasena', () => {
+    expect(partidaSchema.parse(base).visibility).toBe('PUBLICA');
+  });
+
+  it('una privada exige contrasena', () => {
+    const r = partidaSchema.safeParse({ ...base, visibility: 'PRIVADA' });
+
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.path).toEqual(['accessPassword']);
+  });
+
+  it('una contrasena demasiado corta no sirve', () => {
+    const r = partidaSchema.safeParse({
+      ...base,
+      visibility: 'PRIVADA',
+      accessPassword: '123',
+    });
+
+    expect(r.success).toBe(false);
+  });
+
+  it('acepta una privada con su contrasena, sin los espacios de los extremos', () => {
+    const d = partidaSchema.parse({
+      ...base,
+      visibility: 'PRIVADA',
+      accessPassword: ' 12345678 ',
+    });
+
+    expect(d.visibility).toBe('PRIVADA');
+    expect(d.accessPassword).toBe('12345678');
+  });
+
+  it('rechaza una visibilidad que no existe', () => {
+    expect(partidaSchema.safeParse({ ...base, visibility: 'SECRETA' }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('datosDelFormulario', () => {
+  it('lee el formulario completo, y lo leido pasa la validacion', () => {
+    // Las dos acciones que usan el formulario de partida —crear y continuar
+    // una campana— lo leen con esta funcion. Cuando la de campanas leia los
+    // campos por su cuenta se quedo sin los nuevos y no habia forma de crear
+    // una continuacion.
+    const form = new FormData();
+    form.set('title', base.title);
+    form.set('description', base.description);
+    form.set('system', base.system);
+    form.set('startsAt', base.startsAt);
+    form.set('durationHours', base.durationHours);
+    form.set('seatsTotal', base.seatsTotal);
+    form.set('price', base.priceCents);
+    form.append('languages', 'es');
+    form.append('tags', 'terror');
+    form.set('experience', 'ABIERTA');
+    form.set('minAge', '');
+    form.set('visibility', 'PRIVADA');
+    form.set('accessPassword', '12345678');
+
+    const r = partidaSchema.safeParse(datosDelFormulario(form));
+
+    expect(r.success).toBe(true);
+    expect(r.data?.tags).toEqual(['terror']);
+    expect(r.data?.accessPassword).toBe('12345678');
+  });
+
+  it('sin visibilidad en el formulario, la partida es publica', () => {
+    expect(datosDelFormulario(new FormData()).visibility).toBe('PUBLICA');
   });
 });

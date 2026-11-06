@@ -4,7 +4,7 @@
  * Existe para que `@/components/ui` siga funcionando en los dieciseis sitios
  * que ya lo importaban cuando era un unico fichero.
  */
-export { Avatar, Estrellas, Etiqueta, Fecha, Fundador, Precio } from './basicos';
+export { Avatar, Estrellas, Etiqueta, Fecha, Fundador, Precio, Privada } from './basicos';
 export { Button, EnlaceBoton, variantesDeBoton } from './button';
 export { Aviso } from './aviso';
 export { Cargando } from './cargando';

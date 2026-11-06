@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { datosDelFormulario } from '@/modules/games/schema';
 
 import { crearContinuacion, guardarNota } from './service';
 
@@ -39,16 +40,7 @@ export async function crearContinuacionAction(
   const resultado = await crearContinuacion(
     session.user.id,
     String(formData.get('gameId') ?? ''),
-    {
-      title: String(formData.get('title') ?? ''),
-      description: String(formData.get('description') ?? ''),
-      system: String(formData.get('system') ?? ''),
-      startsAt: String(formData.get('startsAt') ?? ''),
-      durationHours: String(formData.get('durationHours') ?? ''),
-      seatsTotal: String(formData.get('seatsTotal') ?? ''),
-      priceCents: String(formData.get('price') ?? ''),
-      campaignSummary: formData.get('campaignSummary'),
-    },
+    { ...datosDelFormulario(formData), campaignSummary: formData.get('campaignSummary') },
   );
 
   if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };

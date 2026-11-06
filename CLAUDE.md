@@ -45,6 +45,14 @@ fidelidad a lo anterior.
   web. El código admite registros durante 3 meses (renovables por un admin);
   lo que caduca es el código, no el emparejamiento. Reglas en
   `src/modules/invitaciones/politica.ts`.
+- **Partidas privadas**: el GM elige al crearla si es pública (por defecto) o
+  privada. Una privada **sale en el listado** con la etiqueta «Privada», para
+  que la web muestre actividad, pero para reservar hay que escribir la
+  contraseña que fija el GM. La contraseña se guarda **en claro a propósito**:
+  protege una mesa, no una cuenta, y el GM tiene que poder verla para
+  repartirla. Nunca sale en una página pública; la comprueba el servidor al
+  reservar. En una continuación de campaña no se pide, porque ya solo entra
+  quien jugó la sesión anterior.
 - **Cancelaciones y reembolsos**:
   - El jugador puede cancelar **sin coste hasta 48h antes** del inicio:
     reembolso íntegro y liberación inmediata del asiento.

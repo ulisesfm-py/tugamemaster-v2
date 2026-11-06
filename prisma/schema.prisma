@@ -237,6 +237,14 @@ enum GameStatus {
   COMPLETED
 }
 
+/// Quien puede reservar en una partida.
+enum VisibilidadPartida {
+  /// Cualquiera con cuenta.
+  PUBLICA
+  /// Quien tenga la contrasena que reparte el GM.
+  PRIVADA
+}
+
 /// Una partida concreta con fecha. Lo que el jugador reserva.
 model Game {
   id          String  @id @default(cuid())
@@ -277,6 +285,15 @@ model Game {
   currency   String @default("EUR")
 
   status GameStatus @default(DRAFT)
+
+  /// Una partida privada sale en el listado como cualquier otra, con su
+  /// etiqueta, pero para reservar hay que saber su contrasena.
+  visibility VisibilidadPartida @default(PUBLICA)
+
+  /// La contrasena de una partida privada. En claro a proposito: no protege
+  /// una cuenta sino una mesa, y el GM tiene que poder verla para pasarla a
+  /// sus jugadores. Nula en las publicas.
+  accessPassword String?
 
   /// Posicion dentro de la campana. Nulo si es una partida suelta.
   sessionNumber Int?

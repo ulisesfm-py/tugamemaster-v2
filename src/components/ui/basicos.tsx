@@ -135,6 +135,24 @@ export function Etiqueta({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Etiqueta de partida privada: sale en el listado, pero para reservar hace
+ * falta la contrasena del game master.
+ */
+export function Privada({ className = '' }: { className?: string }) {
+  return (
+    <span
+      title="Para reservar hace falta la contraseña que da el game master"
+      className={`border-border bg-background/80 text-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${className}`}
+    >
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+        <path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4Zm-2 6V5a2 2 0 1 1 4 0v2H6Z" />
+      </svg>
+      Privada
+    </span>
+  );
+}
+
 /** Importe en centimos, formateado como moneda. */
 export function Precio({ cents, currency }: { cents: number; currency: string }) {
   return (

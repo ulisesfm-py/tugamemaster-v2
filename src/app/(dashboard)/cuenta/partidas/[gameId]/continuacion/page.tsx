@@ -59,6 +59,11 @@ export default async function ContinuacionPage({ params }: Props) {
     experience: anterior.experience,
     minAge: anterior.minAge,
     tags: anterior.tags,
+    // Tambien si es privada. Para la continuacion la contrasena no se pide
+    // —solo entra quien jugo la anterior—, pero la etiqueta sigue diciendo
+    // que es una mesa cerrada.
+    visibility: anterior.visibility,
+    accessPassword: anterior.accessPassword,
   };
 
   return (

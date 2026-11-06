@@ -48,6 +48,10 @@ export function camposDeLaPartida(d: PartidaInput) {
     experience: d.experience,
     minAge: d.minAge,
     tags: d.tags,
+    visibility: d.visibility,
+    // Una publica no guarda contrasena: si se paso de privada a publica, la
+    // anterior se borra en vez de quedarse esperando a volver a usarse.
+    accessPassword: d.visibility === 'PRIVADA' ? d.accessPassword : null,
   };
 }
 

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Lamina } from '@/components/lamina';
 import { ReservarBoton } from '@/components/reservar-boton';
+import { ReservarPrivada } from '@/components/reservar-privada';
 import {
   Avatar,
   Aviso,
@@ -12,6 +13,7 @@ import {
   Fecha,
   Fundador,
   Precio,
+  Privada,
 } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
@@ -154,13 +156,14 @@ export default async function PartidaPage({ params, searchParams }: Props) {
             tres veces no lo hace mas claro. */}
         {/* El sistema lleva a su pagina: desde una mesa concreta, lo natural
             es querer ver que mas hay de lo mismo. */}
-        <p className="text-sm font-semibold">
+        <p className="flex flex-wrap items-center gap-3 text-sm font-semibold">
           <Link
             href={`/sistemas/${slugDeSistema(partida.system)}`}
             className="text-accent hover:underline"
           >
             {partida.system}
           </Link>
+          {partida.visibility === 'PRIVADA' && <Privada />}
         </p>
 
         <h1 className="font-heading text-foreground mt-2 text-3xl font-extrabold text-balance sm:text-4xl">
@@ -288,13 +291,19 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 </p>
               ) : (
                 <>
-                  <ReservarBoton
-                    accion={reservarAction}
-                    texto="Reservar plaza"
-                    tamano="lg"
-                    completo
-                    campos={{ gameId: partida.id, slug: partida.slug }}
-                  />
+                  {/* Privada pide la contrasena, salvo en una continuacion:
+                      ahi ya solo entra quien jugo la anterior. */}
+                  {partida.visibility === 'PRIVADA' && !partida.previousGameId ? (
+                    <ReservarPrivada gameId={partida.id} slug={partida.slug} />
+                  ) : (
+                    <ReservarBoton
+                      accion={reservarAction}
+                      texto="Reservar plaza"
+                      tamano="lg"
+                      completo
+                      campos={{ gameId: partida.id, slug: partida.slug }}
+                    />
+                  )}
 
                   <p className="text-muted-foreground mt-3 text-xs">
                     {partida.priceCents === 0 ? (

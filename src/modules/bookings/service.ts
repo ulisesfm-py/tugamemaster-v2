@@ -73,7 +73,8 @@ export type ResultadoReserva =
         | 'COMPLETA'
         | 'YA_RESERVADA'
         | 'ES_TU_PARTIDA'
-        | 'SOLO_CONTINUACION';
+        | 'SOLO_CONTINUACION'
+        | 'CONTRASENA';
       mensaje: string;
     };
 
@@ -91,6 +92,8 @@ export type ResultadoReserva =
 export async function reservarAsiento(
   gameId: string,
   userId: string,
+  /** La que escribio el jugador. Solo cuenta en una partida privada. */
+  contrasena = '',
 ): Promise<ResultadoReserva> {
   return db.$transaction(async (tx) => {
     // Bloquea la fila de la partida hasta el final de la transaccion.
@@ -138,7 +141,13 @@ export async function reservarAsiento(
     // admitidos se deriva de quien pago, no de una lista aparte.
     const conCampana = await tx.game.findUnique({
       where: { id: gameId },
-      select: { previousGameId: true, priceCents: true, currency: true },
+      select: {
+        previousGameId: true,
+        priceCents: true,
+        currency: true,
+        visibility: true,
+        accessPassword: true,
+      },
     });
 
     if (conCampana?.previousGameId) {
@@ -158,6 +167,21 @@ export async function reservarAsiento(
           mensaje: 'Esta sesión es solo para quienes jugaron la anterior',
         };
       }
+    } else if (
+      // Privada: hay que saber la contrasena. En una continuacion no se pide,
+      // porque ya solo entra quien jugo la sesion anterior.
+      // Una privada sin contrasena guardada no deberia existir —el esquema lo
+      // impide—, pero si existiera queda cerrada, no abierta a cualquiera.
+      conCampana?.visibility === 'PRIVADA' &&
+      (!conCampana.accessPassword || contrasena.trim() !== conCampana.accessPassword)
+    ) {
+      return {
+        ok: false as const,
+        error: 'CONTRASENA' as const,
+        mensaje: contrasena.trim()
+          ? 'Esa no es la contraseña de esta partida'
+          : 'Esta partida es privada: escribe la contraseña que te ha dado el game master',
+      };
     }
 
     const yaReservada = await tx.booking.findUnique({
