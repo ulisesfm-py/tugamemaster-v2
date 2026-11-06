@@ -285,7 +285,7 @@ export function pagoEnviado(datos: {
         ['Transferido', formatearImporte(datos.importeCents, datos.currency)],
       ],
       boton: { texto: 'Ver tus cobros', url: datos.url },
-      pie: 'El importe es el precio de las plazas menos la comisión del 5% y el coste real de la pasarela de pago.',
+      pie: 'El importe es el precio de las plazas menos la comisión de TuGameMaster y el coste real de la pasarela de pago. El desglose de cada plaza está en tus cobros.',
     }),
   };
 }

@@ -50,6 +50,7 @@ export async function campanaPublica(slug: string) {
         select: {
           id: true,
           headline: true,
+          plan: true,
           user: { select: { name: true, slug: true, image: true } },
         },
       },

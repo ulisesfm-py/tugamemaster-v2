@@ -7,7 +7,7 @@ import { auth } from '@/lib/auth';
 
 import { quitarAvatar, subirAvatar } from './avatar';
 import { listaDesdeTexto } from './schema';
-import { actualizarPerfilJugador, guardarPerfilGm } from './service';
+import { actualizarPerfilJugador, cambiarPlanGm, guardarPerfilGm } from './service';
 
 export type EstadoPerfil = EstadoAccion;
 
@@ -100,4 +100,31 @@ export async function quitarAvatarAction(
   revalidatePath(`/gm/${session.user.slug}`);
 
   return { ok: true, mensaje: 'Foto eliminada.' };
+}
+
+/** Un admin nombra fundador a un game master, o se lo quita. */
+export async function cambiarPlanGmAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
+
+  const plan = String(formData.get('plan') ?? '');
+
+  const resultado = await cambiarPlanGm(
+    { gmProfileId: String(formData.get('gmProfileId') ?? ''), plan },
+    { esAdmin: session.user.isAdmin === true },
+  );
+
+  if (!resultado.ok) return { error: resultado.mensaje };
+
+  // El distintivo sale en el perfil, el directorio y las tarjetas: todo lo
+  // publico puede llevarlo, asi que se revalida desde la raiz.
+  revalidatePath('/', 'layout');
+
+  return {
+    ok: true,
+    mensaje: plan === 'FUNDADOR' ? 'Ahora es fundador.' : 'Ya no es fundador.',
+  };
 }

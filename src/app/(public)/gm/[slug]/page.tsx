@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { PartidaCard } from '@/components/partida-card';
-import { Avatar, Estrellas, Etiqueta, Fecha, Vacio } from '@/components/ui';
+import { Avatar, Estrellas, Etiqueta, Fecha, Fundador, Vacio } from '@/components/ui';
 import { nombreDeIdioma } from '@/modules/games/ficha';
 import { perfilPublicoGm } from '@/modules/profiles/queries';
 
@@ -80,11 +80,17 @@ export default async function GmPage({ params }: Props) {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <header className="flex flex-wrap items-start gap-5">
-        <Avatar src={user.image} nombre={user.name} tamano={88} />
+        <Avatar
+          src={user.image}
+          nombre={user.name}
+          tamano={88}
+          fundador={gm.plan === 'FUNDADOR'}
+        />
 
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-foreground text-3xl font-extrabold sm:text-4xl">
+          <h1 className="font-heading text-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-extrabold sm:text-4xl">
             {user.name}
+            {gm.plan === 'FUNDADOR' && <Fundador />}
           </h1>
 
           {gm.headline && (

@@ -39,6 +39,7 @@ export function seleccionTarjeta() {
     gm: {
       select: {
         id: true,
+        plan: true,
         user: { select: { name: true, slug: true, image: true } },
       },
     },
@@ -133,6 +134,7 @@ export async function detallePartida(slug: string, userId?: string) {
           headline: true,
           languages: true,
           userId: true,
+          plan: true,
           user: { select: { name: true, slug: true, image: true } },
         },
       },

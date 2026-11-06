@@ -135,8 +135,10 @@ export class Escenario {
     await consultar(
       `INSERT INTO "Booking"
          ("id", "gameId", "userId", "status", "amountCents", "currency",
-          "creditCents", "isProtected", "paidAt", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4::"BookingStatus", $5, 'EUR', 0, true, $6, now(), now())`,
+          "creditCents", "commissionBps", "isProtected", "paidAt", "createdAt",
+          "updatedAt")
+       VALUES ($1, $2, $3, $4::"BookingStatus", $5, 'EUR', 0, 1000, true, $6,
+               now(), now())`,
       [
         id,
         gameId,

@@ -180,6 +180,7 @@ export async function directorioDeGms(limite = 40) {
       id: true,
       headline: true,
       languages: true,
+      plan: true,
       user: { select: { name: true, slug: true, image: true } },
       _count: {
         select: {
@@ -217,6 +218,7 @@ export async function perfilPublicoGm(slug: string) {
           yearsExperience: true,
           systems: true,
           payoutsEnabled: true,
+          plan: true,
           createdAt: true,
         },
       },
@@ -293,7 +295,7 @@ export async function perfilPublicoUsuario(slug: string) {
       preferredSystems: true,
       preferredStyles: true,
       createdAt: true,
-      gmProfile: { select: { id: true } },
+      gmProfile: { select: { id: true, plan: true } },
     },
   });
 
@@ -310,6 +312,7 @@ export async function perfilPublicoUsuario(slug: string) {
     partidasJugadas: totalJugadas,
     historial,
     esGm: user.gmProfile !== null,
+    esFundador: user.gmProfile?.plan === 'FUNDADOR',
   };
 }
 
@@ -339,4 +342,29 @@ export async function miPerfil(userId: string) {
       },
     },
   });
+}
+
+/**
+ * Todos los game masters, para que un admin decida quien es fundador.
+ *
+ * Incluye a quien no ha terminado el alta de cobros: a un fundador se le
+ * suele nombrar antes, mientras se le ayuda a publicar su primera partida.
+ */
+export async function gmsParaAdmin() {
+  const gms = await db.gmProfile.findMany({
+    orderBy: { createdAt: 'asc' },
+    select: {
+      id: true,
+      plan: true,
+      payoutsEnabled: true,
+      createdAt: true,
+      user: { select: { name: true, slug: true, image: true, email: true } },
+      _count: { select: { games: { where: { status: { not: 'DRAFT' } } } } },
+    },
+  });
+
+  // Fundadores primero, y dentro de cada grupo por antiguedad.
+  return gms.sort(
+    (a, b) => Number(b.plan === 'FUNDADOR') - Number(a.plan === 'FUNDADOR'),
+  );
 }

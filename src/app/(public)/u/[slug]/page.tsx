@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Avatar, EnlaceBoton, Etiqueta, Fecha, Vacio } from '@/components/ui';
+import { Avatar, EnlaceBoton, Etiqueta, Fecha, Fundador, Vacio } from '@/components/ui';
 import { perfilPublicoUsuario } from '@/modules/profiles/queries';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -40,16 +40,17 @@ export default async function UsuarioPage({ params }: Props) {
 
   if (!perfil) notFound();
 
-  const { user, partidasJugadas, historial, esGm } = perfil;
+  const { user, partidasJugadas, historial, esGm, esFundador } = perfil;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <header className="flex flex-wrap items-start gap-5">
-        <Avatar src={user.image} nombre={user.name} tamano={80} />
+        <Avatar src={user.image} nombre={user.name} tamano={80} fundador={esFundador} />
 
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-foreground text-3xl font-extrabold">
+          <h1 className="font-heading text-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-extrabold">
             {user.name}
+            {esFundador && <Fundador />}
           </h1>
 
           <p className="text-muted-foreground mt-1.5">

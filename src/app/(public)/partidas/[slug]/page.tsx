@@ -4,7 +4,15 @@ import { notFound } from 'next/navigation';
 
 import { Lamina } from '@/components/lamina';
 import { ReservarBoton } from '@/components/reservar-boton';
-import { Avatar, Aviso, EnlaceBoton, Estrellas, Fecha, Precio } from '@/components/ui';
+import {
+  Avatar,
+  Aviso,
+  EnlaceBoton,
+  Estrellas,
+  Fecha,
+  Fundador,
+  Precio,
+} from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction, reservarAction } from '@/modules/bookings/actions';
 import {
@@ -432,11 +440,13 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                 src={partida.gm.user.image}
                 nombre={partida.gm.user.name}
                 tamano={56}
+                fundador={partida.gm.plan === 'FUNDADOR'}
               />
 
               <span className="min-w-0 flex-1">
-                <span className="font-heading text-foreground block font-bold">
+                <span className="font-heading text-foreground flex flex-wrap items-center gap-2 font-bold">
                   {partida.gm.user.name}
+                  {partida.gm.plan === 'FUNDADOR' && <Fundador />}
                 </span>
 
                 {partida.gm.headline && (

@@ -7,7 +7,12 @@ import { Avatar, Aviso, Estado, Fecha, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { stripeEnabled } from '@/lib/stripe';
 import { empezarAltaAction, refrescarEstadoAction } from '@/modules/payments/actions';
-import { formatearImporte } from '@/modules/payments/dinero';
+import {
+  COMISION_ESTANDAR,
+  COMISION_FUNDADOR,
+  formatearImporte,
+  porcentaje,
+} from '@/modules/payments/dinero';
 import { ingresosDeGm } from '@/modules/payments/ingresos';
 import { ESTADO_DEL_DINERO, HORAS_DE_RETENCION } from '@/modules/payments/libro';
 
@@ -289,6 +294,11 @@ export default async function CobrosPage({ searchParams }: Props) {
                                 reserva.linea.comisionCents,
                                 partida.currency,
                               )}
+                              {/* El porcentaje de esa plaza, que puede no ser
+                                  el de hoy: se congela al reservar. */}
+                              <span className="block text-xs">
+                                {porcentaje(reserva.commissionBps)}%
+                              </span>
                             </td>
                             <td className="text-muted-foreground px-3 py-2.5 text-right tabular-nums">
                               −
@@ -327,9 +337,22 @@ export default async function CobrosPage({ searchParams }: Props) {
           alguien reporta una incidencia; si no la hay, la transferencia sale sola.
         </p>
         <p>
-          De cada plaza se descuentan la comisión del 5% de TuGameMaster y el coste real
-          que cobra la pasarela por esa transacción, que es un dato de Stripe y no una
+          De cada plaza se descuentan la comisión de TuGameMaster y el coste real que
+          cobra la pasarela por esa transacción, que es un dato de Stripe y no una
           estimación. El resto es tuyo.
+        </p>
+        <p>
+          {gm.plan === 'FUNDADOR' ? (
+            <>
+              Como <strong className="text-foreground">game master fundador</strong>, tu
+              comisión es del {porcentaje(COMISION_FUNDADOR)}%, en lugar del{' '}
+              {porcentaje(COMISION_ESTANDAR)}% general.
+            </>
+          ) : (
+            <>Tu comisión es del {porcentaje(COMISION_ESTANDAR)}%.</>
+          )}{' '}
+          Cada plaza conserva la comisión con la que se reservó, aunque tus condiciones
+          cambien después.
         </p>
         <p>
           Una incidencia abierta detiene el pago de esa partida entera hasta que un

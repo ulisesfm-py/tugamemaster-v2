@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 
 import { RepartoEjemplo } from '@/components/reparto-ejemplo';
 import { EnlaceBoton } from '@/components/ui';
-import { COMISION_PUNTOS_BASICOS } from '@/modules/payments/dinero';
+import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { HORAS_DE_RETENCION } from '@/modules/payments/libro';
 
-const COMISION = COMISION_PUNTOS_BASICOS / 100;
+const COMISION = porcentaje(COMISION_ESTANDAR);
 
 export const metadata: Metadata = {
   title: 'Dirigir en TuGameMaster',

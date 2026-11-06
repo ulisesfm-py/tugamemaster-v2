@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import {
   Avatar,
+  Fundador,
   Aviso,
   Estado,
   ESTADO_DE_PARTIDA,
@@ -67,11 +68,17 @@ export default async function CampanaPage({ params }: Props) {
         href={`/gm/${campana.gm.user.slug}`}
         className="border-border bg-card hover:border-primary focus-visible:ring-ring focus-visible:ring-offset-background mt-8 flex items-center gap-3 rounded-sm border p-4 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
       >
-        <Avatar src={campana.gm.user.image} nombre={campana.gm.user.name} tamano={44} />
+        <Avatar
+          src={campana.gm.user.image}
+          nombre={campana.gm.user.name}
+          tamano={44}
+          fundador={campana.gm.plan === 'FUNDADOR'}
+        />
         <span className="min-w-0">
           <span className="text-muted-foreground block text-xs">La dirige</span>
-          <span className="font-heading text-foreground block font-bold">
+          <span className="font-heading text-foreground flex flex-wrap items-center gap-2 font-bold">
             {campana.gm.user.name}
+            {campana.gm.plan === 'FUNDADOR' && <Fundador />}
           </span>
           {campana.gm.headline && (
             <span className="text-muted-foreground block text-sm">

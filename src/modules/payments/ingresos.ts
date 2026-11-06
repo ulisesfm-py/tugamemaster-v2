@@ -56,7 +56,7 @@ function lineaDe(reserva: {
 export async function ingresosDeGm(userId: string, ahora = new Date()) {
   const gm = await db.gmProfile.findUnique({
     where: { userId },
-    select: { id: true, payoutsEnabled: true, stripeAccountId: true },
+    select: { id: true, payoutsEnabled: true, stripeAccountId: true, plan: true },
   });
 
   if (!gm) return null;
@@ -96,6 +96,7 @@ export async function ingresosDeGm(userId: string, ahora = new Date()) {
           status: true,
           amountCents: true,
           creditCents: true,
+          commissionBps: true,
           commissionCents: true,
           stripeFeeCents: true,
           payoutCents: true,

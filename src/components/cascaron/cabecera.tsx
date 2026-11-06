@@ -53,7 +53,7 @@ export async function Cabecera() {
             image: true,
             // La existencia de un perfil de GM es lo que convierte a alguien en
             // game master; decide que enlaces se ensenan en el menu.
-            gmProfile: { select: { id: true } },
+            gmProfile: { select: { id: true, plan: true } },
           },
         }),
       ])
@@ -96,6 +96,7 @@ export async function Cabecera() {
                 imagen={ficha?.image ?? null}
                 slug={usuario.slug}
                 esGm={ficha?.gmProfile != null}
+                fundador={ficha?.gmProfile?.plan === 'FUNDADOR'}
                 esAdmin={usuario.isAdmin === true}
                 salir={salirAction}
               />

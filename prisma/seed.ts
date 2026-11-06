@@ -30,8 +30,11 @@ const db = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 /** Precio por asiento en centimos. Nunca decimales (ver CLAUDE.md). */
 const PRECIO_ASIENTO_CENTS = 1500;
 
-/** Comision de la plataforma. */
-const COMISION = 0.05;
+/**
+ * Comision de las reservas sembradas, en puntos basicos. Todas son de Laura,
+ * que es fundadora y vende al 5% lo que le trae la web.
+ */
+const COMISION_BPS = 500;
 
 /** Contrasena compartida por todos los usuarios de prueba. */
 const PASSWORD_DEV = 'partida-secreta';
@@ -120,12 +123,14 @@ async function main() {
 
   // --- Perfiles de GM -----------------------------------------------------
 
-  // Laura tiene el alta de Stripe completada: puede publicar.
+  // Laura tiene el alta de Stripe completada: puede publicar. Es fundadora,
+  // para que en local se vean el distintivo y la comision reducida.
   const gmLaura = await db.gmProfile.upsert({
     where: { userId: laura.id },
     // Los datos declarados se refrescan al reseedear, como la ficha de las
     // partidas: son datos de muestra del modelo de hoy.
     update: {
+      plan: 'FUNDADOR',
       yearsExperience: 9,
       systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
     },
@@ -134,6 +139,7 @@ async function main() {
       headline: 'Terror investigativo en los anos 20',
       about: 'Mesas pausadas, mucha ambientacion y decisiones que pesan.',
       languages: ['es', 'en'],
+      plan: 'FUNDADOR',
       yearsExperience: 9,
       systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
       stripeAccountId: 'acct_test_laura',
@@ -320,7 +326,7 @@ async function main() {
    * balance_transaction; en produccion se lee de Stripe, nunca se estima.
    */
   async function reservaPagada(gameId: string, userId: string, precioCents: number) {
-    const comision = Math.round(precioCents * COMISION);
+    const comision = Math.round((precioCents * COMISION_BPS) / 10_000);
     const stripeFee = Math.round(precioCents * 0.015) + 25;
 
     return db.booking.upsert({
@@ -331,6 +337,7 @@ async function main() {
         userId,
         status: 'COMPLETED',
         amountCents: precioCents,
+        commissionBps: COMISION_BPS,
         commissionCents: comision,
         stripeFeeCents: stripeFee,
         payoutCents: precioCents - comision - stripeFee,
@@ -351,6 +358,7 @@ async function main() {
       userId: carla.id,
       status: 'PAID',
       amountCents: 2000,
+      commissionBps: COMISION_BPS,
       commissionCents: 100,
       stripeFeeCents: 55,
       payoutCents: 1845,

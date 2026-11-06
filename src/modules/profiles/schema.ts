@@ -82,3 +82,14 @@ export function listaDesdeTexto(texto: FormDataEntryValue | null): string[] {
     .map((x) => x.trim())
     .filter(Boolean);
 }
+
+/**
+ * Cambio de plan de un GM desde administracion.
+ *
+ * Los valores son los del enum de Prisma; se repiten aqui porque Zod necesita
+ * la lista en tiempo de ejecucion y el enum generado solo aporta el tipo.
+ */
+export const cambioDePlanSchema = z.object({
+  gmProfileId: z.string().min(1),
+  plan: z.enum(['ESTANDAR', 'FUNDADOR']),
+});

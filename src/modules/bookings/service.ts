@@ -1,7 +1,8 @@
 import 'server-only';
 
-import type { BookingStatus } from '@/generated/prisma/enums';
+import type { BookingStatus, OrigenReserva } from '@/generated/prisma/enums';
 import { db } from '@/lib/db';
+import { comisionAplicable } from '@/modules/payments/dinero';
 import { abonar, bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
 
 import {
@@ -122,7 +123,7 @@ export async function reservarAsiento(
 
     const gm = await tx.gmProfile.findUnique({
       where: { id: partida.gmId },
-      select: { userId: true },
+      select: { userId: true, plan: true },
     });
 
     if (gm?.userId === userId) {
@@ -197,8 +198,14 @@ export async function reservarAsiento(
       await bloquearMonedero(userId, tx);
     }
 
+    // La comision se decide aqui y no al cobrar: es el ultimo momento en que
+    // se sabe por donde llego el jugador. El cobro aplica lo que se guarde.
+    const origen: OrigenReserva = 'PLATAFORMA';
+    const commissionBps = comisionAplicable(gm?.plan ?? 'ESTANDAR', origen);
+
     // Si hubo una reserva cancelada antes, se reutiliza la fila: la
-    // restriccion unica (gameId, userId) impide crear otra.
+    // restriccion unica (gameId, userId) impide crear otra. Al reutilizarla
+    // se vuelve a decidir la comision: es una venta nueva.
     const datos = {
       status: 'PENDING' as const,
       amountCents: precio,
@@ -206,6 +213,8 @@ export async function reservarAsiento(
       creditCents: 0,
       cancelledAt: null,
       paidAt: null,
+      commissionBps,
+      origin: origen,
       commissionCents: null,
       stripeFeeCents: null,
       payoutCents: null,

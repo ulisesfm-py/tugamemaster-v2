@@ -28,7 +28,12 @@ fidelidad a lo anterior.
   (cobro inmediato con tarjeta, 3DS resuelto en pantalla). El dinero queda
   retenido en el balance de la plataforma. El GM cobra su parte **48 horas
   después de finalizada la partida**, si no hay incidencias reportadas.
-  TuGameMaster retiene un **5%** del total cobrado en esa partida.
+  TuGameMaster retiene una **comisión del 10%** del total cobrado. Los **GMs
+  fundadores** (los primeros, nombrados a mano por un admin desde
+  `/admin/game-masters`) pagan un 5% por los jugadores que les trae la web y
+  un 0% por los que traen ellos con su enlace personal. Si un GM deja de ser
+  fundador, sus reservas nuevas pasan al 10%. Es un plan, no un rol: no cambia
+  lo que el GM puede hacer, y se ve como distintivo en su avatar y su nombre.
 - **Cancelaciones y reembolsos**:
   - El jugador puede cancelar **sin coste hasta 48h antes** del inicio:
     reembolso íntegro y liberación inmediata del asiento.
@@ -118,25 +123,28 @@ Decidido en la fase de planificación. No cambiar sin discutirlo.
 
 **Secuencia canónica**: el jugador paga al reservar (cobro inmediato,
 on-session) -> el dinero se retiene en el balance de la plataforma -> un job
-diario transfiere al GM el 95% de las reservas cuyas partidas terminaron hace
+diario transfiere al GM su parte de las reservas cuyas partidas terminaron hace
 más de 48h y no tienen incidencia abierta. La plataforma es merchant of
 record; se usan _separate charges and transfers_, nunca destination charges.
 
 - Importes siempre como **enteros en céntimos** + código de moneda. Nunca
   usar float ni decimales en coma flotante para dinero.
-- La **comisión del 5%** se calcula sobre el total cobrado de la partida y se
-  persiste en la reserva en el momento del cobro. Nunca se recalcula después
-  a partir de porcentajes: si la política cambia, las reservas antiguas
-  conservan la comisión con la que se vendieron.
+- La **comisión** se calcula sobre el total cobrado y su **porcentaje se
+  decide al reservar** (`Booking.commissionBps`), a partir del plan del GM y
+  del origen del jugador: es el último momento en que se sabe por dónde llegó.
+  El cobro, que lo confirma un webhook, aplica el porcentaje guardado y
+  persiste el importe. Nunca se recalcula después: si la política o el plan
+  cambian, las reservas antiguas conservan la comisión con la que se
+  vendieron. Los porcentajes viven en `src/modules/payments/dinero.ts`.
 - **Los costes de Stripe nunca los asume TuGameMaster.** Se descuentan del
   pago al GM, usando el coste **real** que Stripe reporta en la
   `balance_transaction` del cobro, nunca una estimación. La fórmula del
   pago al GM es:
 
-      transferencia_al_gm = importe_cobrado - comision_5% - coste_real_stripe
+      transferencia_al_gm = importe_cobrado - comision - coste_real_stripe
 
-  Los tres valores se persisten en la reserva. El 5% es el margen bruto de la
-  plataforma y el coste de Stripe es un pass-through al GM.
+  Los tres valores se persisten en la reserva. La comisión es el margen bruto
+  de la plataforma y el coste de Stripe es un pass-through al GM.
 
 - **Si el game master cancela una partida, quien pagó recupera el 100% en
   saldo**, sin que importe cuánto falte para jugarla. El plazo de 48 horas

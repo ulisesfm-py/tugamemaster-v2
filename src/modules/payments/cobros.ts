@@ -80,6 +80,7 @@ export async function registrarCobro(paymentIntent: Stripe.PaymentIntent): Promi
       status: true,
       amountCents: true,
       creditCents: true,
+      commissionBps: true,
       gameId: true,
     },
   });
@@ -105,7 +106,15 @@ export async function registrarCobro(paymentIntent: Stripe.PaymentIntent): Promi
   // por tarjeta: si parte se pago con saldo, el GM cobra igual su parte del
   // precio entero. Ese dinero ya esta en nuestro balance, porque el saldo
   // procede de un cobro anterior que nunca se devolvio.
-  const reparto = calcularReparto(reserva.amountCents, stripeFeeCents);
+  //
+  // La comision es la que quedo guardada al reservar, no la vigente hoy: el
+  // webhook no sabe por donde llego el jugador, y si el plan del GM cambio
+  // mientras se pagaba, la plaza se vende con lo que se le ofrecio.
+  const reparto = calcularReparto(
+    reserva.amountCents,
+    stripeFeeCents,
+    reserva.commissionBps,
+  );
 
   if (repartoInsuficiente(reparto)) {
     // No impide el cobro, pero deja constancia: ese precio no cubre ni el
@@ -289,7 +298,13 @@ async function devolverPorPlazaPerdida(
 export async function registrarCobroSinTarjeta(bookingId: string): Promise<void> {
   const reserva = await db.booking.findUnique({
     where: { id: bookingId },
-    select: { id: true, status: true, amountCents: true, creditCents: true },
+    select: {
+      id: true,
+      status: true,
+      amountCents: true,
+      creditCents: true,
+      commissionBps: true,
+    },
   });
 
   if (!reserva || reserva.status !== 'PENDING') return;
@@ -301,7 +316,7 @@ export async function registrarCobroSinTarjeta(bookingId: string): Promise<void>
     );
   }
 
-  const reparto = calcularReparto(reserva.amountCents, 0);
+  const reparto = calcularReparto(reserva.amountCents, 0, reserva.commissionBps);
 
   await db.$transaction([
     db.booking.update({

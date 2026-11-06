@@ -120,6 +120,19 @@ model VerificationToken {
 // Game masters
 // ---------------------------------------------------------------------------
 
+/// Las condiciones con las que un GM vende sus plazas.
+///
+/// Es un plan y no un rol: no cambia lo que el GM puede hacer, solo cuanto se
+/// queda la plataforma. Los porcentajes viven en `modules/payments/dinero.ts`,
+/// no aqui, para que cambiarlos sea cambiar codigo revisado y no un dato.
+enum PlanGm {
+  /// La comision base.
+  ESTANDAR
+  /// Uno de los primeros GMs. Conserva sus condiciones mientras lo siga
+  /// siendo; si deja de serlo, sus reservas nuevas pasan a la base.
+  FUNDADOR
+}
+
 /// Datos de cobro y presentacion publica de un GM. Sin onboarding de Stripe
 /// completado (payoutsEnabled) no se le permite publicar partidas.
 model GmProfile {
@@ -137,6 +150,10 @@ model GmProfile {
 
   /// Sistemas que dice dominar. Tambien declarado.
   systems String[] @default([])
+
+  /// Condiciones comerciales del GM. Las asigna un admin a mano: no hay
+  /// forma de pedirlas ni de ganarlas solo.
+  plan PlanGm @default(ESTANDAR)
 
   /// Cuenta conectada de Stripe (Express). Nulo hasta que inicia el alta.
   stripeAccountId String?   @unique
@@ -302,6 +319,14 @@ enum BookingStatus {
   COMPLETED
 }
 
+/// Por donde llego un jugador a una reserva.
+enum OrigenReserva {
+  /// Lo trajo la web: el listado, el buscador, la portada.
+  PLATAFORMA
+  /// Entro por el enlace personal de su game master.
+  ENLACE_GM
+}
+
 /// El asiento de un jugador en una partida. Es la unidad de dinero: el cobro,
 /// la comision, el coste de Stripe y el pago al GM se calculan por reserva.
 model Booking {
@@ -321,9 +346,19 @@ model Booking {
   /// tarjeta es `amountCents - creditCents`.
   creditCents Int @default(0)
 
-  /// Comision de la plataforma (5%) en centimos, calculada en el cobro y
-  /// persistida. Nunca se recalcula: si la politica cambia, las reservas
-  /// antiguas conservan la comision con la que se vendieron.
+  /// Porcentaje de comision de esta reserva, en puntos basicos (1000 = 10%).
+  ///
+  /// Se decide al reservar, que es cuando se sabe quien es el GM, en que plan
+  /// esta y por donde llego el jugador. El cobro lo confirma despues un
+  /// webhook de Stripe, que ya no tiene nada de eso: solo aplica lo guardado.
+  commissionBps Int
+
+  /// Por donde llego el jugador. Junto con el plan del GM decide la comision.
+  origin OrigenReserva @default(PLATAFORMA)
+
+  /// Comision de la plataforma en centimos, calculada en el cobro a partir de
+  /// `commissionBps` y persistida. Nunca se recalcula: si la politica cambia,
+  /// las reservas antiguas conservan la comision con la que se vendieron.
   commissionCents Int?
 
   /// Coste real que Stripe cobro por esta transaccion, leido de la

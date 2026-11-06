@@ -22,7 +22,14 @@ export type MensajeDelHilo = {
   id: string;
   body: string;
   escritoEn: Date;
-  autor: { id: string; name: string; slug: string; image: string | null };
+  autor: {
+    id: string;
+    name: string;
+    slug: string;
+    image: string | null;
+    /** Game master fundador: lleva su distintivo en cualquier mesa. */
+    fundador: boolean;
+  };
   mio: boolean;
   retirado: boolean;
   denunciado: boolean;
@@ -76,7 +83,15 @@ export async function hiloDePartida(
       createdAt: true,
       removedAt: true,
       reportedAt: true,
-      author: { select: { id: true, name: true, slug: true, image: true } },
+      author: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          image: true,
+          gmProfile: { select: { plan: true } },
+        },
+      },
     },
   });
 
@@ -98,7 +113,13 @@ export async function hiloDePartida(
         // viajando en el HTML seria no haberlo quitado.
         body: m.removedAt ? '' : m.body,
         escritoEn: m.createdAt,
-        autor: m.author,
+        autor: {
+          id: m.author.id,
+          name: m.author.name,
+          slug: m.author.slug,
+          image: m.author.image,
+          fundador: m.author.gmProfile?.plan === 'FUNDADOR',
+        },
         mio: m.author.id === userId,
         retirado: !!m.removedAt,
         denunciado: !!m.reportedAt,

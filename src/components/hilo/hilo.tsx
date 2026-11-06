@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { Aviso, Avatar, Button, CLASE_CONTROL } from '@/components/ui';
+import { Aviso, Avatar, Button, CLASE_CONTROL, Fundador } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
 import {
   denunciarMensajeAction,
@@ -142,13 +142,19 @@ function Mensaje({ mensaje, slug }: { mensaje: MensajeDelHilo; slug: string }) {
 
   return (
     <li className="border-border flex gap-3 border-t py-4">
-      <Avatar src={mensaje.autor.image} nombre={mensaje.autor.name} tamano={36} />
+      <Avatar
+        src={mensaje.autor.image}
+        nombre={mensaje.autor.name}
+        tamano={36}
+        fundador={mensaje.autor.fundador}
+      />
 
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-baseline gap-x-2">
           <span className="text-foreground text-sm font-semibold">
             {mensaje.mio ? 'Tú' : mensaje.autor.name}
           </span>
+          {mensaje.autor.fundador && <Fundador className="self-center" />}
           <time
             dateTime={mensaje.escritoEn.toISOString()}
             className="text-muted-foreground text-xs"

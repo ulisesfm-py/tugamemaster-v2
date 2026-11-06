@@ -54,14 +54,22 @@ Todo el desglose económico vive en la reserva, no en la partida:
 | Campo             | Qué es                                                 |
 | ----------------- | ------------------------------------------------------ |
 | `amountCents`     | Lo que pagó el jugador                                 |
-| `commissionCents` | El 5% de TuGameMaster                                  |
+| `commissionBps`   | El porcentaje de comisión, decidido al reservar        |
+| `origin`          | Por dónde llegó el jugador: la web o el enlace del GM  |
+| `commissionCents` | La comisión de TuGameMaster, en céntimos               |
 | `stripeFeeCents`  | El coste real de Stripe en esa transacción             |
 | `payoutCents`     | `amount − commission − stripeFee`: lo que recibe el GM |
 
-Los cuatro se **congelan en el momento del cobro**. Nunca se recalculan a
-partir de porcentajes: si mañana la comisión pasa al 7%, las reservas vendidas
-al 5% siguen valiendo el 5%. Un porcentaje recalculado al vuelo reescribe la
-historia contable.
+El porcentaje se fija al reservar y los importes **se congelan en el momento
+del cobro**. Nunca se recalculan: si mañana la comisión pasa al 12%, las
+reservas vendidas al 10% siguen valiendo el 10%. Un porcentaje recalculado al
+vuelo reescribe la historia contable.
+
+### `GmProfile.plan`
+
+Estándar o fundador. Es un plan y no un rol: decide la comisión, no lo que el
+GM puede hacer. Lo asigna un admin a mano; los porcentajes de cada plan viven
+en `modules/payments/dinero.ts` y no en la base de datos.
 
 `stripeFeeCents` se lee de la `balance_transaction` de Stripe, no se estima,
 porque TuGameMaster no absorbe los costes de Stripe: se descuentan al GM.

@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
 import {
   calcularReparto,
-  COMISION_PUNTOS_BASICOS,
+  COMISION_ESTANDAR,
   formatearImporte,
+  porcentaje,
 } from '@/modules/payments/dinero';
 
 /**
@@ -29,8 +30,10 @@ export function RepartoEjemplo({
   className?: string;
 }) {
   const bruto = precioCents * plazas;
-  const reparto = calcularReparto(bruto, pasarelaCents);
-  const comision = COMISION_PUNTOS_BASICOS / 100;
+  // La comision estandar: es la que se anuncia. Las condiciones de los
+  // fundadores se pactan en persona y no se publican.
+  const reparto = calcularReparto(bruto, pasarelaCents, COMISION_ESTANDAR);
+  const comision = porcentaje(COMISION_ESTANDAR);
 
   return (
     <div className={cn('border-border bg-card rounded-sm border p-6', className)}>

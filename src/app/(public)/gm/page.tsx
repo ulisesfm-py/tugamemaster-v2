@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Avatar, Estrellas, Etiqueta } from '@/components/ui';
+import { Avatar, Estrellas, Etiqueta, Fundador } from '@/components/ui';
 import { directorioDeGms } from '@/modules/profiles/queries';
 
 export const metadata: Metadata = {
@@ -34,10 +34,18 @@ export default async function DirectorioGmPage() {
                 href={`/gm/${gm.user.slug}`}
                 className="border-border bg-card hover:border-primary flex h-full gap-4 rounded-sm border p-4 transition hover:-translate-y-0.5"
               >
-                <Avatar src={gm.user.image} nombre={gm.user.name} tamano={52} />
+                <Avatar
+                  src={gm.user.image}
+                  nombre={gm.user.name}
+                  tamano={52}
+                  fundador={gm.plan === 'FUNDADOR'}
+                />
 
                 <div className="min-w-0 flex-1">
-                  <p className="font-heading text-foreground font-bold">{gm.user.name}</p>
+                  <p className="font-heading text-foreground flex flex-wrap items-center gap-2 font-bold">
+                    {gm.user.name}
+                    {gm.plan === 'FUNDADOR' && <Fundador />}
+                  </p>
 
                   {gm.headline && (
                     <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">

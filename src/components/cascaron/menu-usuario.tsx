@@ -21,6 +21,7 @@ export function MenuUsuario({
   imagen,
   slug,
   esGm,
+  fundador,
   esAdmin,
   salir,
 }: {
@@ -28,6 +29,7 @@ export function MenuUsuario({
   imagen: string | null;
   slug: string;
   esGm: boolean;
+  fundador: boolean;
   esAdmin: boolean;
   salir: () => Promise<void>;
 }) {
@@ -58,7 +60,7 @@ export function MenuUsuario({
         className="hover:bg-secondary focus-visible:ring-ring flex items-center gap-1 rounded-sm p-1 transition focus-visible:ring-2 focus-visible:outline-none"
       >
         <span className="sr-only">Mi cuenta</span>
-        <Avatar src={imagen} nombre={nombre} tamano={28} />
+        <Avatar src={imagen} nombre={nombre} tamano={28} fundador={fundador} />
         <svg
           viewBox="0 0 24 24"
           fill="none"

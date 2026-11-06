@@ -93,6 +93,12 @@ export default async function AdminPage() {
         />
 
         <Atajo
+          href="/admin/game-masters"
+          titulo="Game masters"
+          descripcion="Quién dirige en la web, y a quién nombrar fundador."
+        />
+
+        <Atajo
           href="/admin/blog"
           titulo="Blog"
           descripcion="Escribir, publicar y retirar artículos."

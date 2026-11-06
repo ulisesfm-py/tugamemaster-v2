@@ -2,7 +2,12 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 
-import { perfilGmSchema, perfilJugadorSchema, type PerfilJugadorInput } from './schema';
+import {
+  cambioDePlanSchema,
+  perfilGmSchema,
+  perfilJugadorSchema,
+  type PerfilJugadorInput,
+} from './schema';
 
 /**
  * Reglas de negocio de los perfiles.
@@ -70,6 +75,32 @@ export async function guardarPerfilGm(
     update: datos,
     create: { userId, ...datos },
   });
+
+  return { ok: true };
+}
+
+/**
+ * Nombra fundador a un game master, o le quita la condicion.
+ *
+ * Solo lo hace un admin, a mano: no hay forma de pedirlo. El cambio no toca
+ * ninguna reserva ya hecha, porque cada una guarda la comision con la que se
+ * reservo; afecta solo a las que vengan despues.
+ */
+export async function cambiarPlanGm(
+  entrada: unknown,
+  quien: { esAdmin: boolean },
+): Promise<Resultado> {
+  if (!quien.esAdmin) return { ok: false, mensaje: 'Esto lo decide un administrador' };
+
+  const datos = cambioDePlanSchema.safeParse(entrada);
+  if (!datos.success) return { ok: false, mensaje: 'Ese cambio de plan no es válido' };
+
+  const { count } = await db.gmProfile.updateMany({
+    where: { id: datos.data.gmProfileId },
+    data: { plan: datos.data.plan },
+  });
+
+  if (count === 0) return { ok: false, mensaje: 'Ese game master no existe' };
 
   return { ok: true };
 }

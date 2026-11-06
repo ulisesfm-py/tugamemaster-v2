@@ -47,16 +47,35 @@ cumpla la condición. Ninguna lógica puede depender del minuto exacto.
 
 ```
 importe_cobrado
-  − comisión TuGameMaster (5%)
+  − comisión TuGameMaster (según el plan del GM)
   − coste real de Stripe   (de la balance_transaction, nunca estimado)
   ─────────────────────────
   = transferencia al GM
 ```
 
 Los cuatro valores se **congelan en la reserva** en el momento del cobro. Nunca
-se recalculan a partir de porcentajes: si mañana la comisión sube al 7%, las
-reservas vendidas al 5% siguen valiendo el 5%. Recalcular al vuelo reescribiría
-la historia contable.
+se recalculan a partir de porcentajes: si mañana la comisión sube al 12%, las
+reservas vendidas al 10% siguen valiendo el 10%. Recalcular al vuelo
+reescribiría la historia contable.
+
+### Cuánta comisión
+
+| Plan del GM | Jugador de su enlace | Resto de jugadores |
+| ----------- | -------------------- | ------------------ |
+| Estándar    | (no tiene enlace)    | 10%                |
+| Fundador    | 0%                   | 5%                 |
+
+El porcentaje **se decide al reservar** y se guarda en `Booking.commissionBps`.
+No puede decidirse al cobrar: el cobro lo confirma un webhook de Stripe, que
+llega desde sus servidores y no sabe nada del jugador, de su navegador ni de
+por dónde entró. El webhook aplica lo guardado.
+
+Consecuencia que se acepta a sabiendas: si un admin cambia el plan de un GM
+mientras alguien está en la pantalla de pago, esa plaza se vende con lo que se
+le ofreció al reservar.
+
+Las reservas anteriores a este cambio se vendieron al 5% y la migración las
+dejó con `commissionBps = 500`.
 
 **Los costes de Stripe no los asume TuGameMaster**: se descuentan del pago al
 GM, usando el coste exacto que Stripe reporta, no una estimación.
@@ -212,7 +231,7 @@ Efecto secundario: en una reserva cubierta íntegramente con saldo no hay coste
 de Stripe, así que el GM se lleva algo más.
 
 Verificado con una reserva de 15 € pagada con 5 € de saldo y 10 € de tarjeta:
-comisión 0,75 € (5% de 15 €, no de 10 €), coste de Stripe 0,57 € (solo sobre
+comisión 0,75 € (el 5% de entonces sobre 15 €, no sobre 10 €), coste de Stripe 0,57 € (solo sobre
 los 10 € cobrados), 13,68 € transferidos al GM, y la suma cuadra con los 15 €.
 
 ## Cancelaciones e incidencias (fase 7b, implementado)

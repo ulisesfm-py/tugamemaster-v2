@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { Lamina } from '@/components/lamina';
 import { Avatar, Fecha, Precio } from '@/components/ui';
+import type { PlanGm } from '@/generated/prisma/enums';
 import { etiquetasDe, PLAZAS_POCAS, type Experiencia } from '@/modules/games/ficha';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +39,8 @@ type Partida = {
   priceCents: number;
   currency: string;
   gm: {
+    /** Opcional: el muestrario de `/estilo` pinta tarjetas sin plan. */
+    plan?: PlanGm;
     user: { name: string; slug: string; image: string | null };
   };
   _count: { bookings: number };
@@ -133,8 +136,14 @@ export function PartidaCard({
               src={partida.gm.user.image}
               nombre={partida.gm.user.name}
               tamano={20}
+              fundador={partida.gm.plan === 'FUNDADOR'}
             />
             {partida.gm.user.name}
+            {/* En la tarjeta no cabe la etiqueta: el anillo basta a la vista,
+                y esto se lo cuenta a quien la escucha. */}
+            {partida.gm.plan === 'FUNDADOR' && (
+              <span className="sr-only">, game master fundador</span>
+            )}
             {partida.reputacion?.valoracionMedia !== null &&
               partida.reputacion !== undefined && (
                 <span className="flex items-center gap-1">

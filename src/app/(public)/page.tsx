@@ -5,7 +5,7 @@ import { PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
 import { RepartoEjemplo } from '@/components/reparto-ejemplo';
-import { COMISION_PUNTOS_BASICOS } from '@/modules/payments/dinero';
+import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
 import { resumenDe } from '@/modules/blog/politica';
 import { listarPartidas } from '@/modules/games/queries';
@@ -57,7 +57,7 @@ export default async function Portada() {
     .filter((p) => p.seatsTotal - p._count.bookings > 0)
     .slice(0, 8);
 
-  const comision = COMISION_PUNTOS_BASICOS / 100;
+  const comision = porcentaje(COMISION_ESTANDAR);
 
   return (
     <main>
@@ -304,7 +304,7 @@ export default async function Portada() {
                 <span className="text-foreground font-semibold">
                   Comisión del {comision}%
                 </span>{' '}
-                sobre lo que cobras, y nada más.
+                sobre lo que cobras, más el coste real de la pasarela de pago.
               </li>
               <li>
                 <span className="text-foreground font-semibold">Cobras 48 horas</span>{' '}
