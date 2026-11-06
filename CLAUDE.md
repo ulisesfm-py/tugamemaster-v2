@@ -31,9 +31,20 @@ fidelidad a lo anterior.
   TuGameMaster retiene una **comisión del 10%** del total cobrado. Los **GMs
   fundadores** (los primeros, nombrados a mano por un admin desde
   `/admin/game-masters`) pagan un 5% por los jugadores que les trae la web y
-  un 0% por los que traen ellos con su enlace personal. Si un GM deja de ser
-  fundador, sus reservas nuevas pasan al 10%. Es un plan, no un rol: no cambia
-  lo que el GM puede hacer, y se ve como distintivo en su avatar y su nombre.
+  un 0% por los que se registraron con su **código de invitación**. Si un GM
+  deja de ser fundador, sus reservas nuevas pasan al 10%. Es un plan, no un
+  rol: no cambia lo que el GM puede hacer, y se ve como distintivo en su
+  avatar y su nombre.
+- **Código de invitación del fundador**: el emparejamiento jugador–GM se
+  guarda **en la cuenta del jugador al crearla** (`User.referredByGmId`), nunca
+  en el navegador: tiene que valer aunque el enlace se abra en el móvil y la
+  cuenta se cree en el PC. El enlace `/r/<código>` solo lleva al registro con
+  el código puesto; el campo del formulario es lo que empareja, y se puede
+  escribir a mano. **Una cuenta que ya existe no se empareja nunca**, para que
+  nadie se ahorre la comisión pasándole el código a un jugador que trajo la
+  web. El código admite registros durante 3 meses (renovables por un admin);
+  lo que caduca es el código, no el emparejamiento. Reglas en
+  `src/modules/invitaciones/politica.ts`.
 - **Cancelaciones y reembolsos**:
   - El jugador puede cancelar **sin coste hasta 48h antes** del inicio:
     reembolso íntegro y liberación inmediata del asiento.

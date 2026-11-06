@@ -45,6 +45,14 @@ model User {
   /// ID de Discord, guardado para las salas de partida del backlog.
   discordId String? @unique
 
+  /// Game master fundador que invito a este jugador con su codigo.
+  ///
+  /// Se fija al crear la cuenta y ya no cambia: un codigo solo vale al
+  /// registrarse, para que nadie pueda emparejar despues a un jugador que
+  /// encontro a traves de la web. Nulo si llego por su cuenta.
+  referredByGmId String?
+  referredAt     DateTime?
+
   /// Preferencias de rol mostradas en el perfil.
   preferredSystems String[] @default([])
   preferredStyles  String[] @default([])
@@ -53,19 +61,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  gmProfile GmProfile?
+  accounts   Account[]
+  sessions   Session[]
+  gmProfile  GmProfile?
+  referredBy GmProfile? @relation("Invitados", fields: [referredByGmId], references: [id], onDelete: SetNull)
 
   bookings          Booking[]
-  reviewsWritten    Review[]   @relation("ReviewAuthor")
-  incidentsReported Incident[] @relation("IncidentReporter")
-  incidentsResolved Incident[] @relation("IncidentResolver")
+  reviewsWritten    Review[]      @relation("ReviewAuthor")
+  incidentsReported Incident[]    @relation("IncidentReporter")
+  incidentsResolved Incident[]    @relation("IncidentResolver")
   posts             Post[]
   comments          Comment[]
   postLikes         PostLike[]
-  walletEntries     WalletEntry[]  @relation("MonederoDe")
-  walletEntriesMade WalletEntry[]  @relation("MonederoCreadoPor")
+  walletEntries     WalletEntry[] @relation("MonederoDe")
+  walletEntriesMade WalletEntry[] @relation("MonederoCreadoPor")
 
   threadMessages         ThreadMessage[] @relation("MensajeAutor")
   threadMessagesReported ThreadMessage[] @relation("MensajeDenunciado")
@@ -73,6 +82,7 @@ model User {
   threadReads            ThreadRead[]
 
   @@index([createdAt])
+  @@index([referredByGmId])
 }
 
 /// Cuentas OAuth externas (Discord). Estructura exigida por el adaptador de
@@ -155,6 +165,14 @@ model GmProfile {
   /// forma de pedirlas ni de ganarlas solo.
   plan PlanGm @default(ESTANDAR)
 
+  /// Codigo de invitacion de un fundador, normalizado: 8 caracteres en
+  /// mayusculas, sin guion. Quien se registra con el queda emparejado con el.
+  /// Nulo hasta que se le nombra fundador por primera vez.
+  inviteCode          String?   @unique
+  /// Hasta cuando admite registros. El emparejamiento de quien ya se registro
+  /// no caduca: lo que caduca es la posibilidad de usar el codigo.
+  inviteCodeExpiresAt DateTime?
+
   /// Cuenta conectada de Stripe (Express). Nulo hasta que inicia el alta.
   stripeAccountId String?   @unique
   chargesEnabled  Boolean   @default(false)
@@ -165,6 +183,7 @@ model GmProfile {
   updatedAt DateTime @updatedAt
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitados User[]     @relation("Invitados")
   games     Game[]
   campaigns Campaign[]
   payouts   Payout[]
@@ -220,11 +239,11 @@ enum GameStatus {
 
 /// Una partida concreta con fecha. Lo que el jugador reserva.
 model Game {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   gmId        String
   campaignId  String?
   title       String
-  slug        String @unique
+  slug        String  @unique
   description String
 
   /// Sistema de juego ("D&D 5e", "Vampiro", ...).

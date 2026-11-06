@@ -71,6 +71,15 @@ Estándar o fundador. Es un plan y no un rol: decide la comisión, no lo que el
 GM puede hacer. Lo asigna un admin a mano; los porcentajes de cada plan viven
 en `modules/payments/dinero.ts` y no en la base de datos.
 
+### Código de invitación
+
+`GmProfile.inviteCode` (8 caracteres, único, guardado sin guion) y
+`inviteCodeExpiresAt` son el código del fundador y hasta cuándo admite
+registros. `User.referredByGmId` es el fundador con cuyo código se registró el
+jugador: se fija al crear la cuenta y no cambia. Que el código caduque no
+deshace los emparejamientos ya hechos; que el GM deje de ser fundador tampoco,
+pero mientras no lo sea esos jugadores pagan la comisión general.
+
 `stripeFeeCents` se lee de la `balance_transaction` de Stripe, no se estima,
 porque TuGameMaster no absorbe los costes de Stripe: se descuentan al GM.
 

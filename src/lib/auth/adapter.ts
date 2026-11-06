@@ -2,6 +2,8 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import type { Adapter, AdapterUser } from 'next-auth/adapters';
 
 import { db } from '@/lib/db';
+import { recogerCodigoDeViaje } from '@/modules/invitaciones/cookie';
+import { buscarCodigo } from '@/modules/invitaciones/service';
 import { slugDisponible } from '@/modules/users/slug';
 
 /**
@@ -31,6 +33,13 @@ export function crearAdaptador(): Adapter {
         return ocupado !== null;
       });
 
+      // El codigo de fundador que se escribio antes de salir hacia Discord.
+      // Ya se comprobo al salir; aqui se comprueba otra vez porque pudo
+      // caducar mientras tanto, y si ya no vale la cuenta se crea igual.
+      const codigo = await recogerCodigoDeViaje();
+      const invitacion = codigo ? await buscarCodigo(codigo) : null;
+      const invitadoPor = invitacion?.ok ? invitacion.gmProfileId : null;
+
       const creado = await db.user.create({
         data: {
           email: data.email,
@@ -38,6 +47,8 @@ export function crearAdaptador(): Adapter {
           name,
           slug,
           image: data.image ?? null,
+          referredByGmId: invitadoPor,
+          referredAt: invitadoPor ? new Date() : null,
         },
       });
 

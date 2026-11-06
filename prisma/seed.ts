@@ -36,6 +36,15 @@ const PRECIO_ASIENTO_CENTS = 1500;
  */
 const COMISION_BPS = 500;
 
+/**
+ * Codigo de invitacion de Laura. Fijo, para poder probar el enlace en local
+ * (`/r/K7M2QX9A`), y renovado en cada siembra para que nunca este caducado.
+ */
+const CODIGO_LAURA = {
+  inviteCode: 'K7M2QX9A',
+  inviteCodeExpiresAt: new Date(Date.now() + 90 * 86_400_000),
+};
+
 /** Contrasena compartida por todos los usuarios de prueba. */
 const PASSWORD_DEV = 'partida-secreta';
 
@@ -131,6 +140,7 @@ async function main() {
     // partidas: son datos de muestra del modelo de hoy.
     update: {
       plan: 'FUNDADOR',
+      ...CODIGO_LAURA,
       yearsExperience: 9,
       systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
     },
@@ -140,6 +150,7 @@ async function main() {
       about: 'Mesas pausadas, mucha ambientacion y decisiones que pesan.',
       languages: ['es', 'en'],
       plan: 'FUNDADOR',
+      ...CODIGO_LAURA,
       yearsExperience: 9,
       systems: ['Call of Cthulhu 7e', 'Vaesen', 'Delta Green'],
       stripeAccountId: 'acct_test_laura',

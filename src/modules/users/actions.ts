@@ -4,6 +4,11 @@ import { AuthError } from 'next-auth';
 import { unstable_rethrow } from 'next/navigation';
 
 import { signIn, signOut } from '@/lib/auth';
+import {
+  guardarCodigoDeViaje,
+  olvidarCodigoDeViaje,
+} from '@/modules/invitaciones/cookie';
+import { buscarCodigo } from '@/modules/invitaciones/service';
 
 import { registerSchema } from './schema';
 import { registrarUsuario } from './service';
@@ -26,7 +31,7 @@ export type EstadoFormulario = { error: string; enviado?: FormData } | null;
 function sinContrasena(formData: FormData): FormData {
   const eco = new FormData();
 
-  for (const campo of ['name', 'email']) {
+  for (const campo of ['name', 'email', 'codigo']) {
     const valor = formData.get(campo);
     if (typeof valor === 'string') eco.set(campo, valor);
   }
@@ -44,6 +49,7 @@ export async function registrarAction(
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password'),
+    codigo: formData.get('codigo') ?? undefined,
   });
 
   if (!parsed.success) {
@@ -116,8 +122,36 @@ export async function entrarAction(
   return null;
 }
 
-export async function entrarConDiscordAction(): Promise<void> {
+/**
+ * Entrar o darse de alta con Discord.
+ *
+ * Si el formulario trae un codigo de fundador, se comprueba aqui, antes de
+ * salir hacia Discord: a la vuelta ya no hay formulario en el que avisar de
+ * que no valia. Si vale, viaja en una cookie de pocos minutos hasta que se
+ * crea la cuenta (ver `invitaciones/cookie.ts`).
+ *
+ * Sin codigo se borra cualquiera que quedara de un intento anterior: quien
+ * entra desde la pantalla de login no esta usando ningun codigo.
+ */
+export async function entrarConDiscordAction(
+  _previo: EstadoFormulario,
+  formData: FormData,
+): Promise<EstadoFormulario> {
+  const codigo = String(formData.get('codigo') ?? '').trim();
+
+  if (codigo) {
+    const invitacion = await buscarCodigo(codigo);
+    if (!invitacion.ok)
+      return { error: invitacion.mensaje, enviado: sinContrasena(formData) };
+
+    await guardarCodigoDeViaje(codigo);
+  } else {
+    await olvidarCodigoDeViaje();
+  }
+
   await signIn('discord', { redirectTo: DESTINO_TRAS_ENTRAR });
+
+  return null;
 }
 
 export async function salirAction(): Promise<void> {

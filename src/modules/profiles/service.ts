@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { prepararCodigoDeFundador } from '@/modules/invitaciones/service';
 
 import {
   cambioDePlanSchema,
@@ -101,6 +102,13 @@ export async function cambiarPlanGm(
   });
 
   if (count === 0) return { ok: false, mensaje: 'Ese game master no existe' };
+
+  // Nombrarle fundador le da su codigo de invitacion, o un plazo nuevo si ya
+  // tenia uno. Quitarselo no toca el codigo: deja de valer solo, porque la
+  // vigencia mira el plan.
+  if (datos.data.plan === 'FUNDADOR') {
+    await prepararCodigoDeFundador(datos.data.gmProfileId);
+  }
 
   return { ok: true };
 }

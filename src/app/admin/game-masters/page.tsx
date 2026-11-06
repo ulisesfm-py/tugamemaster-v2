@@ -10,10 +10,14 @@ import {
   COMISION_FUNDADOR,
   porcentaje,
 } from '@/modules/payments/dinero';
+import { nuevoCodigoAction, renovarCodigoAction } from '@/modules/invitaciones/actions';
+import { estadoDelCodigo, formatearCodigo } from '@/modules/invitaciones/politica';
 import { cambiarPlanGmAction } from '@/modules/profiles/actions';
 import { gmsParaAdmin } from '@/modules/profiles/queries';
 
 export const metadata: Metadata = { title: 'Game masters · Admin' };
+
+const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
 
 /**
  * Los game masters y su plan.
@@ -29,6 +33,7 @@ export default async function GameMastersAdminPage() {
   if (!session?.user?.isAdmin) notFound();
 
   const gms = await gmsParaAdmin();
+  const ahora = new Date();
   const fundadores = gms.filter((gm) => gm.plan === 'FUNDADOR').length;
 
   return (
@@ -105,6 +110,44 @@ export default async function GameMastersAdminPage() {
                           }`}
                     </span>
                   </p>
+
+                  {esFundador && gm.inviteCode && (
+                    <div className="border-border mt-3 border-t pt-3">
+                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                        <span className="font-heading text-accent font-bold tracking-widest">
+                          {formatearCodigo(gm.inviteCode)}
+                        </span>
+                        {estadoDelCodigo(gm, ahora) === 'VIGENTE' &&
+                        gm.inviteCodeExpiresAt ? (
+                          <span className="text-muted-foreground">
+                            Vale hasta el {FECHA_CORTA.format(gm.inviteCodeExpiresAt)}
+                          </span>
+                        ) : (
+                          <Estado tono="espera">Caducado</Estado>
+                        )}
+                        <span className="text-muted-foreground">
+                          {gm._count.invitados === 1
+                            ? '1 jugador registrado con él'
+                            : `${gm._count.invitados} jugadores registrados con él`}
+                        </span>
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <ReservarBoton
+                          accion={renovarCodigoAction}
+                          texto="Renovar 3 meses"
+                          tamano="sm"
+                          campos={{ gmProfileId: gm.id }}
+                        />
+                        <ReservarBoton
+                          accion={nuevoCodigoAction}
+                          texto="Código nuevo"
+                          destructivo
+                          tamano="sm"
+                          campos={{ gmProfileId: gm.id }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <ReservarBoton

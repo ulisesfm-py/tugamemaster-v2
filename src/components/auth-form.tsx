@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
@@ -33,11 +33,20 @@ export function AuthForm({
   accion,
   accionDiscord,
   minimoPassword,
+  codigoInicial = '',
+  invitacion,
 }: {
   modo: 'login' | 'registro';
   accion: Accion;
   /** Ausente mientras Discord no este configurado: entonces no se ofrece. */
-  accionDiscord?: () => Promise<void>;
+  accionDiscord?: Accion;
+  /** El codigo de fundador que trae el enlace, para dejarlo ya escrito. */
+  codigoInicial?: string;
+  /**
+   * Lo que se sabe del codigo del enlace: de quien es, o por que no vale.
+   * Se comprueba en la pagina, antes de que la persona escriba nada.
+   */
+  invitacion?: { ok: true; nombre: string } | { ok: false; mensaje: string };
   /**
    * Longitud minima, para decirla antes de que la rechace el servidor.
    *
@@ -47,6 +56,10 @@ export function AuthForm({
   minimoPassword: number;
 }) {
   const [estado, formAction] = useActionState<EstadoFormulario, FormData>(accion, null);
+  const [estadoDiscord, formActionDiscord] = useActionState<EstadoFormulario, FormData>(
+    accionDiscord ?? (async () => null),
+    null,
+  );
 
   const esRegistro = modo === 'registro';
 
@@ -54,6 +67,10 @@ export function AuthForm({
   // la accion, y equivocarse de contrasena no deberia costar tambien el email.
   // La accion devuelve el email y el nombre, nunca la contrasena.
   const { texto } = loEscrito(estado);
+
+  // El codigo se lleva en estado y no solo en el campo: el boton de Discord
+  // vive en otro formulario y tiene que enviar lo mismo que hay escrito aqui.
+  const [codigo, setCodigo] = useState(texto('codigo', codigoInicial));
 
   return (
     <div className="border-border bg-card rounded-sm border p-6 sm:p-8">
@@ -65,6 +82,19 @@ export function AuthForm({
           ? 'Para reservar partidas o dirigir las tuyas.'
           : 'Bienvenido de vuelta.'}
       </p>
+
+      {esRegistro && invitacion?.ok && (
+        <Aviso tono="exito" className="mb-5">
+          Te invita <strong>{invitacion.nombre}</strong>. Al crear tu cuenta quedarás como
+          jugador suyo en TuGameMaster.
+        </Aviso>
+      )}
+
+      {esRegistro && invitacion && !invitacion.ok && (
+        <Aviso tono="atencion" className="mb-5">
+          {invitacion.mensaje}
+        </Aviso>
+      )}
 
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         {esRegistro && (
@@ -108,6 +138,27 @@ export function AuthForm({
           />
         </Campo>
 
+        {esRegistro && (
+          <Campo
+            id="codigo"
+            etiqueta="Código de tu game master (opcional)"
+            ayuda="Si un game master te ha dado uno. Solo sirve al crear la cuenta."
+          >
+            <input
+              id="codigo"
+              name="codigo"
+              type="text"
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              placeholder="K7M2-QX9A"
+              className={`${CLASE_CONTROL} font-mono tracking-wider uppercase`}
+            />
+          </Campo>
+        )}
+
         {estado?.error && <Aviso tono="error">{estado.error}</Aviso>}
 
         <BotonEnviar>{esRegistro ? 'Crear cuenta' : 'Entrar'}</BotonEnviar>
@@ -121,10 +172,12 @@ export function AuthForm({
             <span className="bg-border h-px flex-1" />
           </div>
 
-          <form action={accionDiscord}>
+          <form action={formActionDiscord} className="flex flex-col gap-3">
+            {esRegistro && <input type="hidden" name="codigo" value={codigo} />}
             <Button type="submit" variante="perfil" tamano="lg" className="w-full">
               Continuar con Discord
             </Button>
+            {estadoDiscord?.error && <Aviso tono="error">{estadoDiscord.error}</Aviso>}
           </form>
         </>
       )}

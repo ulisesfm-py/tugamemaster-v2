@@ -33,6 +33,17 @@ export const registerSchema = z.object({
     .max(60, 'El nombre es demasiado largo'),
   email: emailSchema,
   password: passwordSchema,
+  /**
+   * Codigo de un game master fundador, si viene invitado. Vacio es lo mismo
+   * que no traerlo; si trae algo, se comprueba en el servidor contra la base
+   * de datos, que es quien sabe si existe y si sigue vigente.
+   */
+  codigo: z
+    .string()
+    .trim()
+    .max(20, 'Ese código no es válido')
+    .optional()
+    .transform((v) => (v ? v : undefined)),
 });
 
 export const loginSchema = z.object({

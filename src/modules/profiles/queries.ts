@@ -356,10 +356,17 @@ export async function gmsParaAdmin() {
     select: {
       id: true,
       plan: true,
+      inviteCode: true,
+      inviteCodeExpiresAt: true,
       payoutsEnabled: true,
       createdAt: true,
       user: { select: { name: true, slug: true, image: true, email: true } },
-      _count: { select: { games: { where: { status: { not: 'DRAFT' } } } } },
+      _count: {
+        select: {
+          games: { where: { status: { not: 'DRAFT' } } },
+          invitados: true,
+        },
+      },
     },
   });
 

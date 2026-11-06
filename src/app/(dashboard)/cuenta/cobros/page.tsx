@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { CopiarBoton } from '@/components/copiar-boton';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Aviso, Estado, Fecha, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
@@ -10,9 +11,11 @@ import { empezarAltaAction, refrescarEstadoAction } from '@/modules/payments/act
 import {
   COMISION_ESTANDAR,
   COMISION_FUNDADOR,
+  COMISION_FUNDADOR_ENLACE,
   formatearImporte,
   porcentaje,
 } from '@/modules/payments/dinero';
+import { invitacionDeGm } from '@/modules/invitaciones/queries';
 import { ingresosDeGm } from '@/modules/payments/ingresos';
 import { ESTADO_DEL_DINERO, HORAS_DE_RETENCION } from '@/modules/payments/libro';
 
@@ -49,6 +52,8 @@ function Cifra({
   );
 }
 
+const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+
 /** Lo que se dice del estado de una reserva que no llego a cobrarse. */
 const RESERVA_SIN_COBRO = {
   REFUNDED: 'Devuelta por incidencia',
@@ -61,7 +66,10 @@ export default async function CobrosPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const libro = await ingresosDeGm(session.user.id);
+  const [libro, invitacion] = await Promise.all([
+    ingresosDeGm(session.user.id),
+    invitacionDeGm(session.user.id),
+  ]);
   if (!libro) redirect('/cuenta/gm');
 
   const { gm, partidas, resumen } = libro;
@@ -170,6 +178,92 @@ export default async function CobrosPage({ searchParams }: Props) {
           </p>
         )}
       </section>
+
+      {/* ── El codigo de fundador ──────────────────────────────
+          Solo existe para los fundadores. Va en esta pantalla porque es
+          dinero: quien se registra con el no paga comision en sus mesas. */}
+      {invitacion && (
+        <section
+          aria-labelledby="codigo-fundador"
+          className="border-accent/40 bg-card mt-8 rounded-sm border p-5"
+        >
+          <h2
+            id="codigo-fundador"
+            className="font-heading text-foreground text-xl font-bold"
+          >
+            Tu código de fundador
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Quien cree su cuenta con este código queda como jugador tuyo, y por sus plazas
+            en tus partidas{' '}
+            <strong className="text-foreground">
+              pagas un {porcentaje(COMISION_FUNDADOR_ENLACE)}% de comisión
+            </strong>
+            . Solo sirve al crear la cuenta: a quien ya está registrado no se le puede
+            emparejar.
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <span className="font-heading text-accent text-3xl font-extrabold tracking-widest">
+              {invitacion.codigo}
+            </span>
+            <CopiarBoton texto={invitacion.codigo} etiqueta="Copiar código" />
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <code className="bg-secondary text-foreground rounded-sm px-2.5 py-1.5 text-sm break-all">
+              {invitacion.enlace}
+            </code>
+            <CopiarBoton texto={invitacion.enlace} etiqueta="Copiar enlace" />
+          </div>
+          <p className="text-muted-foreground mt-2 text-xs">
+            El enlace lleva directamente a crear la cuenta con tu código ya puesto. Es el
+            que conviene poner en tu bio de Instagram.
+          </p>
+
+          <p className="mt-4 text-sm">
+            {invitacion.vigente && invitacion.caducaEl ? (
+              <span className="text-muted-foreground">
+                Admite registros hasta el{' '}
+                <strong className="text-foreground">
+                  {FECHA_CORTA.format(invitacion.caducaEl)}
+                </strong>
+                . Quien se registre antes seguirá siendo jugador tuyo después.
+              </span>
+            ) : (
+              <Estado tono="espera">
+                Ha caducado: ya no admite registros nuevos. Los jugadores que ya se
+                registraron con él siguen siendo tuyos.
+              </Estado>
+            )}
+          </p>
+
+          <h3 className="font-heading text-foreground mt-6 text-base font-bold">
+            {invitacion.invitados.length === 0
+              ? 'Todavía no se ha registrado nadie con tu código'
+              : `${invitacion.invitados.length} ${
+                  invitacion.invitados.length === 1
+                    ? 'jugador registrado'
+                    : 'jugadores registrados'
+                } con tu código`}
+          </h3>
+          {invitacion.invitados.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {invitacion.invitados.map((j) => (
+                <li key={j.id}>
+                  <Link
+                    href={`/u/${j.slug}`}
+                    className="border-border hover:border-primary flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm"
+                  >
+                    <Avatar src={j.image} nombre={j.name} tamano={24} />
+                    {j.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="font-heading text-foreground text-xl font-bold">Por partida</h2>
@@ -345,8 +439,9 @@ export default async function CobrosPage({ searchParams }: Props) {
           {gm.plan === 'FUNDADOR' ? (
             <>
               Como <strong className="text-foreground">game master fundador</strong>, tu
-              comisión es del {porcentaje(COMISION_FUNDADOR)}%, en lugar del{' '}
-              {porcentaje(COMISION_ESTANDAR)}% general.
+              comisión es del {porcentaje(COMISION_FUNDADOR)}% en lugar del{' '}
+              {porcentaje(COMISION_ESTANDAR)}% general, y del{' '}
+              {porcentaje(COMISION_FUNDADOR_ENLACE)}% con quien se registró con tu código.
             </>
           ) : (
             <>Tu comisión es del {porcentaje(COMISION_ESTANDAR)}%.</>

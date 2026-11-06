@@ -198,9 +198,16 @@ export async function reservarAsiento(
       await bloquearMonedero(userId, tx);
     }
 
-    // La comision se decide aqui y no al cobrar: es el ultimo momento en que
-    // se sabe por donde llego el jugador. El cobro aplica lo que se guarde.
-    const origen: OrigenReserva = 'PLATAFORMA';
+    // La comision se decide aqui y no al cobrar: el cobro lo confirma un
+    // webhook de Stripe, que ya no sabe nada del jugador. Lo que cuenta es si
+    // se registro con el codigo de este GM; eso quedo en su cuenta al crearla.
+    const jugador = await tx.user.findUnique({
+      where: { id: userId },
+      select: { referredByGmId: true },
+    });
+
+    const origen: OrigenReserva =
+      jugador?.referredByGmId === partida.gmId ? 'ENLACE_GM' : 'PLATAFORMA';
     const commissionBps = comisionAplicable(gm?.plan ?? 'ESTANDAR', origen);
 
     // Si hubo una reserva cancelada antes, se reutiliza la fila: la

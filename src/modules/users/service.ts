@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from '@/lib/db';
+import { buscarCodigo } from '@/modules/invitaciones/service';
 
 import { hashPassword, verifyPassword } from './password';
 import { registerSchema, type RegisterInput } from './schema';
@@ -13,7 +14,11 @@ import { slugDisponible } from './slug';
 
 export type ResultadoRegistro =
   | { ok: true; userId: string }
-  | { ok: false; error: 'EMAIL_EN_USO' | 'DATOS_INVALIDOS'; mensaje: string };
+  | {
+      ok: false;
+      error: 'EMAIL_EN_USO' | 'DATOS_INVALIDOS' | 'CODIGO_INVALIDO';
+      mensaje: string;
+    };
 
 /**
  * Da de alta un usuario con email y contrasena.
@@ -32,7 +37,20 @@ export async function registrarUsuario(input: RegisterInput): Promise<ResultadoR
     };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, email, password, codigo } = parsed.data;
+
+  // Un codigo que no vale para el alta: mejor decirlo que crear la cuenta sin
+  // emparejar. Despues ya no se podria arreglar, porque el codigo solo sirve
+  // al registrarse.
+  let invitadoPor: string | null = null;
+
+  if (codigo) {
+    const invitacion = await buscarCodigo(codigo);
+    if (!invitacion.ok) {
+      return { ok: false, error: 'CODIGO_INVALIDO', mensaje: invitacion.mensaje };
+    }
+    invitadoPor = invitacion.gmProfileId;
+  }
 
   const yaExiste = await db.user.findUnique({
     where: { email },
@@ -59,7 +77,14 @@ export async function registrarUsuario(input: RegisterInput): Promise<ResultadoR
 
   try {
     const user = await db.user.create({
-      data: { name, email, slug, passwordHash },
+      data: {
+        name,
+        email,
+        slug,
+        passwordHash,
+        referredByGmId: invitadoPor,
+        referredAt: invitadoPor ? new Date() : null,
+      },
       select: { id: true },
     });
 

@@ -60,10 +60,14 @@ reescribiría la historia contable.
 
 ### Cuánta comisión
 
-| Plan del GM | Jugador de su enlace | Resto de jugadores |
-| ----------- | -------------------- | ------------------ |
-| Estándar    | (no tiene enlace)    | 10%                |
-| Fundador    | 0%                   | 5%                 |
+| Plan del GM | Jugador registrado con su código | Resto de jugadores |
+| ----------- | -------------------------------- | ------------------ |
+| Estándar    | (no tiene código)                | 10%                |
+| Fundador    | 0%                               | 5%                 |
+
+«Registrado con su código» es un dato de la cuenta del jugador
+(`User.referredByGmId`), que se fija al crearla. La reserva lo compara con el
+GM de la partida y guarda el resultado en `Booking.origin`.
 
 El porcentaje **se decide al reservar** y se guarda en `Booking.commissionBps`.
 No puede decidirse al cobrar: el cobro lo confirma un webhook de Stripe, que
