@@ -139,7 +139,12 @@ desarrollo y Stripe en test.
 ### 8. Primer despliegue y webhooks
 
 1. Desplegar `main`. En el registro tiene que salir `prisma migrate deploy`
-   aplicando todas las migraciones.
+   aplicando todas las migraciones (`Applying migration ...`). **Si dice «No
+   pending migrations» en el primer despliegue, la cadena apunta a una base que
+   ya existía**: comparar el servidor (`ep-…`) que muestra el registro con el de
+   `.env.local`; tienen que ser distintos. Ya pasó una vez: producción quedó
+   sobre la base de desarrollo, con las cuentas sembradas y su administrador
+   accesibles en la web real.
 2. Stripe → _Developers_ → _Webhooks_ → dos destinos con la URL
    `https://tugamemaster.com/api/webhooks/stripe` (eventos en
    `docs/environment_setup.md`). Copiar los dos secretos a Vercel y **volver a
