@@ -41,6 +41,12 @@ export const authConfig = {
           Discord({
             clientId: process.env['AUTH_DISCORD_ID'],
             clientSecret: process.env['AUTH_DISCORD_SECRET'],
+            // Discord devuelve su emisor (`iss`) en la vuelta del login, y
+            // Auth.js lo compara con el del proveedor. El de Discord no trae
+            // ninguno y Auth.js usa uno de relleno (`https://authjs.dev`), asi
+            // que rechazaba todas las entradas con `error=Configuration`. Es
+            // el que publica Discord en /.well-known/openid-configuration.
+            issuer: 'https://discord.com',
             // Solo identidad basica: ningun permiso sobre servidores o
             // mensajes (ver CLAUDE.md).
             authorization: { params: { scope: 'identify email' } },
