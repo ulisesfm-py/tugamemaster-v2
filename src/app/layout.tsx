@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Barlow, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
 
+import { sitioIndexable } from '@/lib/indexacion';
+
 /**
  * Brasa usa dos familias y solo dos.
  *
@@ -30,6 +32,8 @@ export const metadata: Metadata = {
   },
   description:
     'Reserva tu sitio en partidas de rol dirigidas por game masters, o abre tu propia mesa y cobra por dirigirla.',
+  // Lanzamiento discreto: fuera de Google hasta que se abra a proposito.
+  ...(sitioIndexable() ? {} : { robots: { index: false, follow: false } }),
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

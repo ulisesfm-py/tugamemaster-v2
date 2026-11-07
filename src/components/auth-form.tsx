@@ -182,6 +182,22 @@ export function AuthForm({
         </>
       )}
 
+      {/* Vale para las dos vias: crear la cuenta con Discord tambien es
+          registrarse. */}
+      {esRegistro && (
+        <p className="text-muted-foreground mt-5 text-center text-xs leading-relaxed">
+          Al crear la cuenta aceptas las{' '}
+          <Link href="/condiciones" className="text-primary hover:underline">
+            condiciones de reserva
+          </Link>{' '}
+          y la{' '}
+          <Link href="/privacidad" className="text-primary hover:underline">
+            política de privacidad
+          </Link>
+          .
+        </p>
+      )}
+
       <p className="text-muted-foreground mt-6 text-center text-sm">
         {esRegistro ? (
           <>

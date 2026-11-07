@@ -6,8 +6,8 @@ import { Logotipo } from '@/components/marca/logotipo';
  * El pie.
  *
  * Aqui viven los enlaces que no caben en la cabecera pero que tienen que
- * existir en alguna parte: las condiciones, como funciona la garantia y la
- * captacion de game masters.
+ * existir en alguna parte: las condiciones y los textos legales, como funciona
+ * la garantia y la captacion de game masters.
  */
 
 const COLUMNAS = [
@@ -33,6 +33,9 @@ const COLUMNAS = [
     enlaces: [
       { href: '/blog', texto: 'Blog' },
       { href: '/condiciones', texto: 'Condiciones' },
+      { href: '/privacidad', texto: 'Privacidad' },
+      { href: '/aviso-legal', texto: 'Aviso legal' },
+      { href: '/contacto', texto: 'Contacto' },
       { href: '/dashboard', texto: 'Mi cuenta' },
     ],
   },

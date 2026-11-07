@@ -129,6 +129,13 @@ algo ya resuelto.
   que Stripe no reintente indefinidamente.
 - Un fallo nuestro al procesar **sí** devuelve 500, porque ahí el reintento de
   Stripe es justo lo que queremos.
+- **En producción son dos destinos con dos secretos** apuntando a la misma URL.
+  Los cobros son eventos de la cuenta de la plataforma; `account.updated` es un
+  evento de la cuenta del GM y llega por el destino de _cuentas conectadas_.
+  Cada uno firma con su secreto (`STRIPE_WEBHOOK_SECRET` y
+  `STRIPE_WEBHOOK_SECRET_CONNECT`) y el endpoint acepta cualquiera de los dos
+  (`src/modules/payments/webhook.ts`). En local hay uno solo, porque
+  `stripe listen` lo reenvía todo.
 
 ## Cobro (fase 6, implementado)
 

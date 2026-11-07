@@ -1,5 +1,3 @@
-import type Stripe from 'stripe';
-
 import { stripe } from '@/lib/stripe';
 import {
   registrarCheckoutCaducado,
@@ -7,6 +5,7 @@ import {
   registrarCobroFallido,
 } from '@/modules/payments/cobros';
 import { guardarEstado } from '@/modules/payments/connect';
+import { secretosDeWebhook, verificarEvento } from '@/modules/payments/webhook';
 
 /**
  * Webhook de Stripe.
@@ -28,9 +27,9 @@ import { guardarEstado } from '@/modules/payments/connect';
  */
 
 export async function POST(request: Request): Promise<Response> {
-  const secreto = process.env['STRIPE_WEBHOOK_SECRET'];
+  const secretos = secretosDeWebhook();
 
-  if (!secreto) {
+  if (secretos.length === 0) {
     console.error('Webhook de Stripe recibido sin STRIPE_WEBHOOK_SECRET configurado');
     return new Response('Webhook no configurado', { status: 500 });
   }
@@ -42,13 +41,12 @@ export async function POST(request: Request): Promise<Response> {
   // bytes y la firma dejaria de cuadrar.
   const cuerpo = await request.text();
 
-  let evento: Stripe.Event;
+  // Dos destinos, dos secretos: ver src/modules/payments/webhook.ts.
+  const evento = await verificarEvento(stripe().webhooks, cuerpo, firma, secretos);
 
-  try {
-    evento = await stripe().webhooks.constructEventAsync(cuerpo, firma, secreto);
-  } catch (error) {
+  if (!evento) {
     // Firma invalida: o el secreto no coincide o alguien esta probando suerte.
-    console.warn('Firma de webhook invalida:', (error as Error).message);
+    console.warn('Firma de webhook invalida para todos los secretos configurados');
     return new Response('Firma invalida', { status: 400 });
   }
 

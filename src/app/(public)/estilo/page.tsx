@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 import { PartidaCard } from '@/components/partida-card';
 import {
@@ -113,6 +114,10 @@ function Bloque({
 }
 
 export default function EstiloPage() {
+  // Es una herramienta de trabajo, no una pagina de la web: en produccion no
+  // existe. En los despliegues de prueba sigue a mano.
+  if (process.env['VERCEL_ENV'] === 'production') notFound();
+
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-12">
       <header>

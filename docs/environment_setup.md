@@ -65,11 +65,12 @@ Scopes: **solo `identify` y `email`**. No solicitar permisos adicionales
 
 ### Pagos (Stripe)
 
-| Variable                             | Descripción                                |
-| ------------------------------------ | ------------------------------------------ |
-| `STRIPE_SECRET_KEY`                  | Clave secreta de la plataforma.            |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública, se envía al navegador.      |
-| `STRIPE_WEBHOOK_SECRET`              | Secreto de firma del endpoint de webhooks. |
+| Variable                             | Descripción                                 |
+| ------------------------------------ | ------------------------------------------- |
+| `STRIPE_SECRET_KEY`                  | Clave secreta de la plataforma.             |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública, se envía al navegador.       |
+| `STRIPE_WEBHOOK_SECRET`              | Secreto de firma del endpoint de webhooks.  |
+| `STRIPE_WEBHOOK_SECRET_CONNECT`      | Solo producción: el del destino de Connect. |
 
 **Dónde se obtiene**: [Dashboard de Stripe](https://dashboard.stripe.com) →
 _Developers_ → _API keys_. Usa siempre las claves de **test** (`sk_test_…`,
@@ -82,8 +83,16 @@ reenvío, y es distinto del de producción:
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
-En producción, el secreto está en _Developers_ → _Webhooks_ → tu endpoint →
-_Signing secret_.
+**Webhooks en producción: dos destinos.** En _Developers_ → _Webhooks_ se
+crean dos destinos con la misma URL, `https://tugamemaster.com/api/webhooks/stripe`:
+
+| Destino              | Eventos                                                                                 | Secreto                         |
+| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| _Your account_       | `payment_intent.succeeded`, `payment_intent.payment_failed`, `checkout.session.expired` | `STRIPE_WEBHOOK_SECRET`         |
+| _Connected accounts_ | `account.updated`                                                                       | `STRIPE_WEBHOOK_SECRET_CONNECT` |
+
+Cada destino tiene su propio _Signing secret_. Si falta el segundo, los cobros
+funcionan pero el estado de verificación de los GMs no se actualiza solo.
 
 **Connect**: hay que activar Connect en el dashboard y configurar la marca de
 la plataforma antes de que los GMs puedan darse de alta. La verificación
@@ -150,6 +159,16 @@ queda un aviso en el registro porque significa que ningún usuario recibe lo suy
 Recuerda que los enlaces de los correos salen de `AUTH_URL`: en local apuntan a
 `localhost`, así que sirven para leer el correo, no para pulsarlos desde el móvil.
 
+### Buscadores
+
+| Variable          | Descripción                                               |
+| ----------------- | --------------------------------------------------------- |
+| `SITIO_INDEXABLE` | `true` para que Google indexe la web. Solo en producción. |
+
+Vacía, todas las páginas llevan `noindex`: es el **lanzamiento discreto**. Se
+lee al compilar, así que tras cambiarla hay que volver a desplegar. Un
+despliegue de prueba no se indexa nunca. Ver `src/lib/indexacion.ts`.
+
 ### Almacenamiento de imágenes
 
 | Variable                | Descripción                                             |
@@ -196,11 +215,16 @@ alguien los cambia sin querer.
 
 ## Entornos
 
-| Entorno    | Base de datos                 | Stripe          | Notas                                              |
-| ---------- | ----------------------------- | --------------- | -------------------------------------------------- |
-| Desarrollo | Rama de Neon o Postgres local | Claves de test  | Webhooks vía `stripe listen`.                      |
-| Preview    | Rama de Neon por PR           | Claves de test  | Nunca apuntar a la base de datos de producción.    |
-| Producción | Neon (rama principal)         | Claves **live** | `AUTH_SECRET` y `CRON_SECRET` propios y distintos. |
+| Entorno    | Base de datos                           | Stripe          | Notas                                                        |
+| ---------- | --------------------------------------- | --------------- | ------------------------------------------------------------ |
+| Desarrollo | Proyecto de Neon de desarrollo          | Claves de test  | Webhooks vía `stripe listen`.                                |
+| Preview    | Proyecto de Neon de desarrollo          | Claves de test  | No aplica migraciones. Nunca la base de datos de producción. |
+| Producción | **Proyecto de Neon propio** (Frankfurt) | Claves **live** | Migra al desplegar. `AUTH_SECRET` y `CRON_SECRET` distintos. |
+
+Producción va en un **proyecto de Neon aparte**, no en una rama del de
+desarrollo: las pruebas E2E borran filas con SQL directo, y una cadena de
+conexión mal copiada no debe poder vaciar la base real. Los pasos del
+despliegue están en `docs/despliegue.md`.
 
 ## Nota sobre `npm audit` y `mysql2`
 

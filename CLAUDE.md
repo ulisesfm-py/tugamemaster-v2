@@ -231,7 +231,8 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   que quien no pueda venir libere la plaza, y eso solo es útil mientras el
   plazo de cancelación siga abierto (48 h). Avisar más tarde es avisar cuando
   ya no se puede hacer nada.
-- El cron se ejecuta a las **04:00 Europe/Madrid**. Ninguna lógica de negocio
+- El cron se ejecuta a las **04:00 Europe/Madrid** (`0 3 * * *` en
+  `vercel.json`, que va en UTC: las 05:00 en horario de verano). Ninguna lógica de negocio
   puede depender del minuto exacto de ejecución: el pago al GM se define como
   "48h o más después del final", no como "exactamente a las 48h".
 - Los jobs se invocan por HTTP con un secreto compartido, sin usar APIs
@@ -269,6 +270,21 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   deja huérfanos en vez de borrarlos en cascada.
 - **Linting**: ESLint + Prettier, ejecutados en CI. No se commitea código que
   no pase lint ni tests.
+
+## Despliegue
+
+- Vercel (región `fra1`, la de la base de datos) + un **proyecto de Neon
+  propio para producción**, separado del de desarrollo. Pasos y comprobaciones
+  en `docs/despliegue.md`.
+- **Solo el despliegue de producción migra** (`scripts/vercel-build.mjs`); los
+  de prueba no tocan nunca la base. Por eso las migraciones tienen que ser
+  compatibles hacia atrás.
+- La base de producción **no se siembra nunca**.
+- Lanzamiento **discreto**: sin `SITIO_INDEXABLE=true`, todas las páginas
+  llevan `noindex`.
+- Los textos legales describen lo que la web hace: un proveedor nuevo que
+  trate datos personales, o una cookie que no sea técnica, se añade a
+  `/privacidad` en el mismo commit.
 
 ## Manejo de secretos (importante — esto falló en la v1)
 
