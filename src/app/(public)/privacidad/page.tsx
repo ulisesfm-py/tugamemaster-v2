@@ -49,8 +49,8 @@ export default function PrivacidadPage() {
     >
       <SeccionLegal titulo="Responsable">
         <p>
-          {TITULAR.nombre} (NIF {TITULAR.nif}), titular de {TITULAR.dominio}. Para
-          cualquier cosa relacionada con tus datos: <Correo direccion={TITULAR.correo} />.
+          {TITULAR.nombre}, titular de {TITULAR.dominio}. Para cualquier cosa relacionada
+          con tus datos: <Correo direccion={TITULAR.correo} />.
         </p>
       </SeccionLegal>
 

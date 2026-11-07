@@ -1,19 +1,14 @@
 /**
- * Quien esta detras de la web, para el aviso legal y la politica de
- * privacidad.
+ * Quien esta detras de la web, para el aviso legal, la privacidad y el
+ * contacto.
  *
- * La LSSI (art. 10) obliga a publicar nombre, NIF, domicilio y un correo de
- * contacto del titular. No son secretos: tienen que salir en la web.
- *
- * Mientras quede algun `PENDIENTE`, el despliegue de produccion se niega a
- * compilar (ver scripts/vercel-build.mjs): un aviso legal a medio rellenar es
- * peor que ninguno.
+ * Version minima a proposito (decidido al preparar el despliegue): nombre y
+ * correo, sin NIF ni domicilio, mientras la web no facture. Cuando lo haga,
+ * se completa aqui y sale en las tres paginas a la vez.
  */
 export const TITULAR = {
-  nombre: 'PENDIENTE',
-  nif: 'PENDIENTE',
-  domicilio: 'PENDIENTE',
-  correo: 'hola@tugamemaster.com',
+  nombre: 'Ulises',
+  correo: 'ulises.fm.py@gmail.com',
   dominio: 'tugamemaster.com',
 } as const;
 

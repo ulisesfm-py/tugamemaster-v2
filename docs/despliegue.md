@@ -19,12 +19,15 @@ se escribe en este fichero ni en el repositorio.
   anterior queda corriendo sobre el esquema nuevo: por eso **las migraciones
   tienen que ser compatibles hacia atrás** (añadir columnas antes de usarlas;
   borrar o renombrar en un despliegue posterior).
-- El despliegue de producción **se niega a compilar** si `src/lib/titular.ts`
-  conserva algún `PENDIENTE`: el aviso legal es obligatorio.
 - La región es `fra1` (Frankfurt, `vercel.json`), la misma que la base de
   datos. Sin eso, cada consulta cruzaría el Atlántico.
 - La base de datos de producción **no se siembra nunca**. El seed crea usuarios
   con contraseñas conocidas.
+
+## Coste fijo
+
+Unos **20 €/mes**: Vercel Pro (20 $). Neon, Resend, Sentry y Blob van en sus
+planes gratuitos mientras quepan; el dominio se paga aparte, al año.
 
 ## Orden de los pasos
 
@@ -42,18 +45,21 @@ Empezando por lo que más tarda, que es la verificación de Stripe.
    icono, color `#c9973f`): es lo que ven los GMs en el alta.
 3. Las claves `live` (`sk_live_…`, `pk_live_…`) solo se copian a Vercel.
 
+Las cuentas Express **no se crean desde el panel**: las crea la web, una por
+GM, cuando pulsa «Configurar cobros» en `/cuenta/cobros`. El panel de Connect
+estará vacío hasta entonces.
+
 Los webhooks se configuran en el paso 8, cuando la web ya responde.
 
-### 2. Dominio y correo de contacto (Hostinger)
+### 2. Dominio (Hostinger)
 
-El dominio sigue en Hostinger y **los DNS también**: así todos los registros
-(web, envío de correo y recepción) viven en un único panel.
+El dominio sigue en Hostinger y **los DNS también**: así los registros de la
+web y los del envío de correo viven en un único panel.
 
-- **Recibir en `hola@tugamemaster.com`**: o el correo de Hostinger si el plan
-  lo incluye, o un reenvío gratuito como ImprovMX hacia tu buzón personal. El
-  reenvío añade dos registros `MX` y un `TXT` de SPF en la raíz del dominio.
-- Resend firma desde el subdominio `send.`, así que su SPF no choca con el de
-  la raíz.
+No hay buzón en el dominio: el contacto público es el correo personal del
+titular (`src/lib/titular.ts`). Si algún día se quiere `hola@tugamemaster.com`,
+basta un reenvío (el correo de Hostinger o ImprovMX). Resend firma desde el
+subdominio `send.`, así que no choca con los registros de la raíz.
 
 ### 3. Vercel
 
@@ -77,15 +83,17 @@ El dominio sigue en Hostinger y **los DNS también**: así todos los registros
    (Frankfurt)**, Postgres de la misma versión que desarrollo.
 2. Copiar las dos cadenas: la _pooled_ (`DATABASE_URL`) y la directa
    (`DIRECT_URL`), las dos acabadas en `?sslmode=verify-full`.
-3. Plan de pago: da historial para restaurar la base a un instante anterior.
-   Con dinero de por medio no es opcional.
+3. **Plan gratuito** para empezar: da de sobra para el tráfico inicial. Lo
+   que se pierde es el historial largo para restaurar la base a un instante
+   anterior; pasar al plan de pago cuando haya movimiento de dinero real
+   (decidido al preparar el despliegue).
 
 ### 5. Resend
 
 1. _Domains_ → añadir `tugamemaster.com`, región UE.
 2. Crear en Hostinger los registros que indique (`MX` y `TXT` en `send.`, el
    DKIM en `resend._domainkey`) y añadir un DMARC:
-   `_dmarc` → `v=DMARC1; p=none; rua=mailto:hola@tugamemaster.com`.
+   `_dmarc` → `v=DMARC1; p=none`.
 3. Esperar a que salga _Verified_ y crear una API key **solo de envío** para
    producción.
 

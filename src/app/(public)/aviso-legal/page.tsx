@@ -13,16 +13,12 @@ export default function AvisoLegalPage() {
   return (
     <PaginaLegal
       titulo="Aviso legal"
-      entradilla="Quién está detrás de esta web, como exige la Ley 34/2002 de servicios de la sociedad de la información (LSSI)."
+      entradilla="Quién está detrás de esta web y cómo contactar."
     >
       <SeccionLegal titulo="Titular">
         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
           <dt className="text-foreground font-semibold">Nombre</dt>
           <dd>{TITULAR.nombre}</dd>
-          <dt className="text-foreground font-semibold">NIF</dt>
-          <dd>{TITULAR.nif}</dd>
-          <dt className="text-foreground font-semibold">Domicilio</dt>
-          <dd>{TITULAR.domicilio}</dd>
           <dt className="text-foreground font-semibold">Correo</dt>
           <dd>
             <Correo direccion={TITULAR.correo} />

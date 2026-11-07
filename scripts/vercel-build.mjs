@@ -13,7 +13,6 @@
  * que ser compatibles hacia atras (anadir antes que renombrar o borrar).
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 
 function ejecutar(orden) {
   console.log(`> ${orden}`);
@@ -24,11 +23,6 @@ function ejecutar(orden) {
 const entorno = process.env.VERCEL_ENV;
 
 if (entorno === 'production') {
-  // El aviso legal es obligatorio (LSSI): no se publica a medio rellenar.
-  if (readFileSync('src/lib/titular.ts', 'utf8').includes("'PENDIENTE'")) {
-    console.error('Faltan datos del titular en src/lib/titular.ts (quedan PENDIENTE).');
-    process.exit(1);
-  }
   if (!process.env.DIRECT_URL) {
     console.error('Falta DIRECT_URL: las migraciones necesitan la conexion directa.');
     process.exit(1);
