@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
-import { RepartoEjemplo } from '@/components/reparto-ejemplo';
 import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
 import { resumenDe } from '@/modules/blog/politica';
@@ -288,45 +287,41 @@ export default async function Portada() {
 
       {/* ── Para game masters ─────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="grid gap-8 sm:grid-cols-[1.2fr_1fr] sm:items-center">
-          <div>
-            <h2 className="font-heading text-foreground text-2xl font-bold">
-              ¿Diriges tú?
-            </h2>
-            <p className="text-muted-foreground mt-2 max-w-prose">
-              Abre tu mesa, pon tus plazas y tu precio, y cobra por dirigirla. Nosotros
-              nos encargamos del cobro, de las cancelaciones y de que tu reputación quede
-              escrita donde se ve.
-            </p>
+        <div>
+          <h2 className="font-heading text-foreground text-2xl font-bold">
+            ¿Diriges tú?
+          </h2>
+          <p className="text-muted-foreground mt-2 max-w-prose">
+            Abre tu mesa, pon tus plazas y tu precio, y cobra por dirigirla. Nosotros nos
+            encargamos del cobro, de las cancelaciones y de que tu reputación quede
+            escrita donde se ve.
+          </p>
 
-            <ul className="text-muted-foreground mt-5 flex flex-col gap-2 text-sm">
-              <li>
-                <span className="text-foreground font-semibold">
-                  Comisión del {comision}%
-                </span>{' '}
-                sobre lo que cobras, más el coste real de la pasarela de pago.
-              </li>
-              <li>
-                <span className="text-foreground font-semibold">Cobras 48 horas</span>{' '}
-                después de terminar la partida, si no hay incidencias.
-              </li>
-              <li>
-                <span className="text-foreground font-semibold">
-                  Sin cuota ni permanencia.
-                </span>{' '}
-                Si un mes no diriges, no pagas nada.
-              </li>
-            </ul>
+          <ul className="text-muted-foreground mt-5 flex flex-col gap-2 text-sm">
+            <li>
+              <span className="text-foreground font-semibold">
+                Comisión del {comision}%
+              </span>{' '}
+              sobre lo que cobras, más el coste real de la plataforma de pago.
+            </li>
+            <li>
+              <span className="text-foreground font-semibold">Cobras 48 horas</span>{' '}
+              después de terminar la partida, si no hay incidencias.
+            </li>
+            <li>
+              <span className="text-foreground font-semibold">
+                Sin cuota ni permanencia.
+              </span>{' '}
+              Si un mes no diriges, no pagas nada.
+            </li>
+          </ul>
 
-            <div className="mt-7 flex flex-wrap gap-3">
-              <EnlaceBoton href="/cuenta/gm">Abrir mi mesa</EnlaceBoton>
-              <EnlaceBoton href="/para-game-masters" variante="perfil">
-                Cómo funciona para el GM
-              </EnlaceBoton>
-            </div>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <EnlaceBoton href="/cuenta/gm">Abrir mi mesa</EnlaceBoton>
+            <EnlaceBoton href="/para-game-masters" variante="perfil">
+              Cómo funciona para el GM
+            </EnlaceBoton>
           </div>
-
-          <RepartoEjemplo />
         </div>
       </section>
 

@@ -7,7 +7,7 @@ conservando el nombre**. No hay que tocar código.
 | Qué                  | Fichero                    | Dónde se ve                            |
 | -------------------- | -------------------------- | -------------------------------------- |
 | Logotipo             | `public/marca/logo.svg`    | Cabecera y pie, en todas las páginas   |
-| Lámina de la portada | `public/marca/portada.svg` | Detrás del titular de la portada       |
+| Lámina de la portada | `public/marca/portada.png` | Detrás del titular de la portada       |
 | Icono de la pestaña  | `src/app/icon.svg`         | La pestaña del navegador y el marcador |
 
 En desarrollo el cambio se ve al recargar. En producción, con el siguiente

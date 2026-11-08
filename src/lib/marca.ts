@@ -59,4 +59,4 @@ export const LOGOTIPO: Logotipo | null = {
  * el texto se lee sobre un velo oscuro: el titular manda sobre la foto, no al
  * revés.
  */
-export const PORTADA: Portada | null = { src: '/marca/portada.svg' };
+export const PORTADA: Portada | null = { src: '/marca/portada.png' };

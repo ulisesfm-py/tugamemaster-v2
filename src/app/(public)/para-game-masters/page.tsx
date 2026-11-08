@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-import { RepartoEjemplo } from '@/components/reparto-ejemplo';
 import { EnlaceBoton } from '@/components/ui';
 import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { HORAS_DE_RETENCION } from '@/modules/payments/libro';
@@ -66,13 +65,11 @@ export default function ParaGameMastersPage() {
         lo transferimos.
       </p>
 
-      <RepartoEjemplo className="mt-8" />
-
       <Bloque titulo="Qué cuesta">
         <p>
           Una <strong className="text-foreground">comisión del {COMISION}%</strong> sobre
-          lo que cobras, y el coste que la pasarela nos cobra por mover ese dinero. Nada
-          más: no hay cuota mensual ni permanencia, así que{' '}
+          lo que cobras, y el coste que la plataforma de pago nos cobra por mover ese
+          dinero. Nada más: no hay cuota mensual ni permanencia, así que{' '}
           <strong className="text-foreground">un mes que no dirijas no pagas nada</strong>
           .
         </p>
