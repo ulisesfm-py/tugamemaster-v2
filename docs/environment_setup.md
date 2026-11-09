@@ -171,11 +171,21 @@ despliegue de prueba no se indexa nunca. Ver `src/lib/indexacion.ts`.
 
 ### Almacenamiento de imágenes
 
-| Variable                | Descripción                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `BLOB_READ_WRITE_TOKEN` | Token de escritura para avatares e imágenes de partida. |
+| Variable                | Descripción                                                    |
+| ----------------------- | -------------------------------------------------------------- |
+| `BLOB_READ_WRITE_TOKEN` | Token de escritura para avatares, láminas y portadas del blog. |
+| `BLOB_STORE_ID`         | Alternativa: identificador del almacén (conexiones nuevas).    |
 
-**Dónde se obtiene**: panel de Vercel → _Storage_ → _Blob_ → _Connect_.
+Basta con una de las dos. Las conexiones nuevas de Vercel dejan
+`BLOB_STORE_ID` y la librería se autentica con el token OIDC que Vercel pone en
+cada petición; en local se usa el token de escritura.
+
+**El almacén tiene que ser público** (_Access: Public_). Las imágenes salen en
+páginas que ve cualquiera, y un almacén privado rechaza las subidas con
+«Cannot use public access on a private store». Ya pasó una vez.
+
+**Dónde se obtiene**: panel de Vercel → _Storage_ → _Create_ → _Blob_, acceso
+público, región Frankfurt → conectar al proyecto con el prefijo `BLOB`.
 
 ### Observabilidad (Sentry, opcional)
 

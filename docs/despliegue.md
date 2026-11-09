@@ -72,8 +72,10 @@ subdominio `send.`, así que no choca con los registros de la raíz.
    Hostinger: un `A` para la raíz y un `CNAME` para `www`. Hay que **borrar** el
    `A` y el `CNAME` que Hostinger trae por defecto, o seguirá saliendo su página
    de aparcamiento.
-4. _Storage_ → crear un **Blob store** de producción y conectarlo al proyecto
-   (rellena `BLOB_READ_WRITE_TOKEN`).
+4. _Storage_ → crear un **Blob store** de producción con acceso **Public** y
+   región Frankfurt, y conectarlo al proyecto solo en Production, con el
+   prefijo `BLOB`. Si hay otros almacenes conectados, desconectarlos antes: sus
+   variables chocan con las del nuevo.
 5. _Settings_ → _Deployment Protection_: los despliegues de prueba con
    protección de Vercel, para que no sean públicos.
 

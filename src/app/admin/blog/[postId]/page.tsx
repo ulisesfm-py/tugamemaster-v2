@@ -6,8 +6,9 @@ import { notFound } from 'next/navigation';
 import { ImagenForm } from '@/components/imagen-form';
 import { PostForm } from '@/components/post-form';
 import { ReservarBoton } from '@/components/reservar-boton';
-import { Estado } from '@/components/ui';
+import { Aviso, Estado } from '@/components/ui';
 import { auth } from '@/lib/auth';
+import { blobEnabled } from '@/lib/env';
 import {
   actualizarPostAction,
   borrarPostAction,
@@ -96,12 +97,18 @@ export default async function EditarPostPage({ params }: Props) {
         )}
 
         <div className="mt-4">
-          <ImagenForm
-            accion={subirPortadaAction}
-            campo="portada"
-            campos={{ postId: post.id, slug: post.slug }}
-            textoBoton={post.coverUrl ? 'Cambiar portada' : 'Subir portada'}
-          />
+          {blobEnabled() ? (
+            <ImagenForm
+              accion={subirPortadaAction}
+              campo="portada"
+              campos={{ postId: post.id, slug: post.slug }}
+              textoBoton={post.coverUrl ? 'Cambiar portada' : 'Subir portada'}
+            />
+          ) : (
+            <Aviso tono="dato">
+              La subida de imágenes no está configurada en este entorno.
+            </Aviso>
+          )}
         </div>
       </section>
 

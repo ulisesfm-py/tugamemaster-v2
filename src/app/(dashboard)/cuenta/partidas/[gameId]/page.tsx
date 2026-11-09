@@ -18,6 +18,7 @@ import {
   Fecha,
   Vacio,
 } from '@/components/ui';
+import { blobEnabled } from '@/lib/env';
 import { auth } from '@/lib/auth';
 import { jugadoresDe } from '@/modules/bookings/queries';
 import { guardarNotaAction } from '@/modules/campaigns/actions';
@@ -294,12 +295,18 @@ export default async function GestionarPartidaPage({ params }: Props) {
             </figure>
 
             <div className="mt-4">
-              <ImagenForm
-                accion={subirLaminaAction}
-                campo="lamina"
-                campos={{ gameId: partida.id, slug: partida.slug }}
-                textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
-              />
+              {blobEnabled() ? (
+                <ImagenForm
+                  accion={subirLaminaAction}
+                  campo="lamina"
+                  campos={{ gameId: partida.id, slug: partida.slug }}
+                  textoBoton={partida.imageUrl ? 'Cambiar lámina' : 'Subir lámina'}
+                />
+              ) : (
+                <Aviso tono="dato">
+                  La subida de imágenes no está configurada en este entorno.
+                </Aviso>
+              )}
             </div>
           </Bloque>
 

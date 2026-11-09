@@ -53,9 +53,17 @@ export function env(): Env {
   return cached;
 }
 
-/** True si el almacenamiento esta configurado y se puede subir foto. */
+/**
+ * True si el almacenamiento esta configurado y se puede subir foto.
+ *
+ * Vale cualquiera de las dos formas de conectar Vercel Blob: el token de
+ * lectura y escritura de siempre, o el identificador del almacen que dejan las
+ * conexiones nuevas (la libreria se autentica entonces con el token OIDC que
+ * Vercel pone en cada peticion). El almacen tiene que ser **publico**: las
+ * imagenes salen en paginas que ve cualquiera.
+ */
 export function blobEnabled(): boolean {
-  return Boolean(process.env['BLOB_READ_WRITE_TOKEN']);
+  return Boolean(process.env['BLOB_READ_WRITE_TOKEN'] || process.env['BLOB_STORE_ID']);
 }
 
 /** True si Discord esta configurado y se puede ofrecer como forma de entrar. */
