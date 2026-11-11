@@ -4,20 +4,10 @@ import { revalidatePath } from 'next/cache';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { devolverADinero } from '@/modules/payments/devoluciones';
 
 import { aprobarIncidencia, rechazarIncidencia, reportarIncidencia } from './service';
-
-/** Comprueba que quien llama es administrador. */
-async function exigirAdmin() {
-  const session = await auth();
-
-  // No basta con el middleware: una accion de servidor es un endpoint por si
-  // misma y podria invocarse directamente.
-  if (!session?.user?.isAdmin) return null;
-
-  return session.user;
-}
 
 export async function reportarIncidenciaAction(
   _previo: EstadoAccion,

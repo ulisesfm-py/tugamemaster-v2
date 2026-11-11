@@ -7,7 +7,7 @@ import { ImagenForm } from '@/components/imagen-form';
 import { PostForm } from '@/components/post-form';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Aviso, Estado } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { blobEnabled } from '@/lib/env';
 import {
   actualizarPostAction,
@@ -25,8 +25,7 @@ type Props = { params: Promise<{ postId: string }> };
 export default async function EditarPostPage({ params }: Props) {
   const { postId } = await params;
 
-  const session = await auth();
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const post = await postParaEditar(postId);
   if (!post) notFound();

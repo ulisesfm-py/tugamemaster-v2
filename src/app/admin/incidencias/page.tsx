@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { ReservarBoton } from '@/components/reservar-boton';
 import { ResolverIncidencia } from '@/components/resolver-incidencia';
 import { Estado, ESTADO_DE_INCIDENCIA, Fecha, Vacio } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import {
   aprobarIncidenciaAction,
   devolverADineroAction,
@@ -17,11 +17,9 @@ import { formatearImporte } from '@/modules/payments/dinero';
 export const metadata: Metadata = { title: 'Incidencias · Admin' };
 
 export default async function IncidenciasPage() {
-  const session = await auth();
-
   // El middleware ya bloquea /admin, pero se repite aqui: la seguridad no
   // puede depender de una sola capa.
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const incidencias = await incidenciasParaAdmin();
   const abiertas = incidencias.filter((i) => i.status === 'OPEN');

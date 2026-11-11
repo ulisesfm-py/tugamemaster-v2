@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { db } from '@/lib/db';
 
 import { emitirCodigo, renovarCodigo } from './service';
@@ -19,7 +20,7 @@ async function fundadorDelFormulario(
 ): Promise<{ ok: true; gmProfileId: string } | { ok: false; error: string }> {
   const session = await auth();
   if (!session?.user) return { ok: false, error: 'Tienes que iniciar sesión' };
-  if (!session.user.isAdmin)
+  if (!(await exigirAdmin()))
     return { ok: false, error: 'Esto lo decide un administrador' };
 
   const gmProfileId = String(formData.get('gmProfileId') ?? '');

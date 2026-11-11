@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Estado } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { db } from '@/lib/db';
 import { formatearImporte } from '@/modules/payments/dinero';
 import { saldoPendienteTotal } from '@/modules/wallet/service';
@@ -45,11 +45,9 @@ function Atajo({
 }
 
 export default async function AdminPage() {
-  const session = await auth();
-
   // El middleware ya bloquea /admin, pero se repite aqui: la seguridad no
   // puede depender de una sola capa.
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const [incidenciasAbiertas, borradores, pagosBloqueados, saldoPendiente, denuncias] =
     await Promise.all([

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 
 import { quitarAvatar, subirAvatar } from './avatar';
 import { listaDesdeTexto } from './schema';
@@ -114,7 +115,7 @@ export async function cambiarPlanGmAction(
 
   const resultado = await cambiarPlanGm(
     { gmProfileId: String(formData.get('gmProfileId') ?? ''), plan },
-    { esAdmin: session.user.isAdmin === true },
+    { esAdmin: (await exigirAdmin()) !== null },
   );
 
   if (!resultado.ok) return { error: resultado.mensaje };

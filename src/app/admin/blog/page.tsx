@@ -3,17 +3,15 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { EnlaceBoton, Estado, Fecha, Vacio } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { postsParaAdmin } from '@/modules/blog/queries';
 
 export const metadata: Metadata = { title: 'Blog · Admin' };
 
 export default async function AdminBlogPage() {
-  const session = await auth();
-
   // El middleware ya bloquea /admin, pero se repite aqui: la seguridad no
   // puede depender de una sola capa.
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const posts = await postsParaAdmin();
   const borradores = posts.filter((p) => p.status !== 'PUBLISHED').length;

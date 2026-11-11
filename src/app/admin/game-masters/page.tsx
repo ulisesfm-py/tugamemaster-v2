@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Estado, Fundador, Vacio } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import {
   COMISION_ESTANDAR,
   COMISION_FUNDADOR,
@@ -26,11 +26,9 @@ const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
  * ni ganarlo solo, porque las condiciones se pactan en persona.
  */
 export default async function GameMastersAdminPage() {
-  const session = await auth();
-
   // El middleware ya bloquea /admin, pero se repite aqui: la seguridad no
   // puede depender de una sola capa.
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const gms = await gmsParaAdmin();
   const ahora = new Date();

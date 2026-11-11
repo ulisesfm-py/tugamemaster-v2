@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 
 import {
   actualizarPost,
@@ -17,17 +18,6 @@ import {
   publicarPost,
   subirPortada,
 } from './service';
-
-/** Comprueba que quien llama es administrador. */
-async function exigirAdmin() {
-  const session = await auth();
-
-  // No basta con el middleware: una accion de servidor es un endpoint por si
-  // misma y podria invocarse directamente.
-  if (!session?.user?.isAdmin) return null;
-
-  return session.user;
-}
 
 function datosDelPost(formData: FormData) {
   return {
@@ -182,7 +172,7 @@ export async function borrarComentarioAction(
   if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await borrarComentario(
-    { id: session.user.id, esAdmin: session.user.isAdmin === true },
+    { id: session.user.id, esAdmin: (await exigirAdmin()) !== null },
     String(formData.get('commentId') ?? ''),
   );
 

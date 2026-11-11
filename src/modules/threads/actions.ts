@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 
 import {
   denunciarMensaje,
@@ -55,7 +56,7 @@ export async function retirarMensajeAction(
 
   const resultado = await retirarMensaje(String(formData.get('messageId') ?? ''), {
     id: session.user.id,
-    esAdmin: session.user.isAdmin === true,
+    esAdmin: (await exigirAdmin()) !== null,
   });
 
   if (!resultado.ok) return { error: resultado.mensaje };
@@ -95,7 +96,7 @@ export async function descartarDenunciaAction(
   if (!session?.user) return { error: 'Tienes que iniciar sesión' };
 
   const resultado = await descartarDenuncia(String(formData.get('messageId') ?? ''), {
-    esAdmin: session.user.isAdmin === true,
+    esAdmin: (await exigirAdmin()) !== null,
   });
 
   if (!resultado.ok) return { error: resultado.mensaje };

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { ReservarBoton } from '@/components/reservar-boton';
 import { Fecha, Vacio } from '@/components/ui';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { descartarDenunciaAction, retirarMensajeAction } from '@/modules/threads/actions';
 import { denunciasParaAdmin } from '@/modules/threads/queries';
 
@@ -18,11 +18,9 @@ export const metadata: Metadata = { title: 'Mensajes denunciados · Admin' };
  * que denuncia como todo el mundo y decide quien si puede devolver el dinero.
  */
 export default async function HilosPage() {
-  const session = await auth();
-
   // El middleware ya bloquea /admin, pero se repite aqui: la seguridad no
   // puede depender de una sola capa.
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   const denuncias = await denunciasParaAdmin();
 

@@ -3,14 +3,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { PostForm } from '@/components/post-form';
-import { auth } from '@/lib/auth';
+import { exigirAdmin } from '@/lib/auth/admin';
 import { crearPostAction } from '@/modules/blog/actions';
 
 export const metadata: Metadata = { title: 'Nuevo artículo · Admin' };
 
 export default async function NuevoPostPage() {
-  const session = await auth();
-  if (!session?.user?.isAdmin) notFound();
+  if (!(await exigirAdmin())) notFound();
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">

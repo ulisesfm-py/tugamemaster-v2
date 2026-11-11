@@ -1,7 +1,19 @@
 import { withSentryConfig } from '@sentry/nextjs/config';
 import type { NextConfig } from 'next';
 
+import { CABECERAS_FIJAS } from './src/lib/cabeceras';
+
 const nextConfig: NextConfig = {
+  // No anunciar con que esta hecha la web: no protege de nada, pero tampoco
+  // hay motivo para ponerselo facil a quien busca versiones con fallos.
+  poweredByHeader: false,
+
+  // Cabeceras de seguridad fijas, para todas las respuestas. La CSP de
+  // scripts, que lleva un nonce por peticion, la pone `src/proxy.ts`.
+  async headers() {
+    return [{ source: '/:path*', headers: [...CABECERAS_FIJAS] }];
+  },
+
   images: {
     // Avatares que sirve Discord tras el login OAuth. Cualquier otro origen
     // se bloquea: next/image no debe poder usarse como proxy de imagenes
