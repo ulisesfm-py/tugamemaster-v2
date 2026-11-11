@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { ContenidoBlog } from '@/components/blog/contenido';
 import { PartidaCard } from '@/components/partida-card';
 import {
   Avatar,
@@ -30,6 +31,36 @@ export const metadata: Metadata = {
   title: 'Estilo · TuGameMaster',
   robots: { index: false, follow: false },
 };
+
+const ARTICULO_DE_EJEMPLO = [
+  '## Si juegas: cuatro pasos',
+  '',
+  'Reservar una plaza es **rapido**. Mira [las partidas abiertas](/partidas) y elige mesa.',
+  'Un salto de linea simple se respeta.',
+  '',
+  '### Reservar y pagar',
+  '',
+  '1. Elige una partida',
+  '2. Pulsa **Reservar**',
+  '3. Paga con tarjeta',
+  '',
+  '- Cancelas gratis hasta 48 h antes',
+  '- El dinero queda retenido hasta que se juega',
+  '',
+  '> Consejo: lleva tus dados y un lapiz. Y puntualidad.',
+  '',
+  '> Ojo: dentro de las ultimas 48 h no hay reembolso.',
+  '',
+  '> Nota: este recuadro no lleva etiqueta propia.',
+  '',
+  '![La ficha de una partida](/blog/ejemplo-captura.png "Asi se ve la ficha de una partida")',
+  '',
+  '---',
+  '',
+  '@[video](https://youtu.be/AAAAAAAAAAA "Un video de YouTube: no carga nada hasta pulsar")',
+  '',
+  '@[video](/blog/ejemplo-clip.mp4 "Un clip propio (aqui no existe el fichero)")',
+].join('\n');
 
 const AHORA = new Date('2026-10-18T18:00:00Z');
 
@@ -295,6 +326,15 @@ export default function EstiloPage() {
         >
           Cuando reserves una plaza, aparecerá aquí con su fecha y su cuenta atrás.
         </Vacio>
+      </Bloque>
+
+      <Bloque
+        titulo="Articulo del blog"
+        nota="El marcado de los articulos tal como lo pinta la web: titulos, listas, recuadros, imagen, y los dos tipos de video."
+      >
+        <div className="border-border bg-card rounded-sm border p-6">
+          <ContenidoBlog texto={ARTICULO_DE_EJEMPLO} />
+        </div>
       </Bloque>
 
       <Bloque titulo="Piezas sueltas">

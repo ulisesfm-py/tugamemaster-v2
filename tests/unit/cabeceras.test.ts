@@ -22,6 +22,14 @@ describe('construirCsp', () => {
     expect(csp).toContain("base-uri 'self'");
   });
 
+  it('permite videos solo de YouTube sin cookies y clips propios', () => {
+    expect(csp).toContain('frame-src https://www.youtube-nocookie.com;');
+    expect(csp).toMatch(
+      /media-src 'self' https:\/\/\*\.public\.blob\.vercel-storage\.com/,
+    );
+    expect(csp).not.toMatch(/frame-src[^;]*youtube\.com/);
+  });
+
   it('solo abre los origenes que la web usa de verdad', () => {
     expect(csp).toContain('https://cdn.discordapp.com');
     expect(csp).toContain('https://*.public.blob.vercel-storage.com');

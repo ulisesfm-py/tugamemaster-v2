@@ -14,6 +14,27 @@ import {
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
+const FORMATO_DE_EJEMPLO = `## Título de sección
+### Subtítulo
+
+Un párrafo con **negrita** y un [enlace a la web](/partidas).
+Un salto de línea simple se respeta.
+
+- Elemento de lista
+- Otro elemento
+
+1. Primer paso
+2. Segundo paso
+
+> Consejo: un recuadro destacado (también Nota: y Ojo:)
+
+---
+
+![Texto alternativo](/blog/guia/reservar.webp "Pie de foto opcional")
+
+@[video](https://youtu.be/XXXXXXXXXXX "Pie opcional")
+@[video](/blog/guia/reservar.mp4)`;
+
 function Guardar({ texto }: { texto: string }) {
   const { pending } = useFormStatus();
 
@@ -85,7 +106,7 @@ export function PostForm({
       <Campo
         id="content"
         etiqueta="Artículo"
-        ayuda="Texto plano: se respetan los saltos de línea, pero no se interpreta ni HTML ni Markdown."
+        ayuda="Se respetan los saltos de línea. No se interpreta HTML ni Markdown: solo el formato de la guía de abajo."
       >
         <textarea
           id="content"
@@ -97,6 +118,20 @@ export function PostForm({
           className={`${CLASE_CONTROL} font-mono`}
         />
       </Campo>
+
+      <details className="border-border bg-card rounded-sm border p-4 text-sm">
+        <summary className="text-foreground cursor-pointer font-medium">
+          Cómo dar formato al artículo
+        </summary>
+        <pre className="text-muted-foreground mt-3 overflow-x-auto font-mono text-xs leading-relaxed whitespace-pre-wrap">
+          {FORMATO_DE_EJEMPLO}
+        </pre>
+        <p className="text-muted-foreground mt-3 text-xs">
+          Imágenes y clips van en la carpeta <code>public/blog/</code> del proyecto (sin
+          puntos en el nombre salvo el de la extensión). Los vídeos de YouTube se pegan
+          con su enlace normal. Cualquier otra dirección se rechaza al guardar.
+        </p>
+      </details>
 
       {estado && 'error' in estado && <Aviso tono="error">{estado.error}</Aviso>}
       {estado && 'ok' in estado && (

@@ -66,8 +66,15 @@ fidelidad a lo anterior.
     abierta bloquea el pago al GM hasta que el admin la resuelva.
 - **Perfiles de usuario**: personalizables, con gustos y preferencias de rol.
 - **Blog**: los admins publican artículos; los usuarios comentan y dan like.
-  El cuerpo es **texto plano**: se respetan los saltos de línea y no se
-  interpreta ni HTML ni Markdown, para no tener que sanear la salida. Un
+  El cuerpo lleva un **marcado propio y pequeño** (títulos, listas, negrita,
+  enlaces, recuadros, imágenes y vídeos; ver `docs/blog.md`) que
+  `src/modules/blog/contenido.ts` convierte en elementos de React. **No se
+  interpreta ni HTML ni Markdown** y no hay `dangerouslySetInnerHTML`: React
+  escapa el texto, y lo único que se vigila son las direcciones, que pasan por
+  una lista de lo permitido (imágenes y clips de `/blog/` o de nuestro Blob,
+  vídeos solo de YouTube, enlaces internos o https). Una dirección no permitida
+  se rechaza al guardar. Los vídeos de YouTube no cargan nada hasta que se
+  pulsa el play. Los comentarios siguen siendo texto plano. Un
   comentario lo puede retirar su autor o un admin, y nadie más. Un artículo
   publicado se retira, no se borra: borrar solo se ofrece sobre borradores,
   porque se lleva por delante los comentarios de otra gente. El `slug` se

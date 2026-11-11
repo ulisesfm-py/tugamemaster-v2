@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { ContenidoBlog } from '@/components/blog/contenido';
 import { BotonLike } from '@/components/boton-like';
 import { ComentarForm } from '@/components/comentar-form';
 import { ReservarBoton } from '@/components/reservar-boton';
@@ -77,11 +78,7 @@ export default async function ArticuloPage({ params }: Props) {
         />
       )}
 
-      {/* Texto plano: se respetan los saltos de linea y no se interpreta
-          ninguna marca. Ver modules/blog/schema.ts. */}
-      <article className="text-foreground/90 mt-8 leading-relaxed whitespace-pre-line">
-        {post.content}
-      </article>
+      <ContenidoBlog texto={post.content} className="mt-8" />
 
       <div className="border-border mt-10 border-t pt-6">
         {session?.user ? (

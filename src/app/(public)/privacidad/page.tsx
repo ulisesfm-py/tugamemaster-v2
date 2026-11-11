@@ -36,6 +36,10 @@ const PROVEEDORES = [
     para: 'Registrar los errores técnicos de la web. Está configurado para no recibir datos personales.',
   },
   {
+    nombre: 'YouTube (Google)',
+    para: 'Reproducir los vídeos de algunos artículos del blog. No se carga nada de YouTube hasta que pulsas el botón de reproducir.',
+  },
+  {
     nombre: 'Discord',
     para: 'Solo si eliges entrar con Discord: nos facilita tu nombre de usuario, tu avatar, tu correo y tu identificador.',
   },
@@ -170,7 +174,8 @@ export default function PrivacidadPage() {
         </p>
         <p>
           La pantalla de pago es de Stripe y usa sus propias cookies para prevenir el
-          fraude.
+          fraude. Y si pulsas el play de un vídeo de YouTube en el blog, YouTube puede
+          guardar las suyas; hasta entonces no se carga nada de YouTube.
         </p>
       </SeccionLegal>
 

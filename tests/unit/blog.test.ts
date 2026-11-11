@@ -46,6 +46,13 @@ describe('resumenDe', () => {
     }
   });
 
+  it('el resumen sale sin marcas, imagenes ni videos', () => {
+    const content =
+      '## Guia\n\n![x](/blog/a.png)\n\nReserva **ya** en [partidas](/partidas).';
+
+    expect(resumenDe({ excerpt: null, content })).toBe('Guia Reserva ya en partidas.');
+  });
+
   it('un cuerpo corto se devuelve entero y sin puntos suspensivos', () => {
     expect(resumenDe({ excerpt: null, content: 'Dos lineas nada mas.' })).toBe(
       'Dos lineas nada mas.',
@@ -71,6 +78,34 @@ describe('postSchema', () => {
     title: 'Como preparar tu primera partida',
     content: 'a'.repeat(60),
   };
+
+  it('acepta imagenes, videos y enlaces permitidos', () => {
+    const content = [
+      '## Guia',
+      '',
+      'Reserva en [partidas](/partidas) y mira el video.',
+      '',
+      '![Ficha](/blog/guia/ficha.webp "Pie")',
+      '@[video](https://youtu.be/AAAAAAAAAAA)',
+    ].join('\n');
+
+    expect(postSchema.safeParse({ ...valido, content }).success).toBe(true);
+  });
+
+  it('rechaza una imagen de otro sitio diciendo en que linea esta', () => {
+    const content = `${'a'.repeat(60)}\n\n![x](https://evil.example/a.png)`;
+    const r = postSchema.safeParse({ ...valido, content });
+
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.path).toEqual(['content']);
+    expect(r.error?.issues[0]?.message).toContain('Línea 3');
+  });
+
+  it('rechaza un enlace javascript:', () => {
+    const content = `${'a'.repeat(60)} [pulsa](javascript:alert(1))`;
+
+    expect(postSchema.safeParse({ ...valido, content }).success).toBe(false);
+  });
 
   it('acepta un articulo sin resumen y lo guarda como null', () => {
     expect(postSchema.parse(valido).excerpt).toBeNull();

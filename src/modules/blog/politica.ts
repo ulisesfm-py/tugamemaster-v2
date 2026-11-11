@@ -1,3 +1,5 @@
+import { textoPlano } from './contenido';
+
 /**
  * Reglas del blog.
  *
@@ -38,7 +40,7 @@ export function resumenDe(
 ): string {
   if (post.excerpt) return post.excerpt;
 
-  const texto = post.content.replace(/\s+/g, ' ').trim();
+  const texto = textoPlano(post.content);
   if (texto.length <= largo) return texto;
 
   const corte = texto.slice(0, largo);

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { leerContenido } from './contenido';
 import {
   COMENTARIO_MAXIMO,
   COMENTARIO_MINIMO,
@@ -39,7 +40,14 @@ export const postSchema = z.object({
     .string()
     .trim()
     .min(CONTENIDO_MINIMO, `Escribe al menos ${CONTENIDO_MINIMO} caracteres`)
-    .max(CONTENIDO_MAXIMO, 'El artículo es demasiado largo'),
+    .max(CONTENIDO_MAXIMO, 'El artículo es demasiado largo')
+    // Una imagen, un video o un enlace que no esta en la lista de lo permitido
+    // no se publica: se le dice a quien escribe que linea corregir, en vez de
+    // dejarlo salir como un hueco sin explicacion.
+    .superRefine((texto, ctx) => {
+      const [primero] = leerContenido(texto).errores;
+      if (primero) ctx.addIssue({ code: 'custom', message: primero });
+    }),
 });
 
 export type PostInput = z.infer<typeof postSchema>;

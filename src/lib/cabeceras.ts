@@ -35,6 +35,9 @@ export function construirCsp(nonce: string, desarrollo: boolean): string {
     // Avatares de Discord y del almacen propio. `data:` y `blob:` para las
     // vistas previas de las imagenes que se van a subir.
     `img-src 'self' data: blob: https://cdn.discordapp.com ${BLOB}`,
+    // Videos de YouTube (sin cookies hasta que se pulsa) y clips propios.
+    'frame-src https://www.youtube-nocookie.com',
+    `media-src 'self' ${BLOB}`,
     "font-src 'self'",
     // Sentry envia los errores del navegador a su propio dominio.
     `connect-src 'self' https://*.sentry.io${desarrollo ? ' ws:' : ''}`,
