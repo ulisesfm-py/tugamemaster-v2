@@ -17,7 +17,7 @@ export const HORAS_MINIMAS_ANTELACION = 2;
 export const PRECIO_MAXIMO_CENTS = 50_000;
 
 /** Longitud de la contrasena de una partida privada. */
-export const CONTRASENA_MINIMA = 4;
+export const CONTRASENA_MINIMA = 6;
 export const CONTRASENA_MAXIMA = 40;
 
 export const VISIBILIDADES = ['PUBLICA', 'PRIVADA'] as const;

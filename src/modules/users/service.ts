@@ -3,7 +3,7 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { buscarCodigo } from '@/modules/invitaciones/service';
 
-import { hashPassword, verifyPassword } from './password';
+import { gastarTiempoDeVerificacion, hashPassword, verifyPassword } from './password';
 import { registerSchema, type RegisterInput } from './schema';
 import { slugDisponible } from './slug';
 
@@ -133,8 +133,13 @@ export async function verificarCredenciales(
     },
   });
 
-  // Cuenta creada solo con Discord: no tiene contrasena que comprobar.
-  if (!user?.passwordHash) return null;
+  // Sin cuenta, o cuenta creada solo con Discord: no hay contrasena que
+  // comprobar, pero se tarda lo mismo que si la hubiera para que el tiempo de
+  // respuesta no delate si el correo existe.
+  if (!user?.passwordHash) {
+    await gastarTiempoDeVerificacion(password);
+    return null;
+  }
 
   const valida = await verifyPassword(user.passwordHash, password);
   if (!valida) return null;

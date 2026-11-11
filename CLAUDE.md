@@ -218,6 +218,26 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   del servidor (`instrumentation.ts`) y el del navegador
   (`instrumentation-client.ts`).
 
+## Seguridad de acceso
+
+- **Quién es admin se pregunta a la base de datos**, con `exigirAdmin()`
+  (`src/lib/auth/admin.ts`), en cada página y acción de administración. El
+  `isAdmin` del JWT no cambia hasta que caduca la sesión: solo sirve de pista
+  para la interfaz, nunca para decidir un permiso.
+- **Límite de intentos** en `src/modules/limites` (contador en la tabla
+  `RateLimit`, sin servicios externos): login por correo y por IP, registro por
+  IP, y contraseña de partida privada por jugador y por partida. El intento se
+  cuenta **antes** de comprobar, no después de fallar; un acierto reinicia el
+  contador del correo. La clave es un HMAC, nunca el correo o la IP en claro. Sin
+  IP conocida (desarrollo local) no se limita por IP, para no ahogar los E2E.
+- El login gasta el mismo tiempo exista o no el correo
+  (`gastarTiempoDeVerificacion`), y la contraseña de una privada se compara con
+  `contrasenasIguales` (tiempo constante).
+- **Cabeceras** en `src/lib/cabeceras.ts`: las fijas se hacen cumplir; la CSP de
+  scripts, con nonce por petición (`src/proxy.ts`), va en Report-Only hasta
+  recorrer la web sin avisos. Dentro de un string de JS, `\.` es solo un punto:
+  el matcher del proxy usa `[.]` por eso, y un test lo vigila.
+
 ## Jobs programados
 
 - Un único endpoint `/api/cron/daily` ejecuta todas las tareas diarias en

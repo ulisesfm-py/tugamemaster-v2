@@ -203,6 +203,14 @@ describe('partidaSchema: visibilidad', () => {
     expect(r.success).toBe(false);
   });
 
+  it('con cinco caracteres aun es corta; con seis ya vale', () => {
+    const con = (accessPassword: string) =>
+      partidaSchema.safeParse({ ...base, visibility: 'PRIVADA', accessPassword });
+
+    expect(con('12345').success).toBe(false);
+    expect(con('123456').success).toBe(true);
+  });
+
   it('acepta una privada con su contrasena, sin los espacios de los extremos', () => {
     const d = partidaSchema.parse({
       ...base,

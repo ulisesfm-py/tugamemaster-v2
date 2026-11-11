@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { limpiarLimites } from '@/modules/limites/service';
 import { pedirResenas, recordarPartidas } from '@/modules/notifications/tareas';
 import { cerrarPartidas, pagarGms } from '@/modules/payments/payouts';
 import { limpiarHilos } from '@/modules/threads/tareas';
@@ -31,6 +32,9 @@ const TAREAS = [
   // La ultima porque no la necesita nadie: solo recoge hilos que ya estaban
   // cerrados para sus mesas, asi que puede esperar a que pase lo que importa.
   { nombre: 'limpiar-hilos', ejecutar: limpiarHilos },
+  // Contadores de intentos de acceso cuya ventana ya vencio. Sin prisa: solo
+  // evitan que la tabla crezca.
+  { nombre: 'limpiar-limites', ejecutar: limpiarLimites },
 ] as const;
 
 async function ejecutarTareas(): Promise<Response> {

@@ -2,9 +2,12 @@ import 'server-only';
 
 import type { BookingStatus, OrigenReserva } from '@/generated/prisma/enums';
 import { db } from '@/lib/db';
+import { REGLAS, mensajeDeEspera } from '@/modules/limites/politica';
+import { consumirIntento, reiniciar } from '@/modules/limites/service';
 import { comisionAplicable } from '@/modules/payments/dinero';
 import { abonar, bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
 
+import { contrasenasIguales } from './contrasena';
 import {
   hayDerechoADevolucion,
   importeDevolucionCents,
@@ -74,7 +77,8 @@ export type ResultadoReserva =
         | 'YA_RESERVADA'
         | 'ES_TU_PARTIDA'
         | 'SOLO_CONTINUACION'
-        | 'CONTRASENA';
+        | 'CONTRASENA'
+        | 'DEMASIADOS_INTENTOS';
       mensaje: string;
     };
 
@@ -167,21 +171,57 @@ export async function reservarAsiento(
           mensaje: 'Esta sesión es solo para quienes jugaron la anterior',
         };
       }
-    } else if (
+    } else if (conCampana?.visibility === 'PRIVADA') {
       // Privada: hay que saber la contrasena. En una continuacion no se pide,
       // porque ya solo entra quien jugo la sesion anterior.
+      const escrita = contrasena.trim();
+
+      // Entrar a la pagina y pulsar sin escribir nada no es un intento de
+      // adivinar: no gasta cupo.
+      if (!escrita) {
+        return {
+          ok: false as const,
+          error: 'CONTRASENA' as const,
+          mensaje:
+            'Esta partida es privada: escribe la contraseña que te ha dado el game master',
+        };
+      }
+
+      // Se frena la fuerza bruta: por jugador, y entre todos por partida, que
+      // es lo que no esquiva quien abre varias cuentas. El intento se cuenta
+      // antes de comparar. Va dentro de la transaccion de la reserva: un
+      // rechazo no la deshace, asi que el intento fallido queda contado.
+      const jugadorYPartida = `${userId}:${gameId}`;
+      const porJugador = await consumirIntento(
+        REGLAS.privadaUsuario,
+        jugadorYPartida,
+        tx,
+      );
+      const porPartida = await consumirIntento(REGLAS.privadaPartida, gameId, tx);
+      const bloqueo = [porJugador, porPartida].find((v) => !v.permitido);
+
+      if (bloqueo) {
+        return {
+          ok: false as const,
+          error: 'DEMASIADOS_INTENTOS' as const,
+          mensaje: mensajeDeEspera(bloqueo.reintentarEnSeg),
+        };
+      }
+
       // Una privada sin contrasena guardada no deberia existir —el esquema lo
       // impide—, pero si existiera queda cerrada, no abierta a cualquiera.
-      conCampana?.visibility === 'PRIVADA' &&
-      (!conCampana.accessPassword || contrasena.trim() !== conCampana.accessPassword)
-    ) {
-      return {
-        ok: false as const,
-        error: 'CONTRASENA' as const,
-        mensaje: contrasena.trim()
-          ? 'Esa no es la contraseña de esta partida'
-          : 'Esta partida es privada: escribe la contraseña que te ha dado el game master',
-      };
+      if (
+        !conCampana.accessPassword ||
+        !contrasenasIguales(escrita, conCampana.accessPassword)
+      ) {
+        return {
+          ok: false as const,
+          error: 'CONTRASENA' as const,
+          mensaje: 'Esa no es la contraseña de esta partida',
+        };
+      }
+
+      await reiniciar(REGLAS.privadaUsuario, jugadorYPartida, tx);
     }
 
     const yaReservada = await tx.booking.findUnique({

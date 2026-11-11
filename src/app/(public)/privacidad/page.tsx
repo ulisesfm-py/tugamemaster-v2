@@ -144,6 +144,12 @@ export default function PrivacidadPage() {
           registros de cobros y pagos, que conservamos durante el plazo que exige la ley
           (hasta seis años) y para nada más.
         </p>
+        <p>
+          Para frenar a quien prueba contraseñas ajenas, contamos los intentos de entrar o
+          de registrarse desde cada dirección IP y para cada correo. No guardamos ni la IP
+          ni el correo, solo una huella que no se puede deshacer, y el contador se borra
+          en un día.
+        </p>
       </SeccionLegal>
 
       <SeccionLegal titulo="Tus derechos">

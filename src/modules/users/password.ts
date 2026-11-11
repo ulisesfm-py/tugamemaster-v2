@@ -40,3 +40,19 @@ export async function verifyPassword(
     return false;
   }
 }
+
+/**
+ * Un hash de mentira, para gastar el mismo tiempo cuando no hay nada que
+ * comprobar.
+ *
+ * Si el login responde al instante cuando el correo no existe y tarda decenas
+ * de milisegundos cuando existe (por el argon2), esa diferencia dice que
+ * cuentas hay, aunque el mensaje de error sea el mismo. Se calcula una vez y
+ * se reutiliza.
+ */
+let hashDeRelleno: Promise<string> | undefined;
+
+export async function gastarTiempoDeVerificacion(plano: string): Promise<void> {
+  hashDeRelleno ??= hashPassword('relleno-que-no-es-de-nadie');
+  await verifyPassword(await hashDeRelleno, plano);
+}

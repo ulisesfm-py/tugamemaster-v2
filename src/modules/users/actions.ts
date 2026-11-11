@@ -1,14 +1,17 @@
 'use server';
 
 import { AuthError } from 'next-auth';
+import { headers } from 'next/headers';
 import { unstable_rethrow } from 'next/navigation';
 
-import { signIn, signOut } from '@/lib/auth';
+import { DemasiadosIntentos, signIn, signOut } from '@/lib/auth';
 import {
   guardarCodigoDeViaje,
   olvidarCodigoDeViaje,
 } from '@/modules/invitaciones/cookie';
 import { buscarCodigo } from '@/modules/invitaciones/service';
+import { REGLAS, mensajeDeEspera } from '@/modules/limites/politica';
+import { consumirIntentoDeIp } from '@/modules/limites/service';
 
 import { registerSchema } from './schema';
 import { registrarUsuario } from './service';
@@ -55,6 +58,16 @@ export async function registrarAction(
   if (!parsed.success) {
     return {
       error: parsed.error.issues[0]?.message ?? 'Revisa los datos',
+      enviado: sinContrasena(formData),
+    };
+  }
+
+  // Cada alta cuesta un argon2, y una cuenta gratuita es todo lo que hace falta
+  // para probar contrasenas de partidas privadas: se frena por IP.
+  const cupo = await consumirIntentoDeIp(REGLAS.registroIp, await headers());
+  if (!cupo.permitido) {
+    return {
+      error: mensajeDeEspera(cupo.reintentarEnSeg),
       enviado: sinContrasena(formData),
     };
   }
@@ -106,6 +119,13 @@ export async function entrarAction(
     });
   } catch (error) {
     unstable_rethrow(error);
+
+    if (error instanceof DemasiadosIntentos) {
+      return {
+        error: mensajeDeEspera(error.reintentarEnSeg),
+        enviado: sinContrasena(formData),
+      };
+    }
 
     if (error instanceof AuthError) {
       // Mensaje deliberadamente ambiguo: decir cual de los dos campos falla

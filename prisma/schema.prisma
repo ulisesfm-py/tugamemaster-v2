@@ -802,3 +802,18 @@ model ScheduledJob {
 
   @@index([name, startedAt])
 }
+
+// ---------------------------------------------------------------------------
+// Limite de intentos
+// ---------------------------------------------------------------------------
+
+/// Contador de intentos por clave, para frenar la fuerza bruta (login,
+/// registro, contrasena de partidas privadas). Ventana fija: `windowStart` es
+/// cuando empezo la ventana actual y `count` cuantos intentos lleva. La clave
+/// es un hash (ver modules/limites): ni el email ni la IP se guardan en claro.
+/// Las filas caducadas las borra el cron diario.
+model RateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+}
