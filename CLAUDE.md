@@ -298,6 +298,12 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   sabe ejecutarlo. **Cada prueba borra lo que crea**, incluidos los apuntes de
   monedero, que sobreviven al borrado de su reserva porque la clave ajena los
   deja huérfanos en vez de borrarlos en cascada.
+- **Subidas**: Next rechaza por defecto cualquier Server Action de más de 1 MB
+  con un 500 sin explicación, antes de que la acción se ejecute. Los límites de
+  las imágenes viven en `src/lib/subidas.ts` (2 MB) y de ahí sale el
+  `serverActions.bodySizeLimit` de `next.config.ts`; un test lo vigila. Si se
+  sube el límite de una imagen, sube a la vez el de Next (Vercel admite 4,5 MB
+  por petición).
 - **Linting**: ESLint + Prettier, ejecutados en CI. No se commitea código que
   no pase lint ni tests.
 

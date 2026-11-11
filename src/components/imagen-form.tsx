@@ -5,10 +5,10 @@ import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button } from '@/components/ui';
 import type { EstadoAccion } from '@/lib/acciones';
+import { TAMANO_MAXIMO_BYTES } from '@/lib/subidas';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
-const TAMANO_MAXIMO_BYTES = 2 * 1024 * 1024;
 const TIPOS = 'image/jpeg,image/png,image/webp';
 
 function Boton({ texto, hayArchivo }: { texto: string; hayArchivo: boolean }) {

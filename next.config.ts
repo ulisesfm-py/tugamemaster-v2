@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs/config';
 import type { NextConfig } from 'next';
 
 import { CABECERAS_FIJAS } from './src/lib/cabeceras';
+import { LIMITE_DE_CUERPO_BYTES } from './src/lib/subidas';
 
 const nextConfig: NextConfig = {
   // No anunciar con que esta hecha la web: no protege de nada, pero tampoco
@@ -12,6 +13,12 @@ const nextConfig: NextConfig = {
   // scripts, que lleva un nonce por peticion, la pone `src/proxy.ts`.
   async headers() {
     return [{ source: '/:path*', headers: [...CABECERAS_FIJAS] }];
+  },
+
+  // Por defecto una Server Action rechaza cuerpos de mas de 1 MB, y las
+  // imagenes pueden pesar 2. Ver src/lib/subidas.ts.
+  experimental: {
+    serverActions: { bodySizeLimit: LIMITE_DE_CUERPO_BYTES },
   },
 
   images: {

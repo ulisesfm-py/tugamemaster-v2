@@ -2,6 +2,8 @@ import 'server-only';
 
 import { del, put } from '@vercel/blob';
 
+import { TAMANO_MAXIMO_BYTES } from './subidas';
+
 /**
  * Subida de imagenes a Vercel Blob.
  *
@@ -19,7 +21,7 @@ const FORMATOS = [
 
 export type Formato = (typeof FORMATOS)[number];
 
-export const TAMANO_MAXIMO_BYTES = 2 * 1024 * 1024;
+export { TAMANO_MAXIMO_BYTES };
 
 /** Dominio de nuestro almacenamiento, para no borrar imagenes ajenas. */
 export const DOMINIO_BLOB = '.public.blob.vercel-storage.com';
