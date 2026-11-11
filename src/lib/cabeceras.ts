@@ -57,17 +57,17 @@ export function nuevoNonce(): string {
 /**
  * Lo que se aplica a todas las respuestas y ya se hace cumplir.
  *
- * `frame-ancestors` y `X-Frame-Options` dicen lo mismo a proposito: la
- * primera es el estandar y la segunda cubre a navegadores antiguos. `object-src`
- * y `base-uri` se fijan aqui porque no dependen del nonce ni de ningun origen.
+ * **Aqui no puede haber una `Content-Security-Policy`**, ni en `next.config.ts`
+ * ni en el proxy: Next saca el nonce de la cabecera `content-security-policy`
+ * (y solo mira la `-report-only` si aquella no existe), y una CSP sin
+ * `script-src` le hace no poner nonce a ningun script. En produccion salian 29
+ * avisos por pagina por eso. Hasta que la CSP completa se haga cumplir, el
+ * framing lo cubre `X-Frame-Options`, y `frame-ancestors`, `object-src` y
+ * `base-uri` viajan en la Report-Only.
  */
 export const CABECERAS_FIJAS = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-  {
-    key: 'Content-Security-Policy',
-    value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
-  },
 ] as const;

@@ -24,7 +24,10 @@ export default auth((request) => {
   const nonce = nuevoNonce();
   const csp = construirCsp(nonce, process.env.NODE_ENV === 'development');
 
-  // Next lee el nonce de la CSP de la *peticion*, no de la respuesta.
+  // Next lee el nonce de la CSP de la *peticion*, no de la respuesta. Ojo: si
+  // en algun sitio (next.config.ts, este proxy) se pone una
+  // `Content-Security-Policy` sin `script-src`, Next la prefiere a esta y deja
+  // los scripts sin nonce. Mientras la CSP sea Report-Only, solo esa.
   const cabeceras = new Headers(request.headers);
   cabeceras.set('x-nonce', nonce);
   cabeceras.set(CABECERA_CSP, csp);

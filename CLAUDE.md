@@ -235,7 +235,10 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   `contrasenasIguales` (tiempo constante).
 - **Cabeceras** en `src/lib/cabeceras.ts`: las fijas se hacen cumplir; la CSP de
   scripts, con nonce por petición (`src/proxy.ts`), va en Report-Only hasta
-  recorrer la web sin avisos. Dentro de un string de JS, `\.` es solo un punto:
+  recorrer la web sin avisos. **No poner ninguna `Content-Security-Policy`
+  enforced sin `script-src`** (ni en `next.config.ts` ni en el proxy): Next la
+  prefiere a la Report-Only al buscar el nonce y deja los scripts sin él. Se vio
+  en producción y no en local. Dentro de un string de JS, `\.` es solo un punto:
   el matcher del proxy usa `[.]` por eso, y un test lo vigila.
 
 ## Jobs programados

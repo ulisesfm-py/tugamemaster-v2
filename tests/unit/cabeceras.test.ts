@@ -39,6 +39,24 @@ describe('nuevoNonce', () => {
 });
 
 describe('CABECERAS_FIJAS', () => {
+  // Una Content-Security-Policy "enforced" sin script-src, puesta en cualquier
+  // sitio (next.config.ts o el proxy), hace que Next no ponga nonce a ningun
+  // script: la prefiere a la Report-Only al buscarlo. Se vio en produccion, con
+  // 29 avisos por pagina, y en local no se nota. Solo la Report-Only.
+  it('no lleva ninguna Content-Security-Policy', () => {
+    expect(CABECERAS_FIJAS.map((c) => c.key.toLowerCase())).not.toContain(
+      'content-security-policy',
+    );
+  });
+
+  it('ni next.config.ts ni el proxy ponen una CSP que no sea Report-Only', () => {
+    const config = readFileSync('next.config.ts', 'utf8');
+    const proxy = readFileSync('src/proxy.ts', 'utf8');
+
+    expect(config).not.toMatch(/key:\s*['"]Content-Security-Policy['"]/i);
+    expect(proxy).not.toMatch(/headers\.set\(\s*['"]Content-Security-Policy['"]/i);
+  });
+
   const valor = (clave: string) => CABECERAS_FIJAS.find((c) => c.key === clave)?.value;
 
   it('incluye las cabeceras basicas', () => {
