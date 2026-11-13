@@ -2,3 +2,8 @@
 node_modules
 package-lock.json
 public
+
+# Borradores del blog: usan el marcado propio de los articulos, no Markdown.
+# Prettier cambiaria las comillas dobles de los pies de foto por simples y se
+# romperia al pegarlos en el editor.
+docs/blog
