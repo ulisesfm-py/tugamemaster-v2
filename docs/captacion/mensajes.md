@@ -49,8 +49,10 @@ extraigan listas y sin comprar bases de datos.
 - **Comunidades**: servidores de Discord y grupos de rol en español, solo para
   encontrar quién dirige y mirar su perfil público. **No uses esos espacios para
   anunciarte**: la mayoría lo prohíben y quemarías el contacto.
-- **Tiendas y asociaciones** de tu ciudad: allí está quien dirige en persona.
-  Es otra conversación y tiene su guion en `plan.html`.
+- **Tiendas y asociaciones** de rol de cualquier punto de España: allí está
+  quien dirige en persona. Es otra conversación y tiene su guion en
+  `plan.html`. Como la web no depende de una ciudad, el que dirige online y el
+  que dirige en persona valen igual de entrada; ya se verá qué mesas llenan.
 
 ## Cómo, con qué ritmo
 
@@ -221,13 +223,17 @@ cifras salen de `oferta-fundador.md`.
 > cobro y que ni lo asumo yo ni lo gano. Para que veas el desglose: en una mesa
 > de 5 plazas a 15 €, con jugadores tuyos te llegan unos 72,60 €.
 
-### «Ya uso Discord / Roll20 / StartPlaying»
+### «Ya uso Discord / Roll20 / otra plataforma»
 
 > No tienes que dejarlo: la web no es dónde juegas, es dónde cobras y donde se
-> acumulan tus reseñas. Sigue usando Discord o Roll20 para la mesa. Frente a
-> StartPlaying, la diferencia es que estamos en español y que, como fundador,
-> pagas bastante menos [**verifica** el 15 % de StartPlaying antes de
-> citarlo, viene de `plan.html` de septiembre].
+> acumulan tus reseñas. Sigue usando Discord o Roll20 para la mesa. Lo que
+> añadimos es el cobro por adelantado, una reputación que sale solo de mesas
+> pagadas aquí y, como fundador, una comisión muy baja.
+
+**No cites a ninguna plataforma competidora por su nombre ni compares sus
+tarifas**, aunque te las pregunten: contesta con lo que hace esta web. Si te
+piden la comparación, «no conozco los números de otras webs al detalle; los de
+la nuestra son estos».
 
 ### «¿Cómo se cobra?»
 
@@ -278,13 +284,17 @@ Es la objeción más importante, y la que más quema si se contesta con humo.
 
 ### «¿Quién eres? ¿Esto es de fiar?»
 
-> Soy Ulises, de Barcelona, y la web es tugamemaster.com. Es un proyecto
-> pequeño: no hay empresa detrás con prisa por facturar, hay una persona que
-> quiere que los game masters cobren por lo que hacen. Si prefieres ver cómo es
-> antes de decidir, puedes mirar una mesa de ejemplo en la web.
+> Soy Ulises, y la web es tugamemaster.com. Es un proyecto pequeño: no hay
+> empresa detrás con prisa por facturar, hay una persona que quiere que los
+> game masters cobren por lo que hacen. Si prefieres ver cómo es antes de
+> decidir, puedes mirar la web y las condiciones.
 
-**[confirmar]** que el dato «de Barcelona» es el que quieres dar y que en la
-web ya consta el titular (`src/lib/titular.ts`).
+Contactas con gente de toda España, así que **no menciones una ciudad**. El
+titular de la web (`src/lib/titular.ts`) ya consta en el aviso legal, en
+contacto y en privacidad: quien quiera comprobar quién eres, lo encuentra.
+
+Ya no hay partidas de ejemplo públicas (las tres son privadas), así que no
+ofrezcas «mira una mesa de ejemplo».
 
 ## Registro de contactos
 

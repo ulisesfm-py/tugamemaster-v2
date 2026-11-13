@@ -8,9 +8,10 @@ Las reglas técnicas viven en `CLAUDE.md`, `docs/payments.md` y
 `src/modules/invitaciones/politica.ts`. Si algo de aquí contradice al código,
 manda el código y se corrige este documento.
 
-> Estado: **borrador cerrado con Ulises** (5 % para siempre, 0 % con código, 10
-> fundadores). Los puntos marcados con **[decidir]** o **[confirmar]** siguen
-> abiertos.
+> Estado: **cerrado con Ulises** (5 % para siempre, 0 % con código, 10
+> fundadores, condición retirable solo por incumplir las normas de la web). Los
+> puntos marcados con **[decidir]** o **[confirmar]** que queden siguen
+> abiertos; hoy solo el fiscal y el tiempo de ayuda personal.
 
 ## En una frase
 
@@ -62,10 +63,9 @@ estándar. Son cifras aproximadas: la real la fija Stripe en cada cobro.
 | Coste de Stripe (1,5 % + 0,25 €) | ≈ 2,40 €                  | ≈ 2,40 €                      |
 | **Transferencia al game master** | **≈ 68,90 €**             | **≈ 72,60 €**                 |
 
-**[confirmar]** La tarifa de Stripe (1,5 % + 0,25 € para tarjetas europeas
-estándar) sale de su página de precios de Connect, que no lleva fecha.
-Comprobarla en el panel de Stripe antes de enseñar cifras a nadie. Las tarjetas
-no europeas cuestan más, y también lo asume el game master.
+La tarifa de Stripe (1,5 % + 0,25 € para tarjetas europeas estándar) está
+confirmada por Ulises. Las tarjetas no europeas cuestan más, y también lo
+asume el game master.
 
 ### Lo que no cambia respecto a cualquier game master
 
@@ -127,27 +127,23 @@ que ya usan. La web se suma a su Instagram, no lo sustituye.
 
 ## Durante cuánto tiempo
 
-**Sin fecha de fin.** El 5 % y el 0 % siguen vigentes mientras la persona sea
-fundadora. Esto es una promesa: conviene que figure por escrito en una página
-que la web enseñe (ver «Texto para la web», más abajo) para que no dependa de
-un mensaje de Instagram.
+**Sin fecha de fin.** El 5 % y el 0 % son **permanentes**: no suben aunque
+cambie la política general del resto de game masters. Lo único que puede
+cambiar es el coste de Stripe, que es de Stripe y se descuenta siempre del
+cobro. Esto es una promesa: conviene que figure por escrito en una página que
+la web enseñe (ver «Texto para la web», más abajo) para que no dependa de un
+mensaje de Instagram.
 
-**[decidir]** Dos huecos que hay que cerrar antes de escribir «para siempre» en
-ningún sitio:
-
-1. **Qué es «seguir siendo fundador».** Propuesta: se conserva mientras la
-   cuenta esté abierta y se cumplan las condiciones de uso. Un fundador que
-   lleve mucho tiempo sin dirigir ninguna partida **no** pierde la condición
-   por eso, pero **sí** puede caducar el código. Hay que decidir si esto se
-   escribe o se deja al criterio de Ulises.
-2. **Si la política general cambia.** Propuesta: el 5 % y el 0 % de un
-   fundador no suben aunque cambien las condiciones del resto. Sí pueden
-   cambiar los costes de Stripe, que son de Stripe.
+**Una sola excepción, y se dice sin rodeos:** la administración se reserva el
+derecho a retirar la condición de fundador a quien incumpla las normas de
+comportamiento de la web. No hace falta detallarlas en la oferta: son las
+condiciones de uso (`/condiciones`). Pasar mucho tiempo sin dirigir **no** es
+motivo para perderla (sí puede caducar el código, que se renueva).
 
 ## Qué pasa cuando dejan de serlo
 
-Un administrador puede quitar la condición (por ejemplo, a petición suya o por
-incumplir las condiciones de uso):
+Un administrador puede quitar la condición (a petición suya o por incumplir
+las normas de comportamiento de la web):
 
 - **Las reservas ya hechas conservan su comisión**: lo vendido no cambia.
 - **Las reservas nuevas pasan al 10 %**, incluidas las de sus jugadores con
@@ -190,9 +186,8 @@ fundador dé de alta su cuenta y publique una partida **sí**.
 
 **Antes de escribir el primer mensaje**
 
-- [ ] Las partidas de prueba, privadas o retiradas. Con Stripe en modo real,
-      cualquiera podría pagar una mesa de 15 € por error.
-- [ ] Esta oferta cerrada: los dos puntos **[decidir]** de arriba.
+- [x] Las partidas de prueba, privadas (hecho por Ulises).
+- [x] Esta oferta cerrada.
 - [ ] Un sitio donde el fundador pueda leer sus condiciones (ver «Texto para la
       web»).
 
@@ -228,7 +223,9 @@ promete por Instagram. Borrador de las condiciones:
 > - Pagan un **5 %** de comisión por los jugadores que llegan por la web y un
 >   **0 %** por los que se registran con su código de invitación.
 > - El coste de la plataforma de pago se descuenta siempre del cobro.
-> - Mantienen estas condiciones mientras sean fundadores.
+> - Estas condiciones son permanentes. La administración puede retirar la
+>   condición de fundador a quien incumpla las normas de comportamiento de la
+>   web.
 > - Las reservas ya hechas conservan siempre la comisión con la que se
 >   vendieron.
 > - El código de invitación admite registros durante tres meses y se renueva
