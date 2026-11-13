@@ -201,13 +201,27 @@ fundador dé de alta su cuenta y publique una partida **sí**.
 
 **Antes de que cobre un solo euro**
 
-- [ ] Prueba real de pago de 1 € con tarjeta propia.
-- [ ] Vercel Pro (el plan gratuito no admite uso comercial).
-- [ ] **El asesor fiscal**, para las dos cuestiones que `plan.html` marca como
-      críticas: el IVA de una plataforma que cobra en su nombre y el
-      informe DAC7 a Hacienda (que exige el NIF y el domicilio fiscal de cada
-      game master). No se sabe aún si el alta actual de Stripe cubre lo que
-      pide DAC7: **[confirmar]**.
+- [ ] Prueba real de pago de 1 € con tarjeta propia (en curso). Hace falta una
+      **segunda cuenta de jugador**: un game master no puede reservar en su
+      propia partida.
+- [ ] **Vercel Pro — decisión de Ulises (13/11/2026): de momento, plan
+      gratuito.** Los términos de Vercel limitan Hobby a uso personal o no
+      comercial, y su guía de pausas cita el cobro de pagos como uso comercial.
+      Pueden desactivar un proyecto Hobby con o sin aviso; si la pausa es por
+      política, avisan por correo a la cuenta. Una pausa deja la web en 503: los
+      webhooks de Stripe fallan (Stripe reintenta durante días) y el cron de
+      pagos no corre. **Riesgo asumido mientras no haya ventas reales de
+      terceros.** Pasar a Pro antes de la primera venta real a un jugador que no
+      seas tú.
+- [ ] **El asesor fiscal — decisión de Ulises (13/11/2026): se pospone hasta
+      que la web facture un rango significativo** (referencia: +300 € al mes en
+      comisiones). Pendientes para entonces, que `plan.html` marca como
+      críticas: el IVA de una plataforma que cobra en su nombre y el informe
+      DAC7 a Hacienda (que exige el NIF y el domicilio fiscal de cada game
+      master). No se sabe aún si el alta actual de Stripe cubre lo que pide
+      DAC7: **[confirmar]**. Si empezar a cobrar comisión obliga a algo antes
+      de ese umbral (por ejemplo, estar dado de alta para facturarla), no lo
+      sabemos: es la pregunta de la primera consulta.
 - [ ] Resend con dominio verificado. Sin él, el game master no recibe ni el
       aviso de una reserva ni el de un pago. Hay que decírselo si todavía no
       está.
