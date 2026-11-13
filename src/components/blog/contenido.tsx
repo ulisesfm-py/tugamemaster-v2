@@ -181,13 +181,13 @@ function BloqueDeContenido({ bloque }: { bloque: Bloque }) {
 
     case 'imagen':
       return (
-        <figure className="mt-8">
+        <figure className="mx-auto mt-8 max-w-3xl">
           <Image
             src={bloque.src}
             alt={bloque.alt}
             width={1600}
             height={900}
-            sizes="(max-width: 52rem) 100vw, 52rem"
+            sizes="(max-width: 48rem) 100vw, 48rem"
             unoptimized={bloque.src.toLowerCase().endsWith('.gif')}
             className="border-border h-auto w-full rounded-sm border"
           />
@@ -197,7 +197,7 @@ function BloqueDeContenido({ bloque }: { bloque: Bloque }) {
 
     case 'youtube':
       return (
-        <figure className="mt-8">
+        <figure className="mx-auto mt-8 max-w-3xl">
           <VideoYoutube id={bloque.id} titulo={titularDe(bloque.pie ?? '')} />
           <Pie texto={bloque.pie} />
         </figure>
@@ -205,7 +205,7 @@ function BloqueDeContenido({ bloque }: { bloque: Bloque }) {
 
     case 'clip':
       return (
-        <figure className="mt-8">
+        <figure className="mx-auto mt-8 max-w-3xl">
           <video
             src={bloque.src}
             controls
@@ -230,7 +230,12 @@ export function ContenidoBlog({
   const { bloques } = leerContenido(texto);
 
   return (
-    <article className={cn('text-foreground/90 leading-relaxed', className)}>
+    <article
+      className={cn(
+        'text-foreground/90 leading-relaxed lg:text-lg lg:leading-8',
+        className,
+      )}
+    >
       {bloques.map((bloque, i) => (
         <BloqueDeContenido key={i} bloque={bloque} />
       ))}
