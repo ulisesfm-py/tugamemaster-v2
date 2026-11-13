@@ -241,6 +241,15 @@ const TONOS: Record<string, TonoDeAviso> = {
   ojo: 'ojo',
 };
 
+/**
+ * La primera letra en mayuscula. Tras una etiqueta («Consejo: lleva dados») el
+ * texto empieza una frase aparte, y escribirla en minuscula en el editor es lo
+ * natural: la etiqueta ya hace de comienzo.
+ */
+function conMayuscula(texto: string): string {
+  return texto.charAt(0).toLocaleUpperCase('es') + texto.slice(1);
+}
+
 /** Una direccion para anclas: sin tildes, en minusculas y con guiones. */
 export function idDeTitulo(titulo: string): string {
   return (
@@ -289,7 +298,7 @@ export function leerContenido(texto: string): Contenido {
     const etiqueta = AVISO.exec(primera?.texto ?? '');
     const tono = etiqueta ? (TONOS[(etiqueta[1] ?? '').toLowerCase()] ?? 'nota') : 'nota';
     const cuerpo = etiqueta
-      ? [{ texto: etiqueta[2] ?? '', n: primera?.n ?? 0 }, ...resto]
+      ? [{ texto: conMayuscula(etiqueta[2] ?? ''), n: primera?.n ?? 0 }, ...resto]
       : cita;
 
     bloques.push({

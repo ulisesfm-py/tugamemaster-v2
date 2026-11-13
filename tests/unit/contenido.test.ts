@@ -150,6 +150,14 @@ describe('leerContenido: bloques', () => {
     expect(bloques[1]).toMatchObject({ tipo: 'aviso', tono: 'nota', titulo: null });
   });
 
+  it('tras la etiqueta de un recuadro, la primera letra va en mayuscula', () => {
+    const { bloques } = leerContenido('> Consejo: lleva dados y lapiz');
+    const aviso = bloques[0];
+    const primera = aviso?.tipo === 'aviso' ? aviso.lineas[0]?.[0] : undefined;
+
+    expect(primera).toEqual({ tipo: 'texto', texto: 'Lleva dados y lapiz' });
+  });
+
   it('lee separadores', () => {
     expect(leerContenido('a\n\n---\n\nb').bloques.map((b) => b.tipo)).toEqual([
       'parrafo',

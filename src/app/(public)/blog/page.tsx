@@ -15,7 +15,7 @@ export default async function BlogPage() {
   const posts = await listarPosts();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
+    <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="font-heading text-foreground text-3xl font-extrabold sm:text-4xl">
         Blog
       </h1>
@@ -39,10 +39,10 @@ export default async function BlogPage() {
                   <Image
                     src={post.coverUrl}
                     alt=""
-                    width={768}
+                    width={896}
                     height={320}
-                    sizes="(max-width: 768px) 100vw, 48rem"
-                    className="h-44 w-full object-cover"
+                    sizes="(max-width: 896px) 100vw, 56rem"
+                    className="h-44 w-full object-cover sm:h-56"
                   />
                 </Link>
               )}

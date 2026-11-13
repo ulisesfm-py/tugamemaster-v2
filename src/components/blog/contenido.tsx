@@ -187,7 +187,7 @@ function BloqueDeContenido({ bloque }: { bloque: Bloque }) {
             alt={bloque.alt}
             width={1600}
             height={900}
-            sizes="(max-width: 768px) 100vw, 48rem"
+            sizes="(max-width: 52rem) 100vw, 52rem"
             unoptimized={bloque.src.toLowerCase().endsWith('.gif')}
             className="border-border h-auto w-full rounded-sm border"
           />
