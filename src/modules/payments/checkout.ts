@@ -3,6 +3,8 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { stripe, urlBase } from '@/lib/stripe';
 
+import { parametrosDeSesion } from './sesion';
+
 /**
  * Cobro al jugador mediante Stripe Checkout.
  *
@@ -66,37 +68,18 @@ export async function crearSesionDeCheckout(
   const base = urlBase();
 
   const sesion = await stripe().checkout.sessions.create(
-    {
-      mode: 'payment',
-      customer_email: reserva.user.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: reserva.currency.toLowerCase(),
-            unit_amount: pendienteCents,
-            product_data: {
-              name: reserva.game.title,
-              description:
-                `${reserva.game.system} · ${reserva.game.startsAt.toLocaleDateString('es-ES', { dateStyle: 'long' })}` +
-                (reserva.creditCents > 0
-                  ? ` · ${(reserva.creditCents / 100).toFixed(2)} EUR cubiertos con tu saldo`
-                  : ''),
-            },
-          },
-        },
-      ],
-      // El bookingId viaja en los metadatos del PaymentIntent, no solo en los
-      // de la sesion: el webhook de pago recibe el PaymentIntent, y asi no
-      // hace falta volver a consultar la sesion para saber que reserva es.
-      payment_intent_data: {
-        metadata: { bookingId: reserva.id },
-      },
-      metadata: { bookingId: reserva.id },
-      success_url: `${base}/partidas/${reserva.game.slug}?pago=ok`,
-      cancel_url: `${base}/partidas/${reserva.game.slug}?pago=cancelado`,
-      locale: 'es',
-    },
+    parametrosDeSesion({
+      bookingId: reserva.id,
+      email: reserva.user.email,
+      titulo: reserva.game.title,
+      sistema: reserva.game.system,
+      empieza: reserva.game.startsAt,
+      currency: reserva.currency,
+      pendienteCents,
+      creditoCents: reserva.creditCents,
+      base,
+      slugPartida: reserva.game.slug,
+    }),
     {
       // Una misma reserva produce siempre la misma sesion: si el jugador
       // recarga o pulsa dos veces, no se generan dos cobros.

@@ -153,6 +153,11 @@ diario transfiere al GM su parte de las reservas cuyas partidas terminaron hace
 más de 48h y no tienen incidencia abierta. La plataforma es merchant of
 record; se usan _separate charges and transfers_, nunca destination charges.
 
+- **Solo se cobra con tarjeta** (`payment_method_types: ['card']`, fijado en
+  `src/modules/payments/sesion.ts`; Apple Pay y Google Pay siguen saliendo,
+  porque son tarjeta). Sin ello, Stripe ofrece todo lo activado en su panel
+  (iDEAL, Bancontact, EPS…): caminos del dinero sin probar, y un coste de Stripe
+  que cambia según el método y que se le descuenta al GM. Un test lo vigila.
 - Importes siempre como **enteros en céntimos** + código de moneda. Nunca
   usar float ni decimales en coma flotante para dinero.
 - La **comisión** se calcula sobre el total cobrado y su **porcentaje se
