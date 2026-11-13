@@ -35,9 +35,11 @@ termine, «pasos 4 y 5».
 > cada plaza se fija en el instante en que alguien reserva, y quiero que tus
 > primeras reservas ya cuenten con tus condiciones.
 >
-> **4. Tu código.** Cuando te nombre fundador verás en tugamemaster.com/cuenta/cobros
-> («Mis ingresos») tu código y tu enlace, con botón para copiarlos. El enlace es
-> el que conviene poner en tu bio de Instagram o en tu canal.
+> **4. Tu código.** Cuando te nombre fundador verás en tu panel
+> (tugamemaster.com/dashboard), en la tarjeta «Tu código de fundador», tu código
+> y tu enlace, con botón para copiarlos. El enlace es el que conviene poner en
+> tu bio de Instagram o en tu canal. Tus condiciones están por escrito en
+> tugamemaster.com/fundadores.
 >
 > **5. Publica tu primera partida.** En tugamemaster.com/cuenta/partidas, «Nueva
 > partida». Nace como borrador y la revisas entera antes de publicarla. Puede
@@ -82,7 +84,7 @@ las garantías, no el precio.
 | 2   | Perfil de game master      | GM    | Hasta que existe, **no aparece** en `/admin/game-masters`.                    |
 | 3   | Alta de cobros en Stripe   | GM    | Es lo que más tarda y lo único que no controlas.                              |
 | 4   | **Nombrarle fundador**     | Tú    | Después del 3, para no gastar los 3 meses del código; antes del 5, ver abajo. |
-| 5   | Su código y su enlace      | Web   | Se crean solos al nombrarle; los ve en `/cuenta/cobros`.                      |
+| 5   | Su código y su enlace      | Web   | Se crean solos al nombrarle; los ve en su panel (`/dashboard`).               |
 | 6   | Primera partida, publicada | GM    | Solo puede publicar con cobros verificados.                                   |
 
 Dos razones para el orden del 4:
@@ -117,9 +119,11 @@ Dos razones para el orden del 4:
    estado» en su pantalla, o espera al webhook.
 2. Pulsa **«Hacer fundador»**. Comprueba que le sale el distintivo y que, en su
    fila, aparece su código con «Vale hasta…».
-3. Avísale por el mismo canal: «Ya eres fundador. Tu código y tu enlace están en
-   tugamemaster.com/cuenta/cobros. Ya puedes publicar.» **Hoy la web no le avisa
-   sola**: no hay correo ni aviso al nombrarle. Ver `mejoras-web.md`.
+3. Avísale tú también por el mismo canal: «Ya eres fundador. Tu código y tu
+   enlace están en tu panel, en tugamemaster.com/dashboard. Ya puedes publicar.»
+   La web le manda además un correo al nombrarle, **pero solo sale si Resend
+   está configurado con dominio verificado**; hasta entonces solo se vuelca al
+   registro del servidor. No cuentes con él. El mensaje personal pesa más.
 4. Hazlo con la cuenta de administrador y **no hay confirmación**: el botón
    actúa al primer clic, y «Código nuevo» invalida el anterior (rompe el enlace
    de su bio). Úsalo solo si lo necesita de verdad.

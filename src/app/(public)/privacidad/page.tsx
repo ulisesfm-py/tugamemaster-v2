@@ -107,8 +107,45 @@ export default function PrivacidadPage() {
           </li>
         </ul>
         <p>
-          No vendemos tus datos, no los usamos para publicidad y no te enviamos
-          comunicaciones comerciales.
+          No vendemos tus datos, no los usamos para publicidad y, si tienes cuenta, no te
+          enviamos comunicaciones comerciales.
+        </p>
+      </SeccionLegal>
+
+      <SeccionLegal titulo="Si te escribimos para proponerte ser game master">
+        <p>
+          Para encontrar a los primeros game masters escribimos a mano a personas que no
+          tienen cuenta aquí y que dirigen partidas de rol en público. A esas personas:
+        </p>
+        <ul className="flex list-disc flex-col gap-2 pl-5">
+          <li>
+            <strong className="text-foreground">Qué datos usamos</strong>: su nombre o
+            usuario público y, solo si lo publican como contacto profesional, su correo.
+          </li>
+          <li>
+            <strong className="text-foreground">De dónde salen</strong>: de sus perfiles
+            públicos (redes sociales, canales de directos, páginas de sus partidas). No
+            compramos listas ni usamos herramientas que recojan datos en masa.
+          </li>
+          <li>
+            <strong className="text-foreground">Para qué</strong>: proponerles formar
+            parte de TuGameMaster. Es nuestro interés legítimo, y por eso el primer
+            mensaje siempre dice quiénes somos y de dónde sacamos el dato.
+          </li>
+          <li>
+            <strong className="text-foreground">Cuántas veces</strong>: un mensaje y, como
+            mucho, un único recordatorio. Si dicen que no, no volvemos a escribirles.
+          </li>
+          <li>
+            <strong className="text-foreground">Cuánto tiempo</strong>: si no hay
+            respuesta, borramos el contacto a los seis meses. Si la hay, lo conservamos
+            mientras dure la conversación.
+          </li>
+        </ul>
+        <p>
+          Para dejar de recibir mensajes o pedir que borremos sus datos, basta con
+          decírnoslo en el mismo mensaje o escribir a{' '}
+          <Correo direccion={TITULAR.correo} />.
         </p>
       </SeccionLegal>
 

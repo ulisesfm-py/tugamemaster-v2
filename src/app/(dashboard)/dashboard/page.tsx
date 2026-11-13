@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { Button, EnlaceBoton, Estado, Fecha, Vacio } from '@/components/ui';
+import { CopiarBoton } from '@/components/copiar-boton';
+import { Button, EnlaceBoton, Estado, Fecha, Fundador, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { misReservas } from '@/modules/bookings/queries';
+import { invitacionDeGm } from '@/modules/invitaciones/queries';
 import { avisosDe } from '@/modules/notifications/avisos';
 import { formatearImporte } from '@/modules/payments/dinero';
 import { resumenDeGm } from '@/modules/payments/ingresos';
@@ -12,6 +14,8 @@ import { salirAction } from '@/modules/users/actions';
 import { saldoDe } from '@/modules/wallet/service';
 
 export const metadata: Metadata = { title: 'Mi cuenta · TuGameMaster' };
+
+const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
 
 /** Un enlace del bloque de accesos. */
 function Acceso({ href, texto }: { href: string; texto: string }) {
@@ -35,11 +39,13 @@ export default async function DashboardPage() {
 
   const { user } = session;
 
-  const [saldo, avisos, reservas, ingresos] = await Promise.all([
+  const [saldo, avisos, reservas, ingresos, invitacion] = await Promise.all([
     saldoDe(user.id),
     avisosDe(user.id),
     misReservas(user.id),
     resumenDeGm(user.id),
+    // Null si no es fundador: entonces no hay tarjeta.
+    invitacionDeGm(user.id),
   ]);
 
   const proximas = reservas.proximas.slice(0, 3);
@@ -117,6 +123,61 @@ export default async function DashboardPage() {
             <div className="mt-4">
               <EnlaceBoton href="/cuenta/cobros" variante="perfil" tamano="sm">
                 Ver el detalle
+              </EnlaceBoton>
+            </div>
+          </section>
+        )}
+
+        {/* ── Código de fundador, solo si lo es ───────────────────
+            Es lo que el fundador pone en su bio: tiene que estar a un clic,
+            no dentro de la pantalla de dinero. El detalle (quién se ha
+            registrado) sigue en «Mis ingresos». */}
+        {invitacion && (
+          <section
+            aria-labelledby="tarjeta-codigo"
+            className="border-accent/40 bg-card flex flex-col rounded-sm border p-5 sm:col-span-2"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <h2
+                id="tarjeta-codigo"
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+              >
+                Tu código de fundador
+              </h2>
+              <Fundador />
+            </div>
+
+            <p className="font-heading text-accent mt-2 text-3xl font-extrabold tracking-widest">
+              {invitacion.codigo}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <code className="bg-secondary text-foreground rounded-sm px-2.5 py-1.5 text-sm break-all">
+                {invitacion.enlace}
+              </code>
+              <CopiarBoton texto={invitacion.enlace} etiqueta="Copiar enlace" />
+              <CopiarBoton texto={invitacion.codigo} etiqueta="Copiar código" />
+            </div>
+
+            <p className="text-muted-foreground mt-3 text-sm">
+              {invitacion.vigente && invitacion.caducaEl ? (
+                <>
+                  Admite registros hasta el {FECHA_CORTA.format(invitacion.caducaEl)}.
+                  Quien se registre con él no te cuesta comisión.
+                </>
+              ) : (
+                'Ha caducado: ya no admite registros nuevos. Los jugadores que ya se registraron con él siguen siendo tuyos.'
+              )}{' '}
+              {invitacion.invitados.length === 0
+                ? 'Todavía no se ha registrado nadie.'
+                : `${invitacion.invitados.length} ${
+                    invitacion.invitados.length === 1 ? 'jugador' : 'jugadores'
+                  } ya se han registrado con él.`}
+            </p>
+
+            <div className="mt-4">
+              <EnlaceBoton href="/cuenta/cobros" variante="perfil" tamano="sm">
+                Ver quién se ha registrado
               </EnlaceBoton>
             </div>
           </section>

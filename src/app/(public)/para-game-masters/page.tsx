@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { EnlaceBoton } from '@/components/ui';
+import { PLAZAS_DE_FUNDADOR } from '@/modules/invitaciones/politica';
 import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { HORAS_DE_RETENCION } from '@/modules/payments/libro';
 
@@ -76,6 +78,14 @@ export default function ParaGameMastersPage() {
         <p>
           La comisión se congela en cada reserva en el momento del cobro. Si algún día
           cambiamos el porcentaje, tus partidas ya vendidas conservan el que tenían.
+        </p>
+        <p>
+          Los primeros {PLAZAS_DE_FUNDADOR} game masters, los fundadores, tienen una
+          comisión menor.{' '}
+          <Link href="/fundadores" className="text-primary hover:underline">
+            Ver sus condiciones
+          </Link>
+          .
         </p>
       </Bloque>
 

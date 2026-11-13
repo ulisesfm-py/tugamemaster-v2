@@ -20,6 +20,12 @@ export const ALFABETO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
 export const LONGITUD_CODIGO = 8;
 
+/**
+ * Cuantos game masters fundadores habra. Es lo que se dice en la pagina de
+ * fundadores y en la oferta; la web no lo impone, lo decide quien nombra.
+ */
+export const PLAZAS_DE_FUNDADOR = 10;
+
 /** Cuanto tiempo admite registros un codigo desde que se emite o se renueva. */
 export const MESES_DE_VALIDEZ = 3;
 

@@ -3,8 +3,10 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { enviarCorreo, urlBase } from '@/lib/email';
 import { TEXTO_CONDICIONES } from '@/modules/bookings/politica';
+import { formatearCodigo } from '@/modules/invitaciones/politica';
 
 import {
+  fundadorNombrado,
   incidenciaResuelta,
   nuevaReserva,
   pagoEnviado,
@@ -183,6 +185,47 @@ export async function avisarIncidenciaResuelta(incidentId: string): Promise<void
         currency: incidencia.booking.currency,
         nota: incidencia.resolutionNote,
         url: `${urlBase()}${aprobada ? '/cuenta/saldo' : '/mis-reservas'}`,
+      }),
+    });
+  });
+}
+
+/**
+ * Al game master: un administrador le ha nombrado fundador.
+ *
+ * Lee el estado de la base de datos en el momento de enviar, no lo que le
+ * pasen: si entre el clic y el envio alguien le quita el plan, no se manda un
+ * correo que ya no es verdad. Sin codigo vigente tampoco hay nada que decirle.
+ */
+export async function avisarFundadorNombrado(gmProfileId: string): Promise<void> {
+  await sinRomper('fundador nombrado', async () => {
+    const gm = await db.gmProfile.findUnique({
+      where: { id: gmProfileId },
+      select: {
+        plan: true,
+        inviteCode: true,
+        inviteCodeExpiresAt: true,
+        payoutsEnabled: true,
+        user: { select: { name: true, email: true } },
+      },
+    });
+
+    if (!gm || gm.plan !== 'FUNDADOR' || !gm.inviteCode || !gm.inviteCodeExpiresAt) {
+      return;
+    }
+
+    const base = urlBase();
+
+    await enviarCorreo({
+      para: gm.user.email,
+      ...fundadorNombrado({
+        gm: gm.user.name,
+        codigo: formatearCodigo(gm.inviteCode),
+        enlace: `${base}/r/${gm.inviteCode}`,
+        caducaEl: gm.inviteCodeExpiresAt,
+        cobrosListos: gm.payoutsEnabled,
+        urlPanel: `${base}/dashboard`,
+        urlCondiciones: `${base}/fundadores`,
       }),
     });
   });

@@ -1,4 +1,9 @@
-import { formatearImporte } from '@/modules/payments/dinero';
+import {
+  COMISION_FUNDADOR,
+  COMISION_FUNDADOR_ENLACE,
+  formatearImporte,
+  porcentaje,
+} from '@/modules/payments/dinero';
 
 /**
  * Plantillas de los correos.
@@ -322,6 +327,54 @@ export function recordatorioPartida(datos: {
         ['Game master', datos.gm],
       ],
       boton: { texto: 'Ver la partida', url: datos.url },
+    }),
+  };
+}
+
+/**
+ * Al game master, cuando un administrador le nombra fundador.
+ *
+ * Es el unico aviso de este nombramiento: ni el boton del administrador ni la
+ * web le dicen nada a quien lo recibe. Lleva lo que necesita para empezar —sus
+ * condiciones, su codigo y su enlace— y avisa de que sin el alta de cobros no
+ * puede publicar, porque lo mas probable es que todavia no la tenga.
+ *
+ * Los porcentajes salen de `payments/dinero.ts`, donde se aplican.
+ */
+export function fundadorNombrado(datos: {
+  gm: string;
+  codigo: string;
+  enlace: string;
+  caducaEl: Date;
+  cobrosListos: boolean;
+  urlPanel: string;
+  urlCondiciones: string;
+}): Plantilla {
+  const caduca = new Intl.DateTimeFormat('es-ES', {
+    dateStyle: 'long',
+    timeZone: 'Europe/Madrid',
+  }).format(datos.caducaEl);
+
+  return {
+    asunto: 'Ya eres game master fundador de TuGameMaster',
+    ...maquetar({
+      titulo: 'Ya eres game master fundador',
+      parrafos: [
+        `Hola ${datos.gm}, te hemos nombrado game master fundador. Tus condiciones son permanentes: pagas un ${porcentaje(COMISION_FUNDADOR)}% de comisión por los jugadores que llegan por la web y un ${porcentaje(COMISION_FUNDADOR_ENLACE)}% por los que se registran con tu código. El coste de la pasarela de pago se descuenta siempre del cobro.`,
+        `Para que tus jugadores de siempre cuenten con el ${porcentaje(COMISION_FUNDADOR_ENLACE)}%, tienen que crear su cuenta con tu enlace o con tu código. Una cuenta que ya existe no se puede emparejar después.`,
+        ...(datos.cobrosListos
+          ? []
+          : [
+              'Para publicar partidas, antes tienes que dar de alta tus cobros en Stripe desde tu panel.',
+            ]),
+      ],
+      datos: [
+        ['Tu código', datos.codigo],
+        ['Tu enlace', datos.enlace],
+        ['Admite registros hasta', caduca],
+      ],
+      boton: { texto: 'Ver mi código', url: datos.urlPanel },
+      pie: `Las condiciones completas están en ${datos.urlCondiciones}.`,
     }),
   };
 }

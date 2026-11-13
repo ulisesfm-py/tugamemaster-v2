@@ -130,13 +130,17 @@ Mensaje corto, con una cosa que hacer: o una llamada, o que lo lea con calma.
 > Lo que **no** puedo prometerte es volumen: la web es nueva. Tus jugadores
 > son los primeros que llenan tus mesas; después irá llegando gente.
 >
-> Si quieres verlo antes de decidir, la guía de cómo se dirige aquí está en
-> [https://tugamemaster.com/blog/dirige-tu-primera-mesa-guia-para-game-masters].
-> ¿Te viene mejor una videollamada de 15 minutos o prefieres leerla y me dices?
+> Si quieres verlo por escrito antes de decidir, las condiciones de fundador
+> están en https://tugamemaster.com/fundadores y la guía de cómo se dirige aquí
+> está en
+> https://tugamemaster.com/blog/dirige-tu-primera-mesa-guia-para-game-masters.
+> ¿Te viene mejor una videollamada de 15 minutos o prefieres leerlas y me dices?
 
-**No envíes `/para-game-masters` de momento**: hoy solo habla del 10 % y no
-menciona a los fundadores, así que contradice lo que acabas de decir. Sí vale
-la guía del blog (aunque lleve `noindex`, se puede abrir con el enlace).
+`/fundadores` y la guía del blog sí valen (aunque lleven `noindex`, se abren con
+el enlace). **`/para-game-masters` también puede enviarse ya**: ahora enlaza a
+`/fundadores`, pero sigue diciendo «10 %» en el cuerpo, así que mejor mándalos
+a `/fundadores` primero. **Solo después de desplegar** (push + deploy de
+Vercel); hasta entonces `/fundadores` no existe en producción.
 
 ## Primer correo (Gmail)
 

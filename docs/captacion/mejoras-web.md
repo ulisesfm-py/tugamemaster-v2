@@ -4,8 +4,7 @@ Recorrí el camino de un fundador tal como lo hace la web hoy (registro → perf
 → cobros → nombramiento → código → primera partida) y lo que ve su jugador con
 el enlace. Esto es lo que encontré y lo que propongo.
 
-**Nada de esto está implementado.** Según `CLAUDE.md`, cada punto se aprueba
-antes de tocar código. No añade dependencias ni servicios nuevos en ninguno de
+**Según `CLAUDE.md`, cada punto se aprueba antes de tocar código.** No añade dependencias ni servicios nuevos en ninguno de
 los casos.
 
 Cada punto lleva: **qué pasa hoy**, dónde lo vi, **la propuesta**, su tamaño y
@@ -13,23 +12,25 @@ Cada punto lleva: **qué pasa hoy**, dónde lo vi, **la propuesta**, su tamaño 
 
 ## Resumen y recomendación
 
-| #   | Mejora                                                  | Tamaño   | Cuándo hace falta                                |
-| --- | ------------------------------------------------------- | -------- | ------------------------------------------------ |
-| 1   | Página `/fundadores` con las condiciones                | Pequeño  | **Antes del primer mensaje**                     |
-| 2   | Párrafo en `/privacidad` sobre contactos de captación   | Mínimo   | **Antes del primer mensaje**                     |
-| 3   | Aviso al fundador cuando se le nombra                   | Pequeño  | Antes del 3.er fundador (los 2 primeros, a mano) |
-| 4   | Tarjeta del código de fundador en el panel              | Mínimo   | Antes del primer fundador                        |
-| 5   | Contador «n/10» y confirmación en `/admin/game-masters` | Mínimo   | Antes del 5.º fundador                           |
-| 6   | Aviso al GM cuando Stripe lo verifica                   | Pequeño  | Opcional                                         |
-| 7   | Alta de Stripe: tipo de cuenta y nombre del negocio     | Variable | Antes del primer fundador en Stripe              |
-| 8   | Registro de quién y por qué deja de ser fundador        | Pequeño  | Opcional, cuando haya un caso                    |
+| #   | Mejora                                                  | Tamaño  | Cuándo hace falta                                |
+| --- | ------------------------------------------------------- | ------- | ------------------------------------------------ |
+| 1   | Página `/fundadores` con las condiciones                | Pequeño | **Antes del primer mensaje**                     |
+| 2   | Párrafo en `/privacidad` sobre contactos de captación   | Mínimo  | **Antes del primer mensaje**                     |
+| 3   | Aviso al fundador cuando se le nombra                   | Pequeño | Antes del 3.er fundador (los 2 primeros, a mano) |
+| 4   | Tarjeta del código de fundador en el panel              | Mínimo  | Antes del primer fundador                        |
+| 5   | Contador «n/10» y confirmación en `/admin/game-masters` | Mínimo  | Antes del 5.º fundador                           |
+| 6   | Aviso al GM cuando Stripe lo verifica                   | Pequeño | Opcional                                         |
+| 7   | Alta de Stripe (nada que hacer, ver el punto)           | —       | —                                                |
+| 8   | Registro de quién y por qué deja de ser fundador        | Pequeño | Opcional, cuando haya un caso                    |
 
 **Recomiendo hacer 1, 2 y 4 ahora** (son lo que el fundador y tú vais a tocar
 desde el primer día y cuestan poco) **y dejar 3, 5, 6 y 8 para cuando haya dos o
 tres fundadores reales**: con diez personas máximo, avisar a mano y mirar un
 número es razonable, y no merece la pena construir antes de saber qué se atasca
-de verdad. El 7 no es código: es una decisión que hay que tomar antes del primer
-alta.
+de verdad. El 7 no pide nada.
+
+> **Aprobados e implementados: 1, 2, 3 y 4** (13 de noviembre de 2026, sin
+> desplegar hasta que se haga el push). Siguen pendientes 5, 6 y 8.
 
 ---
 
@@ -146,22 +147,22 @@ listos, ya puedes publicar». Sale del webhook `account.updated`, que **ya exist
 pocos fundadores, el recordatorio a mano basta. Sí merece la pena si vemos que
 la gente se queda a medias.
 
-## 7. El alta de Stripe: no es código, hay que decidirlo
+## 7. El alta de Stripe: nada que hacer ahora (corregido)
 
-Dos cosas que hoy están así y que importan **antes del primer alta real**:
+En la primera versión de este punto exageré. Lo dejo como es:
 
-- **Tipo de cuenta fijado a «persona física».** `connect.ts` crea las cuentas
-  con `business_type: 'individual'`. Un game master que sea autónomo con
-  actividad, o que lo haga a través de una asociación o una sociedad, no puede
-  darse de alta como tal. No es un bug: es una decisión que acarrea fiscalidad,
-  y es otro punto para el asesor. **No se cambia sin él.**
-- **El nombre del negocio en Stripe** sale hoy como «Tu GM» en pantallas que el
-  game master ve durante el alta (ya lo anoté en `oferta-fundador.md`). Es un
-  ajuste del panel de Stripe, no de la web: hay que cambiarlo a «TuGameMaster»
-  antes del primer alta. Un nombre que no coincide con la web asusta a quien está
-  dando su IBAN.
-
-Esto no requiere ninguna aprobación de código: son dos tareas tuyas.
+- **Cada game master se da de alta él mismo en Stripe**, con sus datos y su
+  cuenta bancaria. La web solo crea, al pulsar «Empezar el alta», una cuenta
+  vacía a su nombre (con su correo) y lo manda al formulario de Stripe
+  (`connect.ts`). Esa cuenta se crea marcada como **persona física**
+  (`business_type: 'individual'`). Para un game master normal, incluido un
+  autónomo, es lo que toca. Solo dejaría fuera a quien quisiera cobrar como
+  sociedad o asociación, que hoy no es el caso de nadie. **No hay nada que
+  cambiar**; si algún día aparece ese caso, se mira con el asesor.
+- **«Tu GM» como nombre del negocio** es un dato del panel de Stripe, no de la
+  web. Es **cosmético**: no afecta a cobros ni a verificaciones. Cambiarlo a
+  «TuGameMaster» son dos minutos en el panel y queda más coherente con la web,
+  pero **no bloquea nada**.
 
 ## 8. Registro de por qué deja de ser fundador
 

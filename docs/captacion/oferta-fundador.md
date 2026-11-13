@@ -92,8 +92,8 @@ Es lo que hace útil la web y se puede contar sin exagerar, porque ya existe:
 ### Lo que es solo de fundadores
 
 - **Distintivo de fundador** en su avatar y en su nombre.
-- **Su código y su enlace** (`/r/<código>`) en `/cuenta/cobros`, listos para
-  copiar.
+- **Su código y su enlace** (`/r/<código>`) en su panel (`/dashboard`) y, con el
+  detalle de quién se ha registrado, en `/cuenta/cobros`, listos para copiar.
 - **Trato directo con Ulises**: sus necesidades pesan en lo que se construye
   después. Es una promesa de atención, no de plazos.
 - **Ayuda para publicar su primera partida** (de `plan.html`). **[decidir]**
@@ -136,8 +136,9 @@ mensaje de Instagram.
 
 **Una sola excepción, y se dice sin rodeos:** la administración se reserva el
 derecho a retirar la condición de fundador a quien incumpla las normas de
-comportamiento de la web. No hace falta detallarlas en la oferta: son las
-condiciones de uso (`/condiciones`). Pasar mucho tiempo sin dirigir **no** es
+comportamiento de la web. No hace falta detallarlas en la oferta. **Ojo:** hoy
+esas normas no están escritas en ninguna página (`/condiciones` solo trata de
+cancelaciones y reclamaciones). Pasar mucho tiempo sin dirigir **no** es
 motivo para perderla (sí puede caducar el código, que se renueva).
 
 ## Qué pasa cuando dejan de serlo
@@ -188,15 +189,16 @@ fundador dé de alta su cuenta y publique una partida **sí**.
 
 - [x] Las partidas de prueba, privadas (hecho por Ulises).
 - [x] Esta oferta cerrada.
-- [ ] Un sitio donde el fundador pueda leer sus condiciones (ver «Texto para la
-      web»).
+- [x] Un sitio donde el fundador pueda leer sus condiciones: `/fundadores`
+      (hecho; falta desplegarlo, ver más abajo).
 
 **Antes del alta de un fundador en Stripe**
 
 - [ ] Los **dos webhooks de Stripe en modo real**. Sin el segundo, la cuenta del
       game master queda verificada en Stripe y la web no se entera sola.
-- [ ] El nombre del negocio en Stripe: hoy sale «Tu GM» en pantallas que el
-      game master ve al darse de alta.
+- [ ] _(Opcional, cosmético.)_ El nombre del negocio en Stripe sale como «Tu GM»;
+      cambiarlo a «TuGameMaster» en el panel deja todo más coherente, pero no
+      bloquea nada.
 
 **Antes de que cobre un solo euro**
 
@@ -211,11 +213,11 @@ fundador dé de alta su cuenta y publique una partida **sí**.
       aviso de una reserva ni el de un pago. Hay que decírselo si todavía no
       está.
 
-## Texto para la web (propuesta, no implementado)
+## Texto para la web (implementado en `/fundadores`)
 
-Una página corta que la oferta pueda enlazar, `/fundadores`, o un bloque en
-`/para-game-masters`. Hoy esa página solo habla del 10 % y contradice lo que se
-promete por Instagram. Borrador de las condiciones:
+Está hecho: la página `/fundadores` existe y `/para-game-masters` enlaza a ella.
+Sus porcentajes salen del código (`payments/dinero.ts`), no de este texto. El
+borrador original, por si hay que revisar algo:
 
 > **Game masters fundadores.** Son los primeros diez game masters de
 > TuGameMaster, nombrados a mano.
@@ -234,8 +236,6 @@ promete por Instagram. Borrador de las condiciones:
 > - Una cuenta que ya existía no se puede emparejar después.
 >
 > No prometemos un número de reservas.
-
-Esto toca la web, así que **se propone aquí y se implementa solo con tu OK**.
 
 ## Lo que cuesta, para que no sorprenda
 

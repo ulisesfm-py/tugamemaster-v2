@@ -13,4 +13,4 @@ export const TITULAR = {
 } as const;
 
 /** Fecha de la ultima revision de los textos legales. */
-export const REVISION_TEXTOS_LEGALES = new Date('2026-11-07');
+export const REVISION_TEXTOS_LEGALES = new Date('2026-11-13');

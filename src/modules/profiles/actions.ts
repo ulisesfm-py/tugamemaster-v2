@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import type { EstadoAccion } from '@/lib/acciones';
 import { auth } from '@/lib/auth';
 import { exigirAdmin } from '@/lib/auth/admin';
+import { avisarFundadorNombrado } from '@/modules/notifications/service';
 
 import { quitarAvatar, subirAvatar } from './avatar';
 import { listaDesdeTexto } from './schema';
@@ -119,6 +120,13 @@ export async function cambiarPlanGmAction(
   );
 
   if (!resultado.ok) return { error: resultado.mensaje };
+
+  // Nombrarle fundador es lo unico que le llega: el boton de administracion no
+  // le dice nada. Va despues de guardar y fuera de cualquier transaccion, y no
+  // puede fallar hacia fuera: un correo que no sale no deshace el nombramiento.
+  if (plan === 'FUNDADOR') {
+    await avisarFundadorNombrado(String(formData.get('gmProfileId') ?? ''));
+  }
 
   // El distintivo sale en el perfil, el directorio y las tarjetas: todo lo
   // publico puede llevarlo, asi que se revalida desde la raiz.
