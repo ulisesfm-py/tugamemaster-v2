@@ -52,3 +52,18 @@ export function resumenDe(
 
   return `${recortado.trimEnd()}…`;
 }
+
+/** Lo que lee una persona por minuto, para el calculo del tiempo de lectura. */
+const PALABRAS_POR_MINUTO = 200;
+
+/**
+ * Minutos que se tarda en leer un articulo, para ensenarlo en las tarjetas.
+ *
+ * Se cuenta el texto sin marcas ni imagenes (`textoPlano`) y se redondea al
+ * minuto mas cercano, con un minimo de uno: «0 min de lectura» no tiene
+ * sentido, y un articulo de tres lineas tambien se lee en un minuto.
+ */
+export function minutosDeLectura(content: string): number {
+  const palabras = textoPlano(content).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(palabras / PALABRAS_POR_MINUTO));
+}

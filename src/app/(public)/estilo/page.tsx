@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { ContenidoBlog } from '@/components/blog/contenido';
+import { GuiasDePortada } from '@/components/blog/guias-de-portada';
 import { PartidaCard } from '@/components/partida-card';
 import {
   Avatar,
@@ -61,6 +62,35 @@ const ARTICULO_DE_EJEMPLO = [
   '',
   '@[video](/blog/ejemplo-clip.mp4 "Un clip propio (aqui no existe el fichero)")',
 ].join('\n');
+
+/** Guias de mentira para ver la seccion de la portada, con y sin portada. */
+const GUIAS_DE_EJEMPLO = [
+  {
+    id: 'g1',
+    slug: '#',
+    title: 'Reserva tu primera mesa en 4 pasos',
+    excerpt:
+      'Encuentra una partida, reserva tu plaza, paga y siéntate a jugar. Así funciona TuGameMaster para jugadores.',
+    content: 'palabra '.repeat(350),
+    coverUrl: '/blog/tavern-empty-chair.webp',
+  },
+  {
+    id: 'g2',
+    slug: '#',
+    title: 'Dirige tu primera mesa: guía para game masters',
+    excerpt: null,
+    content: 'Perfil, cobros, crear partida, hilo, campañas y cuánto cobras. '.repeat(40),
+    coverUrl: '/blog/tavern-dragon-reading.webp',
+  },
+  {
+    id: 'g3',
+    slug: '#',
+    title: 'Una guía sin portada',
+    excerpt: 'Así se ve la tarjeta cuando el artículo todavía no tiene imagen.',
+    content: 'corto',
+    coverUrl: null,
+  },
+];
 
 const AHORA = new Date('2026-10-18T18:00:00Z');
 
@@ -334,6 +364,15 @@ export default function EstiloPage() {
       >
         <div className="border-border bg-card rounded-sm border p-6">
           <ContenidoBlog texto={ARTICULO_DE_EJEMPLO} />
+        </div>
+      </Bloque>
+
+      <Bloque
+        titulo="Guias de la portada"
+        nota="La seccion de guias y tutoriales tal como sale en la portada: fila deslizable en movil, tres columnas desde pantalla mediana. Sin articulos publicados no se pinta."
+      >
+        <div className="border-border -mx-4 rounded-sm border sm:mx-0">
+          <GuiasDePortada guias={GUIAS_DE_EJEMPLO} className="py-8" />
         </div>
       </Bloque>
 

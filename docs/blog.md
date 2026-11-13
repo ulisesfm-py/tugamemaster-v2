@@ -83,6 +83,18 @@ cookies al entrar. Está descrito en `/privacidad`.
 Cualquier otro origen de vídeo (Vimeo, un `.mp4` de otra web) se rechaza al
 guardar.
 
+## Dónde sale un artículo publicado
+
+- En **`/blog`**, el listado completo.
+- En la **portada**, en la sección «Guías y tutoriales»: las **tres últimas**
+  publicadas, con su portada, el tiempo de lectura (unas 200 palabras por minuto)
+  y las dos primeras líneas del resumen. Sin artículos publicados, la sección no
+  se pinta.
+
+Por eso conviene **subir siempre una portada** (16:9, como las `tavern-*.webp`) y
+escribir un **resumen** corto: es lo que se ve en la tarjeta. Sin portada sale un
+fondo de la casa, y sin resumen se recorta el principio del cuerpo.
+
 ## Mientras no hay artículos
 
 `/estilo` (solo en desarrollo, da 404 en producción) enseña un artículo de

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { puedeBorrarComentario, resumenDe } from '@/modules/blog/politica';
+import {
+  minutosDeLectura,
+  puedeBorrarComentario,
+  resumenDe,
+} from '@/modules/blog/politica';
 import { comentarioSchema, postSchema } from '@/modules/blog/schema';
 
 describe('puedeBorrarComentario', () => {
@@ -18,6 +22,27 @@ describe('puedeBorrarComentario', () => {
     expect(puedeBorrarComentario(comentario, { id: 'bruno', esAdmin: false })).toBe(
       false,
     );
+  });
+});
+
+describe('minutosDeLectura', () => {
+  const palabras = (n: number) => 'palabra '.repeat(n);
+
+  it('nunca baja de un minuto, ni con el texto mas corto', () => {
+    expect(minutosDeLectura('Tres palabras nada mas')).toBe(1);
+    expect(minutosDeLectura(palabras(1))).toBe(1);
+  });
+
+  it('cuenta unas 200 palabras por minuto, redondeando', () => {
+    expect(minutosDeLectura(palabras(200))).toBe(1);
+    expect(minutosDeLectura(palabras(350))).toBe(2);
+    expect(minutosDeLectura(palabras(1000))).toBe(5);
+  });
+
+  it('no cuenta las marcas ni las imagenes', () => {
+    const con = `${palabras(200)}\n\n![x](/blog/a.webp)\n\n@[video](/blog/a.mp4)\n\n## ${palabras(0)}Titulo`;
+
+    expect(minutosDeLectura(con)).toBe(1);
   });
 });
 

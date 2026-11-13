@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { GuiasDePortada } from '@/components/blog/guias-de-portada';
 import { PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
 import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
-import { resumenDe } from '@/modules/blog/politica';
 import { listarPartidas } from '@/modules/games/queries';
 import { directorioDeGms } from '@/modules/profiles/queries';
 import {
@@ -49,7 +49,7 @@ export default async function Portada() {
   const [partidas, gms, articulos] = await Promise.all([
     listarPartidas({}),
     directorioDeGms(4),
-    listarPosts(2),
+    listarPosts(3),
   ]);
 
   const abiertas = partidas
@@ -177,6 +177,9 @@ export default async function Portada() {
           </ol>
         </div>
       </section>
+
+      {/* ── Guías y tutoriales ────────────────────────────────── */}
+      <GuiasDePortada guias={articulos} />
 
       {/* ── La garantía ───────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 py-14">
@@ -324,43 +327,6 @@ export default async function Portada() {
           </div>
         </div>
       </section>
-
-      {/* ── Del blog ──────────────────────────────────────────── */}
-      {articulos.length > 0 && (
-        <section className="border-border bg-card border-t">
-          <div className="mx-auto max-w-6xl px-4 py-14">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <h2 className="font-heading text-foreground text-2xl font-bold">
-                Del blog
-              </h2>
-              <Link
-                href="/blog"
-                className="text-primary text-sm font-semibold hover:underline"
-              >
-                Ver todo →
-              </Link>
-            </div>
-
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-              {articulos.map((a) => (
-                <li key={a.id}>
-                  <Link
-                    href={`/blog/${a.slug}`}
-                    className="border-border bg-background hover:border-primary flex h-full flex-col gap-2 rounded-sm border p-5 transition hover:-translate-y-0.5"
-                  >
-                    <h3 className="font-heading text-foreground text-lg font-bold">
-                      {a.title}
-                    </h3>
-                    <p className="text-muted-foreground line-clamp-3 text-sm">
-                      {resumenDe(a, 160)}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      )}
     </main>
   );
 }
