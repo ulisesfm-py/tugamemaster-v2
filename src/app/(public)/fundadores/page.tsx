@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { EnlaceBoton, Fundador } from '@/components/ui';
 import { MESES_DE_VALIDEZ, PLAZAS_DE_FUNDADOR } from '@/modules/invitaciones/politica';
@@ -172,7 +173,11 @@ export default function FundadoresPage() {
       <Bloque titulo="Si dejan de ser fundadores">
         <p>
           Un administrador puede retirar la condición, a petición del game master o si
-          incumple las normas de comportamiento de la web. En ese caso:
+          incumple las{' '}
+          <Link href="/normas" className="text-primary hover:underline">
+            normas de convivencia
+          </Link>{' '}
+          de la web. En ese caso:
         </p>
         <ul className="flex list-disc flex-col gap-2 pl-5">
           <li>Las reservas ya hechas conservan su comisión.</li>

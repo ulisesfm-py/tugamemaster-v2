@@ -33,6 +33,7 @@ const COLUMNAS = [
     enlaces: [
       { href: '/blog', texto: 'Blog' },
       { href: '/condiciones', texto: 'Condiciones' },
+      { href: '/normas', texto: 'Normas de convivencia' },
       { href: '/privacidad', texto: 'Privacidad' },
       { href: '/aviso-legal', texto: 'Aviso legal' },
       { href: '/contacto', texto: 'Contacto' },

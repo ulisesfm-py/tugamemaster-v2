@@ -136,9 +136,8 @@ mensaje de Instagram.
 
 **Una sola excepción, y se dice sin rodeos:** la administración se reserva el
 derecho a retirar la condición de fundador a quien incumpla las normas de
-comportamiento de la web. No hace falta detallarlas en la oferta. **Ojo:** hoy
-esas normas no están escritas en ninguna página (`/condiciones` solo trata de
-cancelaciones y reclamaciones). Pasar mucho tiempo sin dirigir **no** es
+comportamiento de la web. No hace falta detallarlas en la oferta: están en
+`/normas` (Normas de convivencia), a la que enlaza `/fundadores`. Pasar mucho tiempo sin dirigir **no** es
 motivo para perderla (sí puede caducar el código, que se renueva).
 
 ## Qué pasa cuando dejan de serlo
