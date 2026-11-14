@@ -87,6 +87,22 @@ GM, usando el coste exacto que Stripe reporta, no una estimación.
 > En un reembolso Stripe no devuelve la comisión del cobro original, y no hay
 > pago al GM del que descontarla. La fase 7 zanjó ese problema no devolviendo
 > el dinero a la tarjeta: ver [El monedero](#el-monedero-fase-7a-implementado).
+>
+> Stripe documenta una excepción (un reembolso hecho poco después del cobro
+> puede tratarse como _anulación_, sin retener comisión), pero no define
+> «poco después» y no se puede contar con ella.
+
+> **Dato real, 13/11/2026** (cobro de prueba de 1 € con tarjeta europea,
+> reembolsado desde el panel de Stripe). Transacciones de saldo: cobro +1,00 €
+> con comisión −0,27 € (1,5 % + 0,25 €, como se esperaba); reembolso −1,00 € sin
+> comisión propia; **y una línea aparte de −0,05 €, «Radar (…): Standard»**. La
+> comisión de procesamiento no se devolvió. Radar es una comisión por pago
+> examinado que Stripe cobra a la plataforma y **va en una transacción de saldo
+> separada del cargo**, así que `costeRealDeStripe` (que lee la
+> `balance_transaction` del cargo) **no la ve**: hoy esos 0,05 € por pago no se
+> descuentan al GM y los asume la plataforma. **Pendiente de decidir**; no se
+> cambia sin confirmar el enfoque. Antes hay que ver cómo se enlaza esa
+> transacción con el cargo en un cobro real.
 
 ## Alta de los GMs (fase 5, implementada)
 
