@@ -93,11 +93,14 @@ subdominio `send.`, así que no choca con los registros de la raíz.
 ### 5. Resend
 
 1. _Domains_ → añadir `tugamemaster.com`, región UE.
-2. Crear en Hostinger los registros que indique (`MX` y `TXT` en `send.`, el
-   DKIM en `resend._domainkey`) y añadir un DMARC:
-   `_dmarc` → `v=DMARC1; p=none`.
-3. Esperar a que salga _Verified_ y crear una API key **solo de envío** para
-   producción.
+2. Crear en Hostinger **los registros que muestre Resend en pantalla**, tal
+   cual, copiando cada valor con su botón (en la pantalla salen recortados).
+   Cambian con el tiempo: **no copiar de este documento**. El 15/11/2026 eran
+   un `TXT` DKIM en `resend._domainkey`, dos `CNAME` (`rsend` y `send`, TTL 3600) y el `TXT` de DMARC recomendado: `_dmarc` → `v=DMARC1; p=none;`.
+   Dejar **Receiving desactivado**: el dominio no tiene buzón.
+   En Hostinger el nombre va sin el dominio detrás.
+3. Pulsar _I've already added the records_ y esperar a que salga _Verified_.
+   Crear una API key **solo de envío** para producción.
 
 ### 6. Discord y Sentry
 

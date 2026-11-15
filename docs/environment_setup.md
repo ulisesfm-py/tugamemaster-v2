@@ -130,8 +130,9 @@ Hay tres etapas, y solo la última toca DNS:
    a la dirección con la que se creó la cuenta**. Sirve para ver los correos en
    un buzón real.
 3. **Con dominio propio.** Resend → _Domains_ → añadir `tugamemaster.com`, y
-   copiar en el proveedor de DNS los registros TXT que indique (SPF y DKIM;
-   conviene añadir DMARC). Ya se puede enviar a cualquiera desde
+   copiar en el proveedor de DNS los registros que indique en pantalla (DKIM y
+   SPF; conviene añadir DMARC), sea cual sea su tipo: Resend los cambia con el
+   tiempo. Ya se puede enviar a cualquiera desde
    `no-reply@tugamemaster.com`.
 
 Enviar **no requiere buzón de correo**: un remitente `no-reply@` solo necesita
