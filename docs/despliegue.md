@@ -102,6 +102,13 @@ subdominio `send.`, así que no choca con los registros de la raíz.
 3. Pulsar _I've already added the records_ y esperar a que salga _Verified_.
    Crear una API key **solo de envío** para producción.
 
+**Dominio raíz, no subdominio (decidido el 15/11/2026).** Resend recomienda
+enviar desde un subdominio para aislar la reputación y separar tipos de correo.
+Hoy solo se manda correo transaccional, así que se deja la raíz
+(`no-reply@tugamemaster.com`). **Si algún día se envía otro tipo de correo**
+(un boletín, avisos del blog), ese va en un subdominio propio, añadido entonces
+como un dominio más en Resend, y no se mezcla con el de las reservas.
+
 ### 6. Discord y Sentry
 
 - **Discord**: en la aplicación, _OAuth2_ → _Redirects_ → añadir
