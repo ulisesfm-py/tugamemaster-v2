@@ -2,11 +2,12 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { borrarSiEsNuestra, subirImagen } from '@/lib/imagen';
-import { ESTADOS_PAGADOS } from '@/modules/bookings/service';
+import { ESTADOS_PAGADOS, filtroPlazaOcupada } from '@/modules/bookings/service';
 import { avisarPartidaCancelada } from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 import { abonar } from '@/modules/wallet/service';
 
+import { conLaFechaActual, fechaBloqueada, MENSAJE_FECHA_BLOQUEADA } from './politica';
 import { partidaSchema, type PartidaInput } from './schema';
 
 /**
@@ -103,16 +104,12 @@ export async function actualizarPartida(
   gameId: string,
   input: unknown,
 ): Promise<ResultadoPartida> {
-  const parsed = partidaSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, mensaje: parsed.error.issues[0]?.message ?? 'Revisa los datos' };
-  }
-
   const partida = await db.game.findUnique({
     where: { id: gameId },
     select: {
       slug: true,
       status: true,
+      startsAt: true,
       gm: { select: { userId: true } },
       _count: {
         select: { bookings: { where: { status: { in: ['PENDING', 'PAID'] } } } },
@@ -126,6 +123,25 @@ export async function actualizarPartida(
 
   if (partida.status === 'COMPLETED' || partida.status === 'CANCELLED') {
     return { ok: false, mensaje: 'Una partida terminada o cancelada ya no se edita' };
+  }
+
+  // Con plazas ocupadas la fecha esta fija (ver `politica.ts`). Se cuenta con el
+  // mismo filtro que el aforo: una plaza que alguien esta pagando ahora mismo
+  // tambien la ocupa, y cambiarle la fecha a mitad de pago seria venderle otra
+  // partida de la que vio.
+  const ocupadas = await db.booking.count({
+    where: { gameId, ...filtroPlazaOcupada() },
+  });
+
+  const entrada = fechaBloqueada(ocupadas)
+    ? conLaFechaActual(input, partida.startsAt)
+    : input;
+
+  if (entrada === null) return { ok: false, mensaje: MENSAJE_FECHA_BLOQUEADA };
+
+  const parsed = partidaSchema.safeParse(entrada);
+  if (!parsed.success) {
+    return { ok: false, mensaje: parsed.error.issues[0]?.message ?? 'Revisa los datos' };
   }
 
   const d = parsed.data;

@@ -124,6 +124,13 @@ fidelidad a lo anterior.
   implementar hasta tener la v1 base funcionando; cuando llegue el momento,
   debe diseñarse como un servicio aparte y desacoplado del resto del backend,
   no integrado directamente en el flujo de reservas.
+- **Reprogramar una partida con jugadores**: hoy la **fecha de una partida con
+  plazas ocupadas no se puede cambiar** (`src/modules/games/politica.ts`), porque
+  cambiarla no avisa a nadie, desplaza el plazo de cancelación y la salida
+  alternativa (cancelar y crear otra) la paga la plataforma. El diseño de
+  «reprogramar con aviso y cancelación gratuita» está en
+  `docs/reprogramar-partida.md`, pendiente de hablarlo con los fundadores. No
+  implementar hasta entonces.
 
 ## Tech stack
 

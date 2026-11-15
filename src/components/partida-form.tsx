@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
-import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
+import { Aviso, Button, Campo, CLASE_CONTROL, Fecha } from '@/components/ui';
 import { loEscrito, type EstadoAccion } from '@/lib/acciones';
 import {
   ETIQUETAS,
@@ -93,10 +93,17 @@ export function PartidaForm({
   valores,
   idiomasPorDefecto = [],
   campana,
+  fechaFija = false,
 }: {
   accion: Accion;
   textoBoton: string;
   valores?: ValoresDePartida;
+  /**
+   * La partida ya tiene jugadores: la fecha se ensena como texto y no se manda.
+   * Solo tiene sentido al editar. La regla la hace cumplir el servidor; esto
+   * evita que alguien rellene el formulario para recibir un rechazo.
+   */
+  fechaFija?: boolean;
   /**
    * Idiomas del game master, para una partida nueva. No se heredan al editar:
    * ahi mandan los de la mesa, que es justo el dato que se quiso separar.
@@ -296,16 +303,35 @@ export function PartidaForm({
         </legend>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Campo id="startsAt" etiqueta="Empieza">
-            <input
-              id="startsAt"
-              name="startsAt"
-              type="datetime-local"
-              defaultValue={texto('startsAt', valores ? paraInput(valores.startsAt) : '')}
-              required
-              className={CLASE_CONTROL}
-            />
-          </Campo>
+          {valores && fechaFija ? (
+            /* Con jugadores, la fecha no se toca (ver `games/politica.ts`). No
+               se pinta un campo deshabilitado sino el texto: asi se lee igual
+               que en el resto de la web, y no hay un campo que parezca roto. */
+            <div className="flex flex-col gap-1.5">
+              <span className="text-foreground text-sm font-medium">Empieza</span>
+              <p className="text-foreground">
+                <Fecha valor={valores.startsAt} />
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Esta partida ya tiene jugadores, así que la fecha no se puede cambiar. Si
+                necesitas moverla, escríbenos y lo vemos.
+              </p>
+            </div>
+          ) : (
+            <Campo id="startsAt" etiqueta="Empieza">
+              <input
+                id="startsAt"
+                name="startsAt"
+                type="datetime-local"
+                defaultValue={texto(
+                  'startsAt',
+                  valores ? paraInput(valores.startsAt) : '',
+                )}
+                required
+                className={CLASE_CONTROL}
+              />
+            </Campo>
+          )}
 
           <Campo id="durationHours" etiqueta="Duración (horas)">
             <input

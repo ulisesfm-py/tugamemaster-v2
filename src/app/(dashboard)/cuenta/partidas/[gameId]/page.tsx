@@ -31,6 +31,7 @@ import {
   subirLaminaAction,
 } from '@/modules/games/actions';
 import { estadoVisible } from '@/modules/games/ficha';
+import { fechaBloqueada } from '@/modules/games/politica';
 import { miPartida } from '@/modules/games/queries';
 import { accesoAlHilo, DIAS_DE_VIDA } from '@/modules/threads/politica';
 
@@ -315,6 +316,7 @@ export default async function GestionarPartidaPage({ params }: Props) {
               accion={actualizarPartidaAction}
               textoBoton="Guardar cambios"
               valores={partida}
+              fechaFija={fechaBloqueada(pagadas)}
             />
           </Bloque>
 
