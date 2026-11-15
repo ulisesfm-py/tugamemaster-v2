@@ -61,7 +61,7 @@ export async function Cabecera() {
 
   return (
     <header className="border-border bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-6">
+      <div className="max-w-sitio mx-auto flex h-14 items-center gap-2 px-4 sm:gap-6">
         {/* En pantallas estrechas las secciones viven detras de este boton; a
             partir de `sm` se ensenan en fila. Antes se ocultaban sin mas, y en
             un telefono no habia forma de llegar a ninguna desde arriba. */}

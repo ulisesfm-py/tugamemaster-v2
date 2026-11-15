@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { GuiasDePortada } from '@/components/blog/guias-de-portada';
+import { FilaDeslizable } from '@/components/fila-deslizable';
 import { PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
@@ -89,7 +90,7 @@ export default async function Portada() {
           </>
         )}
 
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+        <div className="max-w-sitio mx-auto px-4 py-16 sm:py-24">
           <h1 className="font-heading text-foreground max-w-3xl text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-6xl">
             Una silla libre en una buena mesa
           </h1>
@@ -111,7 +112,7 @@ export default async function Portada() {
       </section>
 
       {/* ── Partidas abiertas ─────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
+      <section className="max-w-sitio mx-auto px-4 py-14">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-heading text-foreground text-2xl font-bold">
@@ -141,8 +142,12 @@ export default async function Portada() {
         ) : (
           /* Fila deslizable, no carrusel: se ven varias tarjetas a la vez y
              ninguna se esconde. Un carrusel que rota solo enseña una cosa cada
-             vez, y las partidas son el producto. */
-          <ul className="-mx-4 mt-6 flex snap-x snap-mandatory [scrollbar-width:thin] gap-4 overflow-x-auto px-4 pb-4">
+             vez, y las partidas son el producto. Con flechas en escritorio y
+             sin barra: ver FilaDeslizable. */
+          <FilaDeslizable
+            etiqueta="partidas"
+            className="-mx-4 mt-6 scroll-px-4 gap-4 px-4 pt-1 pb-4"
+          >
             {abiertas.map((p) => (
               <PartidaCard
                 key={p.id}
@@ -150,13 +155,13 @@ export default async function Portada() {
                 className="w-[17rem] shrink-0 snap-start sm:w-[19rem]"
               />
             ))}
-          </ul>
+          </FilaDeslizable>
         )}
       </section>
 
       {/* ── Cómo funciona ─────────────────────────────────────── */}
       <section className="border-border bg-card border-y">
-        <div className="mx-auto max-w-6xl px-4 py-14">
+        <div className="max-w-sitio mx-auto px-4 py-14">
           <h2 className="font-heading text-foreground text-2xl font-bold">
             Cómo funciona
           </h2>
@@ -182,7 +187,7 @@ export default async function Portada() {
       <GuiasDePortada guias={articulos} />
 
       {/* ── La garantía ───────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
+      <section className="max-w-sitio mx-auto px-4 py-14">
         <div className="border-accent/30 bg-accent/5 flex flex-col gap-6 rounded-sm border p-6 sm:p-8">
           <div className="flex items-start gap-3">
             <svg
@@ -241,7 +246,7 @@ export default async function Portada() {
       {/* ── Game masters ──────────────────────────────────────── */}
       {gms.length > 0 && (
         <section className="border-border bg-card border-y">
-          <div className="mx-auto max-w-6xl px-4 py-14">
+          <div className="max-w-sitio mx-auto px-4 py-14">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="font-heading text-foreground text-2xl font-bold">
@@ -289,7 +294,7 @@ export default async function Portada() {
       )}
 
       {/* ── Para game masters ─────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
+      <section className="max-w-sitio mx-auto px-4 py-14">
         <div>
           <h2 className="font-heading text-foreground text-2xl font-bold">
             ¿Diriges tú?

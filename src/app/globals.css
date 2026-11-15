@@ -5,6 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Ancho maximo del contenido de toda la web: cabecera, pie y secciones. Es lo
+     que mide una fila de cuatro tarjetas de partida (4 x 19rem + 3 huecos de
+     1rem = 79rem) mas los margenes laterales de 1rem. Si cambia el ancho de la
+     tarjeta, cambia esto. */
+  --container-sitio: 81rem;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-barlow);

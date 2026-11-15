@@ -48,7 +48,7 @@ export default async function SistemaPage({ params }: Props) {
   const { sistema, partidas, gms } = datos;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
+    <main className="max-w-sitio mx-auto px-4 py-10">
       <p className="text-accent text-sm font-semibold">Sistema de juego</p>
 
       <h1 className="font-heading text-foreground mt-2 text-3xl font-extrabold text-balance sm:text-4xl">

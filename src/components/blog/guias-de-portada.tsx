@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { FilaDeslizable } from '@/components/fila-deslizable';
 import { cn } from '@/lib/utils';
 import { minutosDeLectura, resumenDe } from '@/modules/blog/politica';
 
@@ -83,7 +84,7 @@ export function GuiasDePortada({
   if (guias.length === 0) return null;
 
   return (
-    <section className={cn('mx-auto max-w-6xl px-4 py-14', className)}>
+    <section className={cn('max-w-sitio mx-auto px-4 py-14', className)}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="font-heading text-foreground text-2xl font-bold">
@@ -99,7 +100,10 @@ export function GuiasDePortada({
         </Link>
       </div>
 
-      <ul className="-mx-4 mt-6 flex snap-x snap-mandatory [scrollbar-width:thin] gap-4 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0">
+      <FilaDeslizable
+        etiqueta="guías"
+        className="-mx-4 mt-6 scroll-px-4 gap-4 px-4 pb-4 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0"
+      >
         {guias.map((guia) => (
           <Tarjeta
             key={guia.id}
@@ -107,7 +111,7 @@ export function GuiasDePortada({
             className="w-[17rem] shrink-0 snap-start sm:w-[19rem] md:w-auto"
           />
         ))}
-      </ul>
+      </FilaDeslizable>
     </section>
   );
 }

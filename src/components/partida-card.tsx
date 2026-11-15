@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
  *
  * Tres cosas que cambian respecto a la anterior:
  *
- * 1. **Las plazas se cuentan como urgencia, no como inventario.** «Queda 1
- *    plaza» y «2 de 6 ocupadas» dicen el mismo dato; el primero mueve a
- *    alguien y el segundo no.
+ * 1. **Las plazas se cuentan como urgencia y, aparte, como inventario.** La
+ *    insignia de la lamina dice «Queda 1 plaza», que mueve a alguien; el pie de
+ *    la tarjeta anade «3/5» con un sillon, corto y a mano para quien prefiere
+ *    ver cuantas hay ocupadas sobre el total.
  * 2. **La nota del game master va en la tarjeta.** Es lo que mas ayuda a
  *    elegir entre dos partidas parecidas, y antes habia que entrar para verla.
  * 3. **Hay lamina siempre.** Cuando el GM no sube imagen —que sera lo normal
@@ -72,7 +73,8 @@ export function PartidaCard({
   /** Se aplica al <li>: quien la coloca decide cuanto ocupa. */
   className?: string;
 }) {
-  const libres = partida.seatsTotal - partida._count.bookings;
+  const ocupadas = partida._count.bookings;
+  const libres = partida.seatsTotal - ocupadas;
   const aforo = plazas(libres, partida.seatsTotal);
 
   // Dos como mucho: la tarjeta tiene que seguir leyendose de un vistazo.
@@ -144,7 +146,7 @@ export function PartidaCard({
               tamano={20}
               fundador={partida.gm.plan === 'FUNDADOR'}
             />
-            {partida.gm.user.name}
+            <span className="truncate">{partida.gm.user.name}</span>
             {/* En la tarjeta no cabe la etiqueta: el anillo basta a la vista,
                 y esto se lo cuenta a quien la escucha. */}
             {partida.gm.plan === 'FUNDADOR' && (
@@ -164,6 +166,35 @@ export function PartidaCard({
                   </span>
                 </span>
               )}
+
+            {/* Sillas ocupadas sobre el total: la insignia de la lamina dice cuanto
+                queda (urgencia), esto da el inventario a quien lo prefiere. */}
+            <span
+              className="text-muted-foreground ml-auto flex shrink-0 items-center gap-1 text-sm tabular-nums"
+              title={`${ocupadas} de ${partida.seatsTotal} plazas ocupadas`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+                aria-hidden
+              >
+                <path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3" />
+                <path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z" />
+                <path d="M5 18v2" />
+                <path d="M19 18v2" />
+              </svg>
+              <span aria-hidden>
+                {ocupadas}/{partida.seatsTotal}
+              </span>
+              <span className="sr-only">
+                {ocupadas} de {partida.seatsTotal} plazas ocupadas
+              </span>
+            </span>
           </div>
 
           <div className="border-border mt-auto flex items-baseline justify-between gap-2 border-t pt-3">

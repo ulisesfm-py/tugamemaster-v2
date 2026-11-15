@@ -45,7 +45,7 @@ const COLUMNAS = [
 export function PieDePagina() {
   return (
     <footer className="border-border bg-card mt-auto border-t">
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="max-w-sitio mx-auto px-4 py-10">
         <div className="flex flex-wrap gap-x-12 gap-y-8">
           <div className="min-w-[14rem] flex-1">
             <p className="text-foreground">

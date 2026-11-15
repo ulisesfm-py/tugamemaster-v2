@@ -43,8 +43,8 @@ export default async function ArticuloPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      {/* Todo al ancho de la cabecera de la web (max-w-6xl): el logo y el avatar
+    <main className="max-w-sitio mx-auto px-4 py-10">
+      {/* Todo al ancho de la cabecera de la web (max-w-sitio): el logo y el avatar
           marcan los bordes, y la portada, el titulo, el texto y los comentarios
           caen justo debajo. */}
       <Link href="/blog" className="text-muted-foreground text-sm hover:underline">
