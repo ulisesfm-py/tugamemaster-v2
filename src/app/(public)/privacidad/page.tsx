@@ -22,7 +22,10 @@ const PROVEEDORES = [
     nombre: 'Stripe',
     para: 'Cobrar las reservas y pagar a los game masters. Los datos de tu tarjeta los recibe Stripe directamente: nunca pasan por nuestros servidores.',
   },
-  { nombre: 'Vercel', para: 'Alojar la web y las imágenes que subes.' },
+  {
+    nombre: 'Vercel',
+    para: 'Alojar la web y las imágenes que subes, y contar las visitas de forma anónima, sin cookies (ver «Cookies»).',
+  },
   {
     nombre: 'Neon',
     para: 'Guardar la base de datos, en servidores de Frankfurt (Alemania).',
@@ -208,6 +211,13 @@ export default function PrivacidadPage() {
           sesión, para que no tengas que entrar en cada página, y una de diez minutos que
           guarda el código de invitación mientras te registras con Discord. No hay cookies
           de analítica ni de publicidad, y por eso no te pedimos permiso al entrar.
+        </p>
+        <p>
+          Contamos las visitas con Vercel Web Analytics, que no usa cookies ni guarda nada
+          en tu navegador y no te identifica: solo suma páginas vistas, de qué enlace
+          llega la visita y el tipo de dispositivo y el país. No se mide ninguna página
+          privada (tu cuenta, tus reservas, la administración), y de las direcciones solo
+          se conserva la marca del enlace de origen, no el resto de sus parámetros.
         </p>
         <p>
           La pantalla de pago es de Stripe y usa sus propias cookies para prevenir el

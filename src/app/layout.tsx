@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Barlow, Bricolage_Grotesque } from 'next/font/google';
 import './globals.css';
 
+import { Analitica } from '@/components/analitica';
 import { sitioIndexable } from '@/lib/indexacion';
 
 /**
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         className="bg-background text-foreground flex min-h-full flex-col"
       >
         {children}
+        <Analitica />
       </body>
     </html>
   );
