@@ -8,9 +8,12 @@
  */
 export const TITULAR = {
   nombre: 'Ulises',
-  correo: 'ulises.fm.py@gmail.com',
+  // Direccion de reenvio (ImprovMX) al correo personal del titular: la web no
+  // publica su Gmail, que ademas es el acceso del administrador. Se contesta
+  // desde Gmail como esta direccion (SMTP de Resend). Ver docs/despliegue.md.
+  correo: 'contacto@tugamemaster.com',
   dominio: 'tugamemaster.com',
 } as const;
 
 /** Fecha de la ultima revision de los textos legales. */
-export const REVISION_TEXTOS_LEGALES = new Date('2026-11-13');
+export const REVISION_TEXTOS_LEGALES = new Date('2026-11-16');

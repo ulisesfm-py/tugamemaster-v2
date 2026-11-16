@@ -56,10 +56,29 @@ Los webhooks se configuran en el paso 8, cuando la web ya responde.
 El dominio sigue en Hostinger y **los DNS también**: así los registros de la
 web y los del envío de correo viven en un único panel.
 
-No hay buzón en el dominio: el contacto público es el correo personal del
-titular (`src/lib/titular.ts`). Si algún día se quiere `hola@tugamemaster.com`,
-basta un reenvío (el correo de Hostinger o ImprovMX). Resend firma desde el
-subdominio `send.`, así que no choca con los registros de la raíz.
+No hay buzón en el dominio: el contacto público es `contacto@tugamemaster.com`
+(`src/lib/titular.ts`), un **reenvío** al correo personal del titular, que no se
+publica en ningún sitio (es además el acceso del administrador). Montado el
+16/11/2026 así:
+
+- **Recibir**: [ImprovMX](https://improvmx.com/) gratuito. Alias `contacto` →
+  correo del titular. En Hostinger, en la raíz, los dos `MX` y el `TXT` (SPF) que
+  muestra ImprovMX en pantalla (cópialos de ahí). Hostinger no tenía plan de
+  correo: no había ningún `MX` previo que borrar. Su pantalla puede seguir en
+  rojo («Incorrect DNS records») aun con todo bien: muestra la última
+  comprobación; se refresca con _Check again_ o en `inspector.improvmx.com`.
+- **Enviar**: en Gmail, _Enviar como_ `contacto@` con el SMTP de Resend
+  (`smtp.resend.com`, puerto 465 SSL, usuario `resend`, contraseña = una **clave
+  de API propia, solo de envío**, distinta de la de producción: queda guardada
+  en Gmail).
+- La web pone esa dirección como `reply_to` de todos sus correos
+  (`src/lib/email.ts`), de modo que quien conteste a un aviso llega a una
+  persona.
+- Si algún día se contrata un buzón de verdad (Hostinger Email, Workspace…),
+  sustituye al reenvío: los `MX` de la raíz son de uno u otro, no de los dos.
+
+Resend firma desde el subdominio `send.`, así que no choca con los registros de
+la raíz.
 
 ### 3. Vercel
 

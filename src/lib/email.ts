@@ -2,6 +2,8 @@ import 'server-only';
 
 import { Resend } from 'resend';
 
+import { TITULAR } from '@/lib/titular';
+
 /**
  * Envio de correo transaccional.
  *
@@ -97,6 +99,8 @@ export async function enviarCorreo(correo: Correo): Promise<boolean> {
     const respuesta = await resend().emails.send({
       from: process.env['EMAIL_FROM'] as string,
       to: salida.para,
+      // Quien conteste a un aviso escribe a una persona, no a un `no-reply@`.
+      replyTo: TITULAR.correo,
       subject: salida.asunto,
       text: salida.texto,
       html: salida.html,
