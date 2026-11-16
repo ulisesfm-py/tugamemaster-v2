@@ -105,6 +105,13 @@ body {
   display: flex; flex-direction: column; justify-content: center; gap: 36px;
 }
 .contenido.abajo { justify-content: flex-end; }
+/* La cuadricula del perfil recorta la primera tarjeta de cada publicacion (3:4 y
+   mas por los lados y por abajo): el texto de una portada se queda en la zona
+   central para que la miniatura no lo corte. */
+.contenido.portada { left: 150px; right: 150px; bottom: 270px; }
+.portada h1 { font-size: 100px; }
+.portada .sub { font-size: 46px; }
+.contenido.segura { left: 140px; right: 140px; }
 .contenido.arriba { justify-content: flex-start; top: 150px; }
 h1, h2, .cifra, .letra { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.02em; }
 h1 { font-size: 112px; line-height: 1.02; text-wrap: balance; }
@@ -193,7 +200,7 @@ ${cuerpo}
 }
 
 const TIPOS = {
-  portada: (d) => `<div class="contenido ${d.foto ? 'abajo' : ''}">
+  portada: (d) => `<div class="contenido portada ${d.foto ? 'abajo' : ''}">
     ${d.emblema ? `<div>${emblema.replace('class="emblema"', 'class="emblema-grande"')}</div>` : ''}
     <h1>${d.titulo}</h1>${d.sub ? `<p class="sub">${d.sub}</p>` : ''}</div>`,
 
@@ -219,7 +226,7 @@ const TIPOS = {
     ${d.sinAviso ? PANELES[d.captura].replace(/<p class="aviso">.*?<\/p>/s, '') : PANELES[d.captura]}
     ${parrafos(d.cuerpo)}</div>`,
 
-  opciones: (d) => `<div class="contenido compacto">
+  opciones: (d) => `<div class="contenido compacto segura">
     <h2>${d.titulo}</h2>
     ${d.opciones
       .map(
