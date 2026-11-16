@@ -67,3 +67,6 @@ next-env.d.ts
 #business plan
 /business-plan.pdf
 /plan.html
+
+# tarjetas de Instagram generadas (se regeneran con scripts/captacion/tarjetas-instagram.mjs)
+/docs/captacion/instagram/tarjetas/

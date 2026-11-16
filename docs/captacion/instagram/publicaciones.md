@@ -33,7 +33,36 @@ primer mensaje: son las que mira un GM para decidir si fiarse.
 Formato de todas las imágenes: **1080 × 1350 px (4:5 vertical)**, que es lo que
 más ocupa en pantalla.
 
-## Cómo se hacen las imágenes
+## Las tarjetas ya hechas
+
+Las genera `scripts/captacion/tarjetas-instagram.mjs` (Chromium de Playwright,
+con las fuentes de la web) y salen en `docs/captacion/instagram/tarjetas/`, una
+carpeta por publicación y un PNG de 1080 × 1350 por diapositiva. **No se suben
+al repositorio**: si cambias un texto, cámbialo en el script y aquí, y vuelve a
+ejecutarlo.
+
+```bash
+node scripts/captacion/tarjetas-instagram.mjs      # todas
+node scripts/captacion/tarjetas-instagram.mjs 3    # solo la publicación 3
+```
+
+Diferencias respecto a lo que describen las secciones de abajo, que son el
+método manual y los prompts para fondos con IA:
+
+- Las portadas de la 1, la 2 y la 4 llevan una **ilustración que ya tiene la
+  web** (`public/marca/portada.png` y `public/blog/tavern-*.webp`) oscurecida;
+  la 3 y la 5 llevan el emblema, y la 6 va solo en texto.
+- Las dos «capturas» (publicación 2, diapositiva 4, y publicación 5,
+  diapositiva 3) están **rehechas con el mismo estilo y las mismas palabras de
+  la web**, no recortadas: a tamaño de móvil una captura deja el texto ilegible.
+  Muestran el estado vacío de una cuenta nueva (0,00 €, 0 partidas), no cifras
+  inventadas.
+- La diapositiva 4 de la publicación 4 solo lleva la invitación a contar cómo
+  dirigen. **El motivo personal** (el hueco que deja el texto de esa
+  publicación) no está en la imagen: si lo quieres, es una diapositiva más que
+  escribes tú.
+
+## Cómo se hacen las imágenes a mano
 
 Hay tres tipos de pieza, y solo una puede salir de la IA.
 
