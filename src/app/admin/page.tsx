@@ -97,6 +97,12 @@ export default async function AdminPage() {
         />
 
         <Atajo
+          href="/admin/metricas"
+          titulo="Métricas"
+          descripcion="Cuántos game masters llegan a cobrar, cuántas cuentas se crean y cuántos pagos se terminan."
+        />
+
+        <Atajo
           href="/admin/blog"
           titulo="Blog"
           descripcion="Escribir, publicar y retirar artículos."

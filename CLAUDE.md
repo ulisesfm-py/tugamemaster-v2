@@ -236,6 +236,15 @@ record; se usan _separate charges and transfers_, nunca destination charges.
 - Los ajustes viven en `src/lib/observabilidad.ts`, compartidos por el arranque
   del servidor (`instrumentation.ts`) y el del navegador
   (`instrumentation-client.ts`).
+- Las **visitas** se cuentan con Vercel Web Analytics (`src/components/analitica.tsx`):
+  sin cookies, y por eso `/privacidad` puede seguir diciendo que no hay cookies
+  de analítica. **No se mide ninguna ruta privada** (`/cuenta`, `/mis-reservas`,
+  `/admin`, `/r/<código>`…) y de la dirección solo se conservan los `utm_*`
+  (`src/lib/analitica.ts`, con pruebas). Una herramienta con cookies exigiría
+  aviso de cookies y cambiar `/privacidad`.
+- Lo que pasa **dentro** de la web (cuentas, game masters que llegan a cobrar,
+  pagos que se terminan) está en `/admin/metricas`, calculado al vuelo desde la
+  base de datos (`src/modules/metricas`). Incluye las cuentas y reservas de prueba.
 
 ## Seguridad de acceso
 
