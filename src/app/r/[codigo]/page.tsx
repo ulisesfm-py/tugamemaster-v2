@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Invitación · TuGameMaster' };
 type Props = { params: Promise<{ codigo: string }> };
 
 /**
- * El enlace de un game master fundador: `tugamemaster.com/r/K7M2QX9A`.
+ * El enlace de invitacion de un game master: `tugamemaster.com/r/K7M2QX9A`.
  *
  * Sin sesion, lleva a crear la cuenta con el codigo ya puesto. Aqui no se
  * guarda nada: el emparejamiento se hace al registrarse, en el servidor, y no

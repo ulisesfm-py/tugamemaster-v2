@@ -199,7 +199,7 @@ export default async function MetricasPage() {
             nota={compararConAnterior(usuarios.nuevos, usuarios.nuevosAnteriores)}
           />
           <Cifra
-            etiqueta="Con código de fundador"
+            etiqueta="Con código de invitación"
             valor={usuarios.conCodigo}
             nota={`${formatearPorcentaje(usuarios.conCodigo, usuarios.total)} de las cuentas`}
           />

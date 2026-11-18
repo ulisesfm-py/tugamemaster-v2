@@ -6,21 +6,22 @@ import { MESES_DE_VALIDEZ, PLAZAS_DE_FUNDADOR } from '@/modules/invitaciones/pol
 import {
   COMISION_ESTANDAR,
   COMISION_FUNDADOR,
-  COMISION_FUNDADOR_ENLACE,
+  COMISION_ENLACE,
   porcentaje,
 } from '@/modules/payments/dinero';
 
 export const metadata: Metadata = {
   title: 'Game masters fundadores · TuGameMaster',
-  description: `Los primeros ${PLAZAS_DE_FUNDADOR} game masters de TuGameMaster pagan una comisión del ${porcentaje(COMISION_FUNDADOR)}% por los jugadores que trae la web y del ${porcentaje(COMISION_FUNDADOR_ENLACE)}% por los suyos.`,
+  description: `Los primeros ${PLAZAS_DE_FUNDADOR} game masters de TuGameMaster pagan una comisión del ${porcentaje(COMISION_FUNDADOR)}% por los jugadores que trae la web, en lugar del ${porcentaje(COMISION_ESTANDAR)}%.`,
 };
 
 /**
  * Las condiciones de los game masters fundadores, por escrito.
  *
  * Existe para que lo que se promete en una conversacion se pueda leer aqui, y
- * para que alguien que mire la web antes de fiarse no encuentre solo el 10 %
- * de `/para-game-masters` y piense que le han contado otra cosa.
+ * para que alguien que mire la web antes de fiarse no encuentre solo la
+ * comision general de `/para-game-masters` y piense que le han contado otra
+ * cosa.
  *
  * Los porcentajes salen de `payments/dinero.ts`, que es donde se aplican: esta
  * pagina no puede decir una cifra distinta de la que cobra la web. No lleva
@@ -41,18 +42,18 @@ function Bloque({ titulo, children }: { titulo: string; children: React.ReactNod
 
 const CONDICIONES = [
   {
-    quien: 'Un jugador que se registró con el código del fundador',
-    valor: COMISION_FUNDADOR_ENLACE,
-    destacado: true,
-  },
-  {
     quien: 'Un jugador que llegó por la web',
     valor: COMISION_FUNDADOR,
     destacado: true,
   },
   {
-    quien: 'Para comparar: cualquier otro game master, con cualquier jugador',
+    quien: 'Para comparar: cualquier otro game master, con un jugador de la web',
     valor: COMISION_ESTANDAR,
+    destacado: false,
+  },
+  {
+    quien: 'Un jugador que se registró con su enlace (igual para cualquier game master)',
+    valor: COMISION_ENLACE,
     destacado: false,
   },
 ] as const;
@@ -122,11 +123,13 @@ export default function FundadoresPage() {
         </p>
       </Bloque>
 
-      <Bloque titulo="El código de invitación">
+      <Bloque titulo="El enlace de invitación">
         <p>
-          Cada fundador tiene un código y un enlace propios. Quien crea su cuenta con
-          ellos queda como jugador suyo, y por sus plazas el fundador paga un{' '}
-          {porcentaje(COMISION_FUNDADOR_ENLACE)}%.
+          No es exclusivo de los fundadores: cualquier game master puede crear su código y
+          su enlace desde su panel. Quien crea su cuenta con ellos queda como jugador
+          suyo, y por sus plazas en sus mesas el game master paga un{' '}
+          {porcentaje(COMISION_ENLACE)}%. Si ese jugador reserva con otro game master,
+          allí paga la comisión normal.
         </p>
         <ul className="flex list-disc flex-col gap-2 pl-5">
           <li>
@@ -142,9 +145,9 @@ export default function FundadoresPage() {
             web.
           </li>
           <li>
-            El código admite registros durante {MESES_DE_VALIDEZ} meses y se renueva
-            cuando hace falta. Lo que caduca es el código, no el emparejamiento: quien ya
-            se registró con él sigue siendo del fundador.
+            El código admite registros durante {MESES_DE_VALIDEZ} meses y el propio game
+            master lo renueva desde su panel. Lo que caduca es el código, no el
+            emparejamiento: quien ya se registró con él sigue siendo suyo.
           </li>
         </ul>
       </Bloque>
@@ -182,11 +185,14 @@ export default function FundadoresPage() {
         <ul className="flex list-disc flex-col gap-2 pl-5">
           <li>Las reservas ya hechas conservan su comisión.</li>
           <li>
-            Las nuevas pasan al {porcentaje(COMISION_ESTANDAR)}%, también las de sus
-            jugadores con código: el {porcentaje(COMISION_FUNDADOR_ENLACE)}% es una
-            ventaja del plan, no algo suyo aparte.
+            Las nuevas de jugadores que llegan por la web pasan al{' '}
+            {porcentaje(COMISION_ESTANDAR)}%.
           </li>
-          <li>Su código deja de admitir registros y pierde el distintivo.</li>
+          <li>
+            Su enlace sigue funcionando y sus jugadores con código siguen en el{' '}
+            {porcentaje(COMISION_ENLACE)}%, como los de cualquier game master.
+          </li>
+          <li>Pierde el distintivo.</li>
         </ul>
         <p>
           Es un plan, no un rol: no cambia lo que un game master puede hacer en la web.

@@ -5,19 +5,23 @@ import { consultar, unaFila } from './apoyo/db';
 import { entrarComo } from './apoyo/sesion';
 
 /**
- * El codigo de invitacion de los fundadores.
+ * El codigo de invitacion de los game masters.
+ *
+ * Lo tiene cualquier GM, sea o no fundador: por los jugadores que se registran
+ * con el no paga comision en sus mesas.
  *
  * Lo que se prueba es que el emparejamiento queda en la cuenta al crearla, y
  * no en el navegador: por eso hay una prueba que escribe el codigo a mano,
  * sin haber pasado nunca por el enlace.
  *
  * Laura es fundadora en el seed y tiene codigo. Lo que estas pruebas le
- * cambian —la caducidad— y lo que le cambian a Marco —el plan— se deja como
- * estaba al terminar, pase lo que pase.
+ * cambian —la caducidad— y lo que le cambian a Marco —el plan y su codigo— se
+ * deja como estaba al terminar, pase lo que pase.
  */
 
 let escenario: Escenario;
 let laura: { id: string; inviteCode: string; inviteCodeExpiresAt: Date };
+let marco: { id: string; inviteCode: string | null; inviteCodeExpiresAt: Date | null };
 
 /** Contrasena de las cuentas que se crean aqui. Cumple la longitud minima. */
 const CLAVE = 'una-clave-de-prueba';
@@ -30,6 +34,12 @@ test.beforeEach(async () => {
      WHERE u."email" = $1`,
     [USUARIOS.gm],
   );
+  marco = await unaFila(
+    `SELECT g."id", g."inviteCode", g."inviteCodeExpiresAt"
+     FROM "GmProfile" g JOIN "User" u ON u."id" = g."userId"
+     WHERE u."email" = $1`,
+    [USUARIOS.otroGm],
+  );
 });
 
 test.afterEach(async () => {
@@ -41,9 +51,10 @@ test.afterEach(async () => {
     laura.id,
   ]);
   await consultar(
-    `UPDATE "GmProfile" SET "plan" = 'ESTANDAR'
-     WHERE "userId" = (SELECT "id" FROM "User" WHERE "email" = $1)`,
-    [USUARIOS.otroGm],
+    `UPDATE "GmProfile"
+     SET "plan" = 'ESTANDAR', "inviteCode" = $1, "inviteCodeExpiresAt" = $2
+     WHERE "id" = $3`,
+    [marco.inviteCode, marco.inviteCodeExpiresAt, marco.id],
   );
 });
 
@@ -132,7 +143,7 @@ test('un código caducado no deja crear la cuenta con él, y se dice', async ({ 
   expect(creadas).toHaveLength(0);
 });
 
-test('con su game master no paga comisión; con otro fundador, el 5%', async ({
+test('con su game master no paga comisión; con otro fundador, el 3%', async ({
   page,
 }) => {
   const email = `${escenario.marca}-reserva@tugamemaster.test`;
@@ -167,9 +178,55 @@ test('con su game master no paga comisión; con otro fundador, el 5%', async ({
 
   expect(await reservaDe(deLaura.id)).toEqual({ commissionBps: 0, origin: 'ENLACE_GM' });
   expect(await reservaDe(deMarco.id)).toEqual({
-    commissionBps: 500,
+    commissionBps: 300,
     origin: 'PLATAFORMA',
   });
+});
+
+test('un game master que no es fundador crea su enlace, y sus jugadores no le cuestan comisión', async ({
+  page,
+}) => {
+  const email = `${escenario.marca}-estandar@tugamemaster.test`;
+
+  // Marco es estandar en el seed. Se parte de que no tiene codigo.
+  await consultar(
+    'UPDATE "GmProfile" SET "inviteCode" = NULL, "inviteCodeExpiresAt" = NULL WHERE "id" = $1',
+    [marco.id],
+  );
+
+  await entrarComo(page, USUARIOS.otroGm);
+  await page.goto('/dashboard');
+
+  const tarjeta = page.getByRole('region', { name: 'Tu enlace de invitación' });
+  await tarjeta.getByRole('button', { name: 'Crear mi enlace' }).click();
+  await expect(tarjeta.getByRole('button', { name: 'Copiar enlace' })).toBeVisible();
+
+  const { inviteCode } = await unaFila<{ inviteCode: string }>(
+    'SELECT "inviteCode" FROM "GmProfile" WHERE "id" = $1',
+    [marco.id],
+  );
+  await expect(tarjeta).toContainText(`/r/${inviteCode}`);
+
+  const deMarco = await escenario.crearPartida('La torre de Marco', {
+    gm: USUARIOS.otroGm,
+  });
+
+  await page.context().clearCookies();
+  await page.goto(`/r/${inviteCode}`);
+  await rellenarAlta(page, email);
+  await expect(page).toHaveURL(/\/dashboard/);
+  expect(await invitadoPor(email)).toBe(marco.id);
+
+  await page.goto(`/partidas/${deMarco.slug}`);
+  await page.getByRole('button', { name: 'Reservar plaza' }).click();
+  await expect(page.getByText('Tienes una plaza reservada.')).toBeVisible();
+
+  expect(
+    await unaFila<{ commissionBps: number; origin: string }>(
+      'SELECT "commissionBps", "origin"::text FROM "Booking" WHERE "gameId" = $1',
+      [deMarco.id],
+    ),
+  ).toEqual({ commissionBps: 0, origin: 'ENLACE_GM' });
 });
 
 test('con sesión iniciada, el enlace explica que solo sirve para cuentas nuevas', async ({
@@ -186,7 +243,7 @@ test('con sesión iniciada, el enlace explica que solo sirve para cuentas nuevas
   expect(await invitadoPor(USUARIOS.ana)).toBeNull();
 });
 
-test('el fundador ve su código y quién se ha registrado con él', async ({ page }) => {
+test('el game master ve su código y quién se ha registrado con él', async ({ page }) => {
   const email = `${escenario.marca}-panel@tugamemaster.test`;
 
   await page.goto(`/r/${laura.inviteCode}`);
@@ -197,7 +254,7 @@ test('el fundador ve su código y quién se ha registrado con él', async ({ pag
   await entrarComo(page, USUARIOS.gm);
   await page.goto('/cuenta/cobros');
 
-  const panel = page.getByRole('region', { name: 'Tu código de fundador' });
+  const panel = page.getByRole('region', { name: 'Tu enlace de invitación' });
   await expect(panel).toContainText(
     `${laura.inviteCode.slice(0, 4)}-${laura.inviteCode.slice(4)}`,
   );

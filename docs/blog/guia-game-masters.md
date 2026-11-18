@@ -62,7 +62,7 @@ El jugador paga al reservar y el dinero queda retenido. **48 horas después de t
 De cada plaza recibes:
 
 - lo que pagó el jugador,
-- **menos** la comisión de TuGameMaster (el 10 %; los game masters fundadores tienen una reducida),
+- **menos** la comisión de TuGameMaster: el 0 % si el jugador creó su cuenta con tu enlace de invitación (lo generas en tu panel) y el 6 % si llegó por la web (los game masters fundadores tienen una reducida),
 - **menos** el coste real de Stripe por esa transacción.
 
 > Ojo: si un jugador abre una incidencia, el pago de esa partida se detiene hasta que un administrador la resuelve. Y si cancelas tú una partida, quien ya había pagado recupera el 100 % en saldo.

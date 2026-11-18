@@ -209,8 +209,10 @@ Bizums.
 
 - **Se confirma** si al menos **3 de los 5** cuentan un caso concreto reciente
   **y** al menos **2** se comprometen a probar con una mesa real.
-- Si se confirma: plan para el código de invitación para todos los GMs y las
-  comisiones nuevas (3 % / 6 % / 0 %), presentado antes de tocar código.
+- El código de invitación para todos los GMs y las comisiones nuevas (3 % / 6 %
+  / 0 %) **ya están en la web desde el 18/11/2026**, antes de las entrevistas.
+  Si H1 se confirma, se mantienen y se cierran las cifras; si no, se revisan
+  antes de nombrar al primer fundador.
 
 **H2 · Las mesas se quedan vacías.**
 

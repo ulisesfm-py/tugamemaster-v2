@@ -16,26 +16,30 @@ import type { OrigenReserva, PlanGm } from '@/generated/prisma/enums';
  * Estos valores solo deciden las reservas **nuevas**: cada reserva guarda el
  * suyo al reservar (`Booking.commissionBps`) y el cobro aplica el guardado.
  */
-export const COMISION_ESTANDAR = 1000; // 10 %
+export const COMISION_ESTANDAR = 600; // 6 %
 
 /** Lo que paga un GM fundador por los jugadores que le trae la web. */
-export const COMISION_FUNDADOR = 500; // 5 %
+export const COMISION_FUNDADOR = 300; // 3 %
 
-/** Lo que paga un GM fundador por los jugadores que trae el, con su enlace. */
-export const COMISION_FUNDADOR_ENLACE = 0;
+/**
+ * Lo que paga cualquier GM, fundador o no, por los jugadores que trae el con
+ * su enlace de invitacion.
+ *
+ * Solo vale en las mesas de ese GM: si el mismo jugador reserva con otro, paga
+ * la comision normal de ese otro, porque a el lo trajo la web.
+ */
+export const COMISION_ENLACE = 0;
 
 /**
  * La comision que corresponde a una reserva nueva.
  *
- * El enlace solo cuenta para un fundador: un GM estandar no tiene enlace, y si
- * deja de ser fundador pierde tambien la ventaja de sus propios jugadores.
+ * El enlace cuenta igual para todos los planes; lo que distingue al fundador es
+ * lo que paga por los jugadores que le trae la web.
  */
 export function comisionAplicable(plan: PlanGm, origen: OrigenReserva): number {
-  if (plan === 'FUNDADOR') {
-    return origen === 'ENLACE_GM' ? COMISION_FUNDADOR_ENLACE : COMISION_FUNDADOR;
-  }
+  if (origen === 'ENLACE_GM') return COMISION_ENLACE;
 
-  return COMISION_ESTANDAR;
+  return plan === 'FUNDADOR' ? COMISION_FUNDADOR : COMISION_ESTANDAR;
 }
 
 /** Puntos basicos como porcentaje legible: 1000 -> "10", 1250 -> "12,5". */

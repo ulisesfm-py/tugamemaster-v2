@@ -3,14 +3,19 @@ import Link from 'next/link';
 
 import { EnlaceBoton } from '@/components/ui';
 import { PLAZAS_DE_FUNDADOR } from '@/modules/invitaciones/politica';
-import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
+import {
+  COMISION_ENLACE,
+  COMISION_ESTANDAR,
+  porcentaje,
+} from '@/modules/payments/dinero';
 import { HORAS_DE_RETENCION } from '@/modules/payments/libro';
 
 const COMISION = porcentaje(COMISION_ESTANDAR);
+const COMISION_TUS_JUGADORES = porcentaje(COMISION_ENLACE);
 
 export const metadata: Metadata = {
   title: 'Dirigir en TuGameMaster',
-  description: `Cobra por dirigir tus partidas. Comisión del ${COMISION}%, sin cuota mensual: si un mes no diriges, no pagas nada.`,
+  description: `Cobra por dirigir tus partidas. Comisión del ${COMISION_TUS_JUGADORES}% por los jugadores que traes tú y del ${COMISION}% por los que trae la web, sin cuota mensual.`,
 };
 
 /**
@@ -69,12 +74,27 @@ export default function ParaGameMastersPage() {
 
       <Bloque titulo="Qué cuesta">
         <p>
-          Una <strong className="text-foreground">comisión del {COMISION}%</strong> sobre
-          lo que cobras, y el coste que la plataforma de pago nos cobra por mover ese
-          dinero. Nada más: no hay cuota mensual ni permanencia, así que{' '}
+          Una comisión sobre lo que cobras, que depende de cómo llegó el jugador, y el
+          coste que la plataforma de pago nos cobra por mover ese dinero. Nada más: no hay
+          cuota mensual ni permanencia, así que{' '}
           <strong className="text-foreground">un mes que no dirijas no pagas nada</strong>
           .
         </p>
+        <ul className="flex list-disc flex-col gap-2 pl-5">
+          <li>
+            <strong className="text-foreground">
+              {COMISION_TUS_JUGADORES}% por los jugadores que traes tú
+            </strong>
+            : los que crean su cuenta con tu enlace de invitación, que generas desde tu
+            panel.
+          </li>
+          <li>
+            <strong className="text-foreground">
+              {COMISION}% por los que trae la web
+            </strong>
+            : el listado, el buscador, la portada.
+          </li>
+        </ul>
         <p>
           La comisión se congela en cada reserva en el momento del cobro. Si algún día
           cambiamos el porcentaje, tus partidas ya vendidas conservan el que tenían.

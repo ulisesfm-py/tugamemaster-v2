@@ -35,11 +35,11 @@ termine, «pasos 4 y 5».
 > cada plaza se fija en el instante en que alguien reserva, y quiero que tus
 > primeras reservas ya cuenten con tus condiciones.
 >
-> **4. Tu código.** Cuando te nombre fundador verás en tu panel
-> (tugamemaster.com/dashboard), en la tarjeta «Tu código de fundador», tu código
-> y tu enlace, con botón para copiarlos. El enlace es el que conviene poner en
-> tu bio de Instagram o en tu canal. Tus condiciones están por escrito en
-> tugamemaster.com/fundadores.
+> **4. Tu enlace.** En tu panel (tugamemaster.com/dashboard), en la tarjeta «Tu
+> enlace de invitación», verás tu código y tu enlace, con botón para copiarlos
+> (si aún no lo tienes, pulsa «Crear mi enlace»). El enlace es el que conviene
+> poner en tu bio de Instagram o en tu canal. Tus condiciones están por escrito
+> en tugamemaster.com/fundadores.
 >
 > **5. Publica tu primera partida.** En tugamemaster.com/cuenta/partidas, «Nueva
 > partida». Nace como borrador y la revisas entera antes de publicarla. Puede
@@ -78,24 +78,25 @@ las garantías, no el precio.
 
 ### El orden, y por qué
 
-| #   | Paso                       | Quién | Por qué en este orden                                                         |
-| --- | -------------------------- | ----- | ----------------------------------------------------------------------------- |
-| 1   | Cuenta                     | GM    | Sin cuenta no hay perfil.                                                     |
-| 2   | Perfil de game master      | GM    | Hasta que existe, **no aparece** en `/admin/game-masters`.                    |
-| 3   | Alta de cobros en Stripe   | GM    | Es lo que más tarda y lo único que no controlas.                              |
-| 4   | **Nombrarle fundador**     | Tú    | Después del 3, para no gastar los 3 meses del código; antes del 5, ver abajo. |
-| 5   | Su código y su enlace      | Web   | Se crean solos al nombrarle; los ve en su panel (`/dashboard`).               |
-| 6   | Primera partida, publicada | GM    | Solo puede publicar con cobros verificados.                                   |
+| #   | Paso                       | Quién | Por qué en este orden                                                     |
+| --- | -------------------------- | ----- | ------------------------------------------------------------------------- |
+| 1   | Cuenta                     | GM    | Sin cuenta no hay perfil.                                                 |
+| 2   | Perfil de game master      | GM    | Hasta que existe, **no aparece** en `/admin/game-masters`.                |
+| 3   | Alta de cobros en Stripe   | GM    | Es lo que más tarda y lo único que no controlas.                          |
+| 4   | **Nombrarle fundador**     | Tú    | Después del 3; antes del 6, ver abajo.                                    |
+| 5   | Su código y su enlace      | Web   | Si no lo tenía, se crea al nombrarle; si ya lo tenía, se renueva 3 meses. |
+| 6   | Primera partida, publicada | GM    | Solo puede publicar con cobros verificados.                               |
 
 Dos razones para el orden del 4:
 
 - **La comisión se congela al reservar.** Si una partida se publica antes de
-  nombrarle y alguien reserva, esa plaza se vende al **10 %**, y no se puede
+  nombrarle y alguien de la web reserva, esa plaza se vende al **6 %**, y no se puede
   cambiar luego. Nombrarle antes de que publique lo evita. Un borrador sí puede
   existir antes sin problema.
-- **El código dura 3 meses desde que se emite**, y se emite al nombrarle. Si se
-  le nombra el día 1 y tarda 6 semanas en tener Stripe, ha gastado la mitad.
-  Renovarlo es un clic (`Renovar 3 meses`), pero mejor no gastarlo.
+- **El código dura 3 meses desde que se emite.** Cualquier game master puede
+  crearlo él mismo, antes de ser fundador; al nombrarle se le renueva. Y lo
+  renueva también él desde su panel («Renovar 3 meses»), así que el orden ya no
+  pesa por esto.
 
 ### Qué hacer tú en cada paso
 
@@ -146,9 +147,9 @@ Dos razones para el orden del 4:
 | Aparece «Alta de cobros sin terminar»                    | Stripe sigue verificando, o dejó el formulario a medias.              | Que pulse «Continuar con el alta» o «Comprobar estado».                                                                                                                     |
 | «Aún no puedo publicar» tras terminar con Stripe         | El webhook de la cuenta no llegó (o no está activo en modo real).     | Mira si «Comprobar estado» lo arregla. Si no, **es un problema tuyo**: revisa los webhooks de Stripe.                                                                       |
 | Abre su propio enlace `/r/…` y ve «Ya tienes una cuenta» | Es lo correcto: el código solo vale al crear una cuenta nueva.        | Que pruebe en una ventana privada, y sin iniciar sesión.                                                                                                                    |
-| Un jugador suyo se registró **sin** el código            | La cuenta ya existe: no se puede emparejar nunca. Es una regla firme. | No lo arregles a mano en la base. Dile que el jugador puede reservar igual y que esa plaza llevará el 5 % de comisión (la paga el game master, no el jugador).              |
-| El enlace de su bio ya no funciona                       | Se le emitió un «Código nuevo».                                       | Dale el enlace nuevo. Evita emitir códigos nuevos si no hace falta: usa «Renovar 3 meses».                                                                                  |
-| Su código ha caducado                                    | Pasaron 3 meses desde que se emitió.                                  | «Renovar 3 meses». Los jugadores ya registrados siguen siendo suyos.                                                                                                        |
+| Un jugador suyo se registró **sin** el código            | La cuenta ya existe: no se puede emparejar nunca. Es una regla firme. | No lo arregles a mano en la base. Dile que el jugador puede reservar igual y que esa plaza llevará la comisión de la web (la paga el game master, no el jugador).           |
+| El enlace de su bio ya no funciona                       | Se le emitió un «Código nuevo».                                       | Dale el enlace nuevo. Evita emitir códigos nuevos si no hace falta: él mismo puede «Renovar 3 meses».                                                                       |
+| Su código ha caducado                                    | Pasaron 3 meses desde que se emitió.                                  | «Renovar 3 meses», desde su panel o desde el admin. Los jugadores ya registrados siguen siendo suyos.                                                                       |
 | Quiere mover la fecha de una mesa con jugadores          | Con plazas ocupadas la fecha no se puede cambiar (a propósito).       | Háblalo con esa persona. Cancelar y crear otra devuelve el 100 % en saldo y la comisión de Stripe de cada plaza la asumes tú. Diseño futuro: `docs/reprogramar-partida.md`. |
 
 ### Lo que no hay que hacer

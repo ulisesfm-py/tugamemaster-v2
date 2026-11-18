@@ -4,6 +4,14 @@ Para que quien mire el perfil antes de contestar a un mensaje encuentre una
 cuenta con vida y con lo mismo que dice la web. **Todo lo que afirman sale de
 `/fundadores`, `/para-game-masters` y `/normas`**; si cambia allí, cambia aquí.
 
+**Las comisiones van sin cifras, a propósito** (decidido el 18/11/2026). Se
+están ajustando estas primeras semanas y una publicación no se puede corregir
+como una página. Lo único que se dice claro es que **no hay comisión por los
+jugadores que trae el propio game master** con su enlace; el resto es
+«comisión pequeña», «comisión reducida» o «menos que el resto». Las cifras
+exactas están en `/fundadores` y `/para-game-masters`, que las leen del código.
+Cuando estén cerradas, se publica una aparte con los números.
+
 Reglas que valen para las seis:
 
 - **Ninguna promete reservas, ingresos ni «vivir de esto».** La web es nueva y
@@ -217,7 +225,7 @@ debajo.
 >
 > Si cancelas tú, quien pagó recupera el 100 % en saldo.
 >
-> Sin cuota mensual. Un mes que no diriges, no pagas nada.
+> Sin cuota mensual, y sin comisión por los jugadores que traes tú.
 
 **Texto de la publicación**
 
@@ -226,8 +234,9 @@ debajo.
 > El jugador paga al reservar, el dinero se retiene, y 48 horas después de
 > terminar la partida llega a tu cuenta, si no hay incidencias.
 >
-> Hay una comisión y el coste de la pasarela de pago, que se descuenta del
-> cobro. Los detalles, en tugamemaster.com/para-game-masters.
+> Por los jugadores que traes tú con tu enlace, sin comisión. Por los que llegan
+> por la web, una comisión pequeña. Y el coste de la pasarela de pago, que se
+> descuenta del cobro. Los detalles, en tugamemaster.com/para-game-masters.
 >
 > ¿Qué es lo que más te cuesta hoy al cobrar una mesa?
 >
@@ -241,8 +250,8 @@ horas después de terminar la partida, y qué pasa si hay una incidencia.»
 
 ## 3. Game masters fundadores
 
-**Carrusel de 4.** Tarjetas sobre el fondo 2 (o liso). En la diapositiva 2, la
-tabla va como tres filas grandes: cifra en dorado a la derecha.
+**Carrusel de 4.** Tarjetas sobre el fondo 2 (o liso). Sin cifras de comisión
+(ver arriba): la diapositiva 2 va como texto, no como tabla.
 
 **Diapositiva 1 — portada**
 
@@ -254,18 +263,24 @@ tabla va como tres filas grandes: cifra en dorado a la derecha.
 
 > **Lo que pagan los fundadores**
 >
-> **0 %** · jugadores que se registran con tu código
-> **5 %** · jugadores que llegan por la web
-> _Para comparar: el resto de game masters pagan un 10 %._
+> **Sin comisión** por los jugadores que traes tú con tu enlace.
+>
+> **Comisión reducida** por los que llegan por la web: menos que el resto de
+> game masters.
 >
 > El coste de Stripe se descuenta siempre del cobro.
 
 **Diapositiva 3**
 
-> **Es permanente.**
-> No sube aunque cambie la política general. Una reserva ya hecha conserva
-> siempre la comisión con la que se vendió.
->
+> **Lo que pactas, se queda.**
+> Al nombrarte fundador, tus condiciones quedan fijas: no suben aunque cambie la
+> política general. Una reserva ya hecha conserva siempre la comisión con la que
+> se vendió.
+
+_Por qué no dice «es permanente» a secas: no se puede prometer que no sube una
+cifra que no se ha dado. Lo que sí es verdad es que lo pactado al nombrar a
+alguien queda fijo. Por eso no se nombra a nadie hasta cerrar las cifras._
+
 > Sin cuota mensual ni permanencia. Sin exclusividad.
 
 **Diapositiva 4**
@@ -281,9 +296,9 @@ tabla va como tres filas grandes: cifra en dorado a la derecha.
 > Estamos nombrando a los primeros 10 game masters fundadores de
 > TuGameMaster.
 >
-> Pagan un 5 % de comisión por los jugadores que llegan por la web y un 0 % por
-> los que traen ellos con su código de invitación. Es para siempre mientras
-> sean fundadores, y está todo por escrito.
+> No pagan comisión por los jugadores que traen ellos con su enlace, y por los
+> que llegan por la web pagan una comisión reducida, menor que la del resto de
+> game masters. Lo que pactan al entrar se queda, y está todo por escrito.
 >
 > No prometemos reservas ni ingresos: la web es nueva y lo decimos pronto.
 >
@@ -292,8 +307,8 @@ tabla va como tres filas grandes: cifra en dorado a la derecha.
 > #rolenespañol #partidasderol #masterderol #rolonline #dungeonmaster
 
 **Texto alternativo:** «Carrusel de cuatro imágenes con las condiciones de los
-game masters fundadores: 0 % para los jugadores con su código, 5 % para los que
-llegan por la web.»
+game masters fundadores: sin comisión por los jugadores que traen ellos y una
+comisión reducida por los que llegan por la web.»
 
 ---
 
@@ -433,8 +448,11 @@ que no, se acabó).
 
 ## Antes de publicar cada una
 
-- [ ] Las cifras (0 %, 5 %, 10 %, 48 horas, 60 y 14 días, 10 plazas) coinciden
-      con `/fundadores`, `/para-game-masters` y la política de reseñas.
+- [ ] Las cifras (48 horas, 60 y 14 días, 10 plazas) coinciden con
+      `/fundadores`, `/para-game-masters` y la política de reseñas.
+- [ ] **Ningún porcentaje de comisión**, salvo que no hay comisión con los
+      jugadores propios. «Reducida» y «menos que el resto» siguen siendo
+      verdad en la web.
 - [ ] Ninguna captura enseña correos ni datos de nadie.
 - [ ] El texto de cada diapositiva se lee a tamaño de móvil, sin acercar.
 - [ ] El texto alternativo está puesto (Instagram lo pide al publicar, en

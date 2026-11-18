@@ -87,8 +87,8 @@ propones y que puede decir que no.
 > partidas y cobran las plazas por adelantado: con tarjeta, con devolución si
 > algo falla y con reseñas de gente que ha jugado de verdad. Es nueva y
 > pequeña, así que **no te prometo reservas**: busco unos pocos GMs para
-> probarla desde el principio, como fundadores, con comisión reducida (0 % con
-> los jugadores que ya tienes y se registren con tu código, más el coste de
+> probarla desde el principio, como fundadores, con comisión reducida (y 0 %
+> con los jugadores que ya tienes y se registren con tu enlace, más el coste de
 > Stripe).
 >
 > ¿Te cuento cómo funciona por aquí? Y si no te encaja, sin problema.
@@ -111,7 +111,7 @@ Solo cambia lo que dice quién es el otro. El resto se queda.
   se sentiría engañado al ver su primer pago.
 - **«Si no te encaja, sin problema»**: tampoco es retórica, es lo que hace que
   conteste.
-- No dice «para siempre» ni «el 5 %» en el primer mensaje: son demasiados
+- No dice «para siempre» ni «el 3 %» en el primer mensaje: son demasiados
   números. Salen en la respuesta.
 - No incluye cifras, ni «ganarás», ni «vivir de esto».
 
@@ -121,9 +121,9 @@ Mensaje corto, con una cosa que hacer: o una llamada, o que lo lea con calma.
 
 > ¡Genial! Te lo resumo:
 >
-> - Pagas **un 5 %** por los jugadores que te llegan por la web y **un 0 %**
->   por los que traigas tú y se registren con tu código. Es de por vida
->   mientras seas fundador.
+> - Pagas **un 3 %** por los jugadores que te llegan por la web (el resto de
+>   GMs, un 6 %) y **un 0 %** por los que traigas tú y se registren con tu
+>   enlace. Es de por vida mientras seas fundador.
 > - Stripe cobra aparte su coste de tarjeta (1,5 % + 0,25 € las europeas): se
 >   descuenta de cada pago, ni lo asumo yo ni lo gano.
 > - Los jugadores pagan al reservar; tú cobras **48 horas después de terminar
@@ -141,10 +141,13 @@ Mensaje corto, con una cosa que hacer: o una llamada, o que lo lea con calma.
 > ¿Te viene mejor una videollamada de 15 minutos o prefieres leerlas y me dices?
 
 `/fundadores` y la guía del blog sí valen (aunque lleven `noindex`, se abren con
-el enlace). **`/para-game-masters` también puede enviarse ya**: ahora enlaza a
-`/fundadores`, pero sigue diciendo «10 %» en el cuerpo, así que mejor mándalos
-a `/fundadores` primero. **Solo después de desplegar** (push + deploy de
-Vercel); hasta entonces `/fundadores` no existe en producción.
+el enlace). **`/para-game-masters` también puede enviarse**: da la comisión
+general (6 % y 0 % con enlace) y enlaza a `/fundadores`.
+
+**Las cifras de este documento son las de hoy.** Las publicaciones de
+Instagram las dejan en el aire a propósito; en un mensaje uno a uno sí se dan
+si las preguntan, porque el GM tiene que saber lo que paga. Si cambian antes
+de nombrar a nadie, se cambian aquí.
 
 ## Primer correo (Gmail)
 
@@ -177,8 +180,8 @@ escribiendo a otra.
 > prometo reservas: busco diez game masters fundadores para probarla desde el
 > principio.
 >
-> Los fundadores pagan un 5 % de comisión por los jugadores que llegan por la
-> web y un 0 % por los que traigan ellos con su código (más el coste de
+> Los fundadores pagan un 3 % de comisión por los jugadores que llegan por la
+> web y un 0 % por los que traigan ellos con su enlace (más el coste de
 > Stripe, que se descuenta siempre). Sin cuota ni permanencia.
 >
 > ¿Te cuento más? Si no te interesa, dímelo y no vuelvo a escribirte.
@@ -225,8 +228,9 @@ cifras salen de `oferta-fundador.md`.
 
 ### «Comisión: ¿cuánto os lleváis?»
 
-> Un 5 % de lo que cobras por los jugadores que llegan por la web, y un 0 % por
-> los que traigas tú con tu código. Aparte, el coste que Stripe cobra por mover
+> Como fundador, un 3 % de lo que cobras por los jugadores que llegan por la
+> web (el resto de game masters, un 6 %), y un 0 % por los que traigas tú con
+> tu enlace. Aparte, el coste que Stripe cobra por mover
 > el dinero (1,5 % + 0,25 € por pago con tarjeta europea), que se descuenta del
 > cobro y que ni lo asumo yo ni lo gano. Para que veas el desglose: en una mesa
 > de 5 plazas a 15 €, con jugadores tuyos te llegan unos 72,60 €.
@@ -236,7 +240,7 @@ cifras salen de `oferta-fundador.md`.
 > No tienes que dejarlo: la web no es dónde juegas, es dónde cobras y donde se
 > acumulan tus reseñas. Sigue usando Discord o Roll20 para la mesa. Lo que
 > añadimos es el cobro por adelantado, una reputación que sale solo de mesas
-> pagadas aquí y, como fundador, una comisión muy baja.
+> pagadas aquí y, con tus jugadores, sin comisión.
 
 **No cites a ninguna plataforma competidora por su nombre ni compares sus
 tarifas**, aunque te las pregunten: contesta con lo que hace esta web. Si te

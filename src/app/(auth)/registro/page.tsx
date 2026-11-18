@@ -14,7 +14,7 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 /**
  * Crear cuenta.
  *
- * Con `?codigo=` llega desde el enlace de un game master fundador (`/r/...`).
+ * Con `?codigo=` llega desde el enlace de invitacion de un game master (`/r/...`).
  * El codigo se comprueba aqui para decir de quien es antes de que la persona
  * escriba nada, y se deja puesto en el formulario. Quien lo trae apuntado de
  * otro sitio puede escribirlo a mano: el enlace es una comodidad, el campo es

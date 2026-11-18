@@ -74,7 +74,7 @@ test('cada reserva guarda la comisión del plan de su game master', async ({ pag
       )
     ).commissionBps;
 
-  // Laura es fundadora: 5%. Marco no: el 10% general.
-  expect(await comisionDe(deLaura.id)).toBe(500);
-  expect(await comisionDe(deMarco.id)).toBe(1000);
+  // Laura es fundadora: 3%. Marco no: el 6% general.
+  expect(await comisionDe(deLaura.id)).toBe(300);
+  expect(await comisionDe(deMarco.id)).toBe(600);
 });

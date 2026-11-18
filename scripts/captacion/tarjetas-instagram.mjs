@@ -301,7 +301,7 @@ const PUBLICACIONES = [
         cuerpo: [
           'Una incidencia detiene ese pago hasta que se revisa a mano.',
           'Si cancelas tú, quien pagó recupera el 100 % en saldo.',
-          '<b>Sin cuota mensual.</b> Un mes que no diriges, no pagas nada.',
+          '<b>Sin cuota mensual</b>, y sin comisión por los jugadores que traes tú.',
         ],
       },
     ],
@@ -315,25 +315,23 @@ const PUBLICACIONES = [
         titulo: `Buscamos ${o('10')} game masters fundadores.`,
         sub: 'Comisión reducida, y se queda así.',
       },
+      // Sin cifras a proposito: la comision de la web se esta ajustando estas
+      // primeras semanas. Las cifras exactas estan en /fundadores, que las lee
+      // del codigo. Ver docs/captacion/instagram/publicaciones.md.
       {
-        tipo: 'tabla',
+        tipo: 'texto',
         titulo: 'Lo que pagan los fundadores',
-        filas: [
-          { cifra: '0 %', texto: 'Jugadores que se registran con tu código' },
-          { cifra: '5 %', texto: 'Jugadores que llegan por la web' },
-          {
-            cifra: '10 %',
-            texto: 'Para comparar: el resto de game masters',
-            tenue: true,
-          },
+        cuerpo: [
+          '<b>Sin comisión</b> por los jugadores que traes tú con tu enlace.',
+          '<b>Comisión reducida</b> por los que llegan por la web: menos que el resto de game masters.',
+          'El coste de Stripe se descuenta siempre del cobro.',
         ],
-        nota: 'El coste de Stripe se descuenta siempre del cobro.',
       },
       {
         tipo: 'texto',
-        titulo: `Es ${o('permanente')}.`,
+        titulo: `Lo que pactas, ${o('se queda')}.`,
         cuerpo: [
-          'No sube aunque cambie la política general. Una reserva ya hecha conserva siempre la comisión con la que se vendió.',
+          'Al nombrarte fundador, tus condiciones quedan fijas: no suben aunque cambie la política general. Una reserva ya hecha conserva siempre la comisión con la que se vendió.',
           'Sin cuota mensual ni permanencia. Sin exclusividad.',
         ],
       },

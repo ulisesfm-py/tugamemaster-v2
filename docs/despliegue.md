@@ -200,7 +200,7 @@ Antes de anunciar nada:
 - [ ] El código fuente de la portada lleva `noindex` (lanzamiento discreto).
 - [ ] Registro con correo: llega el correo, enviado desde `no-reply@`.
 - [ ] Entrar con Discord funciona.
-- [ ] `/r/<código>` de un fundador lleva al registro con el código puesto.
+- [ ] `/r/<código>` de un game master lleva al registro con el código puesto.
 - [ ] Alta de GM en Stripe Connect con datos reales; al volver, la cuenta sale
       verificada **sin recargar a mano** (prueba que llega `account.updated` por
       el segundo destino).

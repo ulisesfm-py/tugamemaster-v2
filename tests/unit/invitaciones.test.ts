@@ -80,31 +80,26 @@ describe('estadoDelCodigo', () => {
   const manana = new Date('2026-11-07T10:00:00Z');
   const ayer = new Date('2026-11-05T10:00:00Z');
 
-  it('un fundador con plazo por delante admite registros', () => {
-    expect(
-      estadoDelCodigo({ plan: 'FUNDADOR', inviteCodeExpiresAt: manana }, ahora),
-    ).toBe('VIGENTE');
+  it('un codigo con plazo por delante admite registros', () => {
+    expect(estadoDelCodigo({ inviteCodeExpiresAt: manana }, ahora)).toBe('VIGENTE');
   });
 
   it('al caducar deja de admitirlos', () => {
-    expect(estadoDelCodigo({ plan: 'FUNDADOR', inviteCodeExpiresAt: ayer }, ahora)).toBe(
-      'CADUCADO',
-    );
+    expect(estadoDelCodigo({ inviteCodeExpiresAt: ayer }, ahora)).toBe('CADUCADO');
     // El instante exacto de la caducidad ya no vale.
-    expect(estadoDelCodigo({ plan: 'FUNDADOR', inviteCodeExpiresAt: ahora }, ahora)).toBe(
-      'CADUCADO',
-    );
+    expect(estadoDelCodigo({ inviteCodeExpiresAt: ahora }, ahora)).toBe('CADUCADO');
   });
 
-  it('quien deja de ser fundador pierde el codigo, aunque no haya caducado', () => {
-    expect(
-      estadoDelCodigo({ plan: 'ESTANDAR', inviteCodeExpiresAt: manana }, ahora),
-    ).toBe('SIN_PLAN');
+  it('vale igual sea cual sea el plan del game master', () => {
+    // Antes solo los fundadores tenian codigo. Ahora el enlace es de todos.
+    const estandar = { plan: 'ESTANDAR' as const, inviteCodeExpiresAt: manana };
+    const fundador = { plan: 'FUNDADOR' as const, inviteCodeExpiresAt: manana };
+
+    expect(estadoDelCodigo(estandar, ahora)).toBe('VIGENTE');
+    expect(estadoDelCodigo(fundador, ahora)).toBe('VIGENTE');
   });
 
-  it('un fundador sin fecha de caducidad no admite registros', () => {
-    expect(estadoDelCodigo({ plan: 'FUNDADOR', inviteCodeExpiresAt: null }, ahora)).toBe(
-      'CADUCADO',
-    );
+  it('un codigo sin fecha de caducidad no admite registros', () => {
+    expect(estadoDelCodigo({ inviteCodeExpiresAt: null }, ahora)).toBe('CADUCADO');
   });
 });

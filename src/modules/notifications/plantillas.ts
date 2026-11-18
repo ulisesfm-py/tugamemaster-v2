@@ -1,6 +1,7 @@
 import {
+  COMISION_ENLACE,
+  COMISION_ESTANDAR,
   COMISION_FUNDADOR,
-  COMISION_FUNDADOR_ENLACE,
   formatearImporte,
   porcentaje,
 } from '@/modules/payments/dinero';
@@ -360,8 +361,8 @@ export function fundadorNombrado(datos: {
     ...maquetar({
       titulo: 'Ya eres game master fundador',
       parrafos: [
-        `Hola ${datos.gm}, te hemos nombrado game master fundador. Tus condiciones son permanentes: pagas un ${porcentaje(COMISION_FUNDADOR)}% de comisión por los jugadores que llegan por la web y un ${porcentaje(COMISION_FUNDADOR_ENLACE)}% por los que se registran con tu código. El coste de la pasarela de pago se descuenta siempre del cobro.`,
-        `Para que tus jugadores de siempre cuenten con el ${porcentaje(COMISION_FUNDADOR_ENLACE)}%, tienen que crear su cuenta con tu enlace o con tu código. Una cuenta que ya existe no se puede emparejar después.`,
+        `Hola ${datos.gm}, te hemos nombrado game master fundador. Tus condiciones son permanentes: pagas un ${porcentaje(COMISION_FUNDADOR)}% de comisión por los jugadores que llegan por la web, en lugar del ${porcentaje(COMISION_ESTANDAR)}% general, y un ${porcentaje(COMISION_ENLACE)}% por los que se registran con tu código. El coste de la pasarela de pago se descuenta siempre del cobro.`,
+        `Para que tus jugadores de siempre cuenten con el ${porcentaje(COMISION_ENLACE)}%, tienen que crear su cuenta con tu enlace o con tu código. Una cuenta que ya existe no se puede emparejar después.`,
         ...(datos.cobrosListos
           ? []
           : [

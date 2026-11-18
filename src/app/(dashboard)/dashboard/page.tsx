@@ -3,9 +3,14 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { CopiarBoton } from '@/components/copiar-boton';
-import { Button, EnlaceBoton, Estado, Fecha, Fundador, Vacio } from '@/components/ui';
+import { ReservarBoton } from '@/components/reservar-boton';
+import { Button, EnlaceBoton, Estado, Fecha, Vacio } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { misReservas } from '@/modules/bookings/queries';
+import {
+  crearMiCodigoAction,
+  renovarMiCodigoAction,
+} from '@/modules/invitaciones/actions';
 import { invitacionDeGm } from '@/modules/invitaciones/queries';
 import { avisosDe } from '@/modules/notifications/avisos';
 import { formatearImporte } from '@/modules/payments/dinero';
@@ -128,58 +133,81 @@ export default async function DashboardPage() {
           </section>
         )}
 
-        {/* ── Código de fundador, solo si lo es ───────────────────
-            Es lo que el fundador pone en su bio: tiene que estar a un clic,
-            no dentro de la pantalla de dinero. El detalle (quién se ha
+        {/* ── Enlace de invitación, para cualquier game master ─────
+            Es lo que el GM pone en su bio: tiene que estar a un clic, no
+            dentro de la pantalla de dinero. El detalle (quién se ha
             registrado) sigue en «Mis ingresos». */}
         {invitacion && (
           <section
             aria-labelledby="tarjeta-codigo"
             className="border-accent/40 bg-card flex flex-col rounded-sm border p-5 sm:col-span-2"
           >
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                id="tarjeta-codigo"
-                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
-              >
-                Tu código de fundador
-              </h2>
-              <Fundador />
-            </div>
+            <h2
+              id="tarjeta-codigo"
+              className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+            >
+              Tu enlace de invitación
+            </h2>
 
-            <p className="font-heading text-accent mt-2 text-3xl font-extrabold tracking-widest">
-              {invitacion.codigo}
-            </p>
+            {invitacion.codigo === null ? (
+              <>
+                <p className="text-foreground mt-2">
+                  Los jugadores que creen su cuenta con tu enlace no te cuestan comisión
+                  en tus mesas. Créalo y ponlo donde ya te encuentran: tu bio, tu canal,
+                  tu Discord.
+                </p>
+                <div className="mt-4">
+                  <ReservarBoton
+                    accion={crearMiCodigoAction}
+                    texto="Crear mi enlace"
+                    tamano="sm"
+                    campos={{}}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="font-heading text-accent mt-2 text-3xl font-extrabold tracking-widest">
+                  {invitacion.codigo}
+                </p>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <code className="bg-secondary text-foreground rounded-sm px-2.5 py-1.5 text-sm break-all">
-                {invitacion.enlace}
-              </code>
-              <CopiarBoton texto={invitacion.enlace} etiqueta="Copiar enlace" />
-              <CopiarBoton texto={invitacion.codigo} etiqueta="Copiar código" />
-            </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <code className="bg-secondary text-foreground rounded-sm px-2.5 py-1.5 text-sm break-all">
+                    {invitacion.enlace}
+                  </code>
+                  <CopiarBoton texto={invitacion.enlace} etiqueta="Copiar enlace" />
+                  <CopiarBoton texto={invitacion.codigo} etiqueta="Copiar código" />
+                </div>
 
-            <p className="text-muted-foreground mt-3 text-sm">
-              {invitacion.vigente && invitacion.caducaEl ? (
-                <>
-                  Admite registros hasta el {FECHA_CORTA.format(invitacion.caducaEl)}.
-                  Quien se registre con él no te cuesta comisión.
-                </>
-              ) : (
-                'Ha caducado: ya no admite registros nuevos. Los jugadores que ya se registraron con él siguen siendo tuyos.'
-              )}{' '}
-              {invitacion.invitados.length === 0
-                ? 'Todavía no se ha registrado nadie.'
-                : `${invitacion.invitados.length} ${
-                    invitacion.invitados.length === 1 ? 'jugador' : 'jugadores'
-                  } ya se han registrado con él.`}
-            </p>
+                <p className="text-muted-foreground mt-3 text-sm">
+                  {invitacion.vigente && invitacion.caducaEl ? (
+                    <>
+                      Admite registros hasta el {FECHA_CORTA.format(invitacion.caducaEl)}.
+                      Quien se registre con él no te cuesta comisión en tus mesas.
+                    </>
+                  ) : (
+                    'Ha caducado: ya no admite registros nuevos. Los jugadores que ya se registraron con él siguen siendo tuyos.'
+                  )}{' '}
+                  {invitacion.invitados.length === 0
+                    ? 'Todavía no se ha registrado nadie.'
+                    : `${invitacion.invitados.length} ${
+                        invitacion.invitados.length === 1 ? 'jugador' : 'jugadores'
+                      } ya se han registrado con él.`}
+                </p>
 
-            <div className="mt-4">
-              <EnlaceBoton href="/cuenta/cobros" variante="perfil" tamano="sm">
-                Ver quién se ha registrado
-              </EnlaceBoton>
-            </div>
+                <div className="mt-4 flex flex-wrap items-start gap-3">
+                  <ReservarBoton
+                    accion={renovarMiCodigoAction}
+                    texto="Renovar 3 meses"
+                    tamano="sm"
+                    campos={{}}
+                  />
+                  <EnlaceBoton href="/cuenta/cobros" variante="perfil" tamano="sm">
+                    Ver quién se ha registrado
+                  </EnlaceBoton>
+                </div>
+              </>
+            )}
           </section>
         )}
       </div>

@@ -4,7 +4,7 @@ import {
   calcularReparto,
   COMISION_ESTANDAR,
   COMISION_FUNDADOR,
-  COMISION_FUNDADOR_ENLACE,
+  COMISION_ENLACE,
   comisionAplicable,
   formatearImporte,
   porcentaje,
@@ -103,25 +103,24 @@ describe('calcularReparto', () => {
 });
 
 describe('comisionAplicable', () => {
-  it('la comision general es del 10%', () => {
-    expect(COMISION_ESTANDAR).toBe(1000);
-    expect(comisionAplicable('ESTANDAR', 'PLATAFORMA')).toBe(1000);
+  it('la comision general es del 6%', () => {
+    expect(COMISION_ESTANDAR).toBe(600);
+    expect(comisionAplicable('ESTANDAR', 'PLATAFORMA')).toBe(600);
   });
 
-  it('un fundador paga el 5% por los jugadores que le trae la web', () => {
-    expect(COMISION_FUNDADOR).toBe(500);
-    expect(comisionAplicable('FUNDADOR', 'PLATAFORMA')).toBe(500);
+  it('un fundador paga el 3% por los jugadores que le trae la web', () => {
+    expect(COMISION_FUNDADOR).toBe(300);
+    expect(comisionAplicable('FUNDADOR', 'PLATAFORMA')).toBe(300);
   });
 
-  it('un fundador no paga comision por los jugadores de su enlace', () => {
-    expect(COMISION_FUNDADOR_ENLACE).toBe(0);
+  it('nadie paga comision por los jugadores de su enlace', () => {
+    expect(COMISION_ENLACE).toBe(0);
     expect(comisionAplicable('FUNDADOR', 'ENLACE_GM')).toBe(0);
+    expect(comisionAplicable('ESTANDAR', 'ENLACE_GM')).toBe(0);
   });
 
-  it('quien deja de ser fundador paga lo general, tambien por los suyos', () => {
-    // Un GM estandar no tiene enlace; si una reserva llegara marcada asi, no
-    // por eso le toca una ventaja que ya no tiene.
-    expect(comisionAplicable('ESTANDAR', 'ENLACE_GM')).toBe(COMISION_ESTANDAR);
+  it('el fundador siempre paga menos que el resto por los jugadores de la web', () => {
+    expect(COMISION_FUNDADOR).toBeLessThan(COMISION_ESTANDAR);
   });
 });
 

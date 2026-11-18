@@ -6,6 +6,7 @@ import { ReservarBoton } from '@/components/reservar-boton';
 import { Avatar, Estado, Fundador, Vacio } from '@/components/ui';
 import { exigirAdmin } from '@/lib/auth/admin';
 import {
+  COMISION_ENLACE,
   COMISION_ESTANDAR,
   COMISION_FUNDADOR,
   porcentaje,
@@ -53,9 +54,10 @@ export default async function GameMastersAdminPage() {
 
       <p className="text-muted-foreground mt-4 text-sm">
         Un fundador paga un {porcentaje(COMISION_FUNDADOR)}% en lugar del{' '}
-        {porcentaje(COMISION_ESTANDAR)}% y lleva el distintivo en su perfil. Cambiar el
-        plan solo afecta a las reservas que vengan después: las ya hechas conservan su
-        comisión.
+        {porcentaje(COMISION_ESTANDAR)}% por los jugadores que le trae la web y lleva el
+        distintivo en su perfil. Por los que se registran con su enlace, cualquier game
+        master paga un {porcentaje(COMISION_ENLACE)}%. Cambiar el plan solo afecta a las
+        reservas que vengan después: las ya hechas conservan su comisión.
       </p>
 
       {gms.length === 0 ? (
@@ -109,7 +111,7 @@ export default async function GameMastersAdminPage() {
                     </span>
                   </p>
 
-                  {esFundador && gm.inviteCode && (
+                  {gm.inviteCode && (
                     <div className="border-border mt-3 border-t pt-3">
                       <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                         <span className="font-heading text-accent font-bold tracking-widest">

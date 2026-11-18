@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  COMISION_ENLACE,
+  COMISION_ESTANDAR,
+  COMISION_FUNDADOR,
+  porcentaje,
+} from '@/modules/payments/dinero';
+
+import {
   fundadorNombrado,
   incidenciaResuelta,
   nuevaReserva,
@@ -305,8 +312,9 @@ describe('fundadorNombrado', () => {
   it('dice las condiciones con los porcentajes que aplica la web', () => {
     const correo = fundadorNombrado(FUNDADOR);
 
-    expect(correo.texto).toContain('5%');
-    expect(correo.texto).toContain('0%');
+    expect(correo.texto).toContain(`${porcentaje(COMISION_FUNDADOR)}%`);
+    expect(correo.texto).toContain(`${porcentaje(COMISION_ESTANDAR)}%`);
+    expect(correo.texto).toContain(`${porcentaje(COMISION_ENLACE)}%`);
     expect(correo.texto).toContain('permanentes');
   });
 

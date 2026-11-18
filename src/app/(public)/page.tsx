@@ -6,7 +6,11 @@ import { FilaDeslizable } from '@/components/fila-deslizable';
 import { PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
-import { COMISION_ESTANDAR, porcentaje } from '@/modules/payments/dinero';
+import {
+  COMISION_ENLACE,
+  COMISION_ESTANDAR,
+  porcentaje,
+} from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
 import { listarPartidas } from '@/modules/games/queries';
 import { directorioDeGms } from '@/modules/profiles/queries';
@@ -58,6 +62,7 @@ export default async function Portada() {
     .slice(0, 8);
 
   const comision = porcentaje(COMISION_ESTANDAR);
+  const comisionTusJugadores = porcentaje(COMISION_ENLACE);
 
   return (
     <main>
@@ -308,9 +313,10 @@ export default async function Portada() {
           <ul className="text-muted-foreground mt-5 flex flex-col gap-2 text-sm">
             <li>
               <span className="text-foreground font-semibold">
-                Comisión del {comision}%
+                Comisión del {comisionTusJugadores}% con tus jugadores
               </span>{' '}
-              sobre lo que cobras, más el coste real de la plataforma de pago.
+              y del {comision}% con los que trae la web, más el coste real de la
+              plataforma de pago.
             </li>
             <li>
               <span className="text-foreground font-semibold">Cobras 48 horas</span>{' '}

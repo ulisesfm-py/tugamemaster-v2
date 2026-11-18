@@ -12,7 +12,7 @@ import {
 } from './politica';
 
 /**
- * El codigo de invitacion de los fundadores, con base de datos.
+ * El codigo de invitacion de los game masters, con base de datos.
  *
  * Las reglas estan en `politica.ts`; aqui solo se leen y se guardan.
  */
@@ -22,11 +22,7 @@ export type Invitacion =
   | { ok: false; mensaje: string };
 
 /**
- * A que fundador corresponde un codigo, si admite registros ahora.
- *
- * Los mensajes no distinguen entre un codigo que no existe y uno de alguien
- * que ya no es fundador: decir cual de los dos es ensenaria que codigos
- * existieron.
+ * A que game master corresponde un codigo, si admite registros ahora.
  */
 export async function buscarCodigo(
   entrada: string,
@@ -42,7 +38,6 @@ export async function buscarCodigo(
     where: { inviteCode: codigo },
     select: {
       id: true,
-      plan: true,
       inviteCodeExpiresAt: true,
       user: { select: { name: true, slug: true } },
     },
@@ -51,10 +46,6 @@ export async function buscarCodigo(
   if (!gm) return { ok: false, mensaje: 'No hay ningún game master con ese código' };
 
   const estado = estadoDelCodigo(gm, ahora);
-
-  if (estado === 'SIN_PLAN') {
-    return { ok: false, mensaje: 'No hay ningún game master con ese código' };
-  }
 
   if (estado === 'CADUCADO') {
     return {

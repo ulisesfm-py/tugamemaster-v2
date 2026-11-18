@@ -8,27 +8,34 @@ Las reglas técnicas viven en `CLAUDE.md`, `docs/payments.md` y
 `src/modules/invitaciones/politica.ts`. Si algo de aquí contradice al código,
 manda el código y se corrige este documento.
 
-> Estado: **cerrado con Ulises** (5 % para siempre, 0 % con código, 10
-> fundadores, condición retirable solo por incumplir las normas de la web). Los
-> puntos marcados con **[decidir]** o **[confirmar]** que queden siguen
-> abiertos; hoy solo el fiscal y el tiempo de ayuda personal.
+> Estado: **revisado con Ulises el 18/11/2026** (3 % para siempre, 10
+> fundadores, condición retirable solo por incumplir las normas de la web). El
+> 0 % con código ya **no es exclusivo de los fundadores**: lo tiene cualquier
+> game master. Antes eran 5 % para el fundador y 10 % para el resto. Los puntos
+> marcados con **[decidir]** o **[confirmar]** que queden siguen abiertos; hoy
+> solo el fiscal y el tiempo de ayuda personal.
+>
+> **Las publicaciones de Instagram no dan cifras a propósito** («comisión
+> reducida», «menos que el resto»), para poder ajustarlas estas primeras
+> semanas. La web sí las da: `/fundadores` y `/para-game-masters` las leen del
+> código. Por eso **no se nombra a ningún fundador hasta dar las cifras por
+> cerradas**: al nombrarle, sus condiciones quedan fijas para siempre.
 
 ## En una frase
 
-Los diez primeros game masters de la web pagan **un 5 %** por los jugadores que
-les trae la web, **un 0 %** por los que traen ellos con su código, y lo
-conservan para siempre. A cambio de probar con nosotros una web que todavía es
-pequeña.
+Los diez primeros game masters de la web pagan **un 3 %** por los jugadores que
+les trae la web, en lugar del 6 % general, y lo conservan para siempre. Como
+cualquier game master, pagan **un 0 %** por los que traen ellos con su código.
+A cambio de probar con nosotros una web que todavía es pequeña.
 
 ## Qué reciben
 
 ### Las condiciones económicas
 
-| Jugador que reserva                                        | Comisión de TuGameMaster |
-| ---------------------------------------------------------- | ------------------------ |
-| Se registró con **el código del fundador**                 | **0 %**                  |
-| Llegó por la web (cualquier otro jugador)                  | **5 %**                  |
-| _(Para comparar: un game master estándar, cualquier caso)_ | _10 %_                   |
+| Jugador que reserva                              | Fundador | Resto de game masters |
+| ------------------------------------------------ | -------- | --------------------- |
+| Llegó por la web (cualquier otro jugador)        | **3 %**  | 6 %                   |
+| Se registró con **el código de ese game master** | 0 %      | 0 %                   |
 
 Cómo se aplica, tal como lo hace hoy el código:
 
@@ -43,9 +50,11 @@ Cómo se aplica, tal como lo hace hoy el código:
   su código. Quien ya se había registrado por su cuenta no puede acogerse al 0
   % después: así nadie se ahorra la comisión pasándole el código a un jugador
   que trajo la web.
-- **El código admite registros durante 3 meses** desde que se emite. Un
-  administrador lo renueva o emite uno nuevo cuando haga falta (por ejemplo,
-  cuando el game master quiera traer a otra tanda de jugadores).
+- **El código admite registros durante 3 meses** desde que se emite. El propio
+  game master lo renueva desde su panel; un administrador emite uno nuevo si se
+  filtra.
+- **El 0 % solo vale en las mesas de quien lo trajo.** Si ese jugador reserva
+  con otro game master, paga la comisión normal de ese otro.
 - **Lo que caduca es el código, no el emparejamiento.** Un jugador que se
   registró con el código dentro de plazo sigue siendo suyo, con el 0 %, para
   siempre.
@@ -56,12 +65,12 @@ Cómo se aplica, tal como lo hace hoy el código:
 Ejemplo, con una mesa de 5 plazas a 15 € (75 € en total) y tarjetas europeas
 estándar. Son cifras aproximadas: la real la fija Stripe en cada cobro.
 
-|                                  | Jugadores de la web (5 %) | Jugadores con su código (0 %) |
+|                                  | Jugadores de la web (3 %) | Jugadores con su código (0 %) |
 | -------------------------------- | ------------------------- | ----------------------------- |
 | Cobrado a los jugadores          | 75,00 €                   | 75,00 €                       |
-| Comisión de TuGameMaster         | 3,75 €                    | 0,00 €                        |
+| Comisión de TuGameMaster         | 2,25 €                    | 0,00 €                        |
 | Coste de Stripe (1,5 % + 0,25 €) | ≈ 2,40 €                  | ≈ 2,40 €                      |
-| **Transferencia al game master** | **≈ 68,90 €**             | **≈ 72,60 €**                 |
+| **Transferencia al game master** | **≈ 70,35 €**             | **≈ 72,60 €**                 |
 
 La tarifa de Stripe (1,5 % + 0,25 € para tarjetas europeas estándar) está
 confirmada por Ulises. Las tarjetas no europeas cuestan más, y también lo
@@ -91,9 +100,12 @@ Es lo que hace útil la web y se puede contar sin exagerar, porque ya existe:
 
 ### Lo que es solo de fundadores
 
+- **El 3 %** por los jugadores de la web, en lugar del 6 %, para siempre.
 - **Distintivo de fundador** en su avatar y en su nombre.
-- **Su código y su enlace** (`/r/<código>`) en su panel (`/dashboard`) y, con el
-  detalle de quién se ha registrado, en `/cuenta/cobros`, listos para copiar.
+
+El código y el enlace (`/r/<código>`) ya **no** son de fundadores: cualquier
+game master los crea en su panel (`/dashboard` y `/cuenta/cobros`).
+
 - **Trato directo con Ulises**: sus necesidades pesan en lo que se construye
   después. Es una promesa de atención, no de plazos.
 - **Ayuda para publicar su primera partida** (de `plan.html`). **[decidir]**
@@ -127,8 +139,11 @@ que ya usan. La web se suma a su Instagram, no lo sustituye.
 
 ## Durante cuánto tiempo
 
-**Sin fecha de fin.** El 5 % y el 0 % son **permanentes**: no suben aunque
-cambie la política general del resto de game masters. Lo único que puede
+**Sin fecha de fin.** Para un fundador, el 3 % y el 0 % con código son
+**permanentes**: no suben aunque cambie la política general del resto de game
+masters. (Al resto de game masters, el 0 % con código **no** se les promete
+para siempre: se dice «de momento», y como la comisión se congela en cada
+reserva, cambiarlo más adelante no toca nada de lo ya vendido.) Lo único que puede
 cambiar es el coste de Stripe, que es de Stripe y se descuenta siempre del
 cobro. Esto es una promesa: conviene que figure por escrito en una página que
 la web enseñe (ver «Texto para la web», más abajo) para que no dependa de un
@@ -146,11 +161,9 @@ Un administrador puede quitar la condición (a petición suya o por incumplir
 las normas de comportamiento de la web):
 
 - **Las reservas ya hechas conservan su comisión**: lo vendido no cambia.
-- **Las reservas nuevas pasan al 10 %**, incluidas las de sus jugadores con
-  código: el 0 % es una ventaja del plan, no algo suyo aparte.
-- **Su código deja de admitir registros**, aunque no haya caducado.
-- Los jugadores emparejados siguen emparejados, pero eso ya no les da ninguna
-  ventaja.
+- **Las reservas nuevas de jugadores de la web pasan al 6 %.**
+- **Su código sigue funcionando** y sus jugadores con código siguen al 0 %,
+  como los de cualquier game master.
 - Pierde el distintivo. No cambia lo que puede hacer en la web: es un plan, no
   un rol.
 
@@ -230,7 +243,8 @@ fundador dé de alta su cuenta y publique una partida **sí**.
 
 Está hecho: la página `/fundadores` existe y `/para-game-masters` enlaza a ella.
 Sus porcentajes salen del código (`payments/dinero.ts`), no de este texto. El
-borrador original, por si hay que revisar algo:
+borrador original, con las cifras de entonces (5 % y código solo para
+fundadores), por si hay que revisar algo:
 
 > **Game masters fundadores.** Son los primeros diez game masters de
 > TuGameMaster, nombrados a mano.
@@ -252,11 +266,13 @@ borrador original, por si hay que revisar algo:
 
 ## Lo que cuesta, para que no sorprenda
 
-Dato para Ulises, no para los mensajes. Con 10 fundadores, 200 partidas al mes
-de 5 plazas a 15 € (15.000 € cobrados) y **todo al 0 %**, los costes de Stripe
+Dato para Ulises, no para los mensajes. Desde el 18/11/2026 el 0 % con código
+lo tiene **cualquier game master**, así que esto vale para todos, no solo para
+los diez. Con 200 partidas al mes de 5 plazas a 15 € (15.000 € cobrados) y
+**todo al 0 %**, los costes de Stripe
 Connect que paga la plataforma son unos **60–76 € al mes**, y hasta ~112 € si
 Stripe suma además la fila de «direccionamiento de fondos»: 2 € por cuenta
 activa, un 0,25 % del dinero transferido y 0,10 € por transferencia. Es un
 0,4–0,75 % del volumen. No hace falta una tarifa al jugador. Se revisa cuando
-haya volumen real. El 0 % con jugadores emparejados es permanente: es ingreso
-que no existirá.
+haya volumen real. El 0 % con jugadores emparejados es permanente para los
+fundadores: es ingreso que no existirá. El de los demás se puede revisar.

@@ -63,10 +63,7 @@ async function fundadores(ahora: Date) {
     cobrosActivados: fila.payoutsEnabled,
     partidas: fila._count.games,
     invitados: fila._count.invitados,
-    codigo: estadoDelCodigo(
-      { plan: 'FUNDADOR', inviteCodeExpiresAt: fila.inviteCodeExpiresAt },
-      ahora,
-    ),
+    codigo: estadoDelCodigo({ inviteCodeExpiresAt: fila.inviteCodeExpiresAt }, ahora),
   }));
 }
 

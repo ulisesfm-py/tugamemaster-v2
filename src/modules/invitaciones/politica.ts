@@ -1,7 +1,8 @@
-import type { PlanGm } from '@/generated/prisma/enums';
-
 /**
- * Reglas del codigo de invitacion de los game masters fundadores.
+ * Reglas del codigo de invitacion de los game masters.
+ *
+ * Cualquier GM puede tener uno: los jugadores que se registran con el no le
+ * cuestan comision en sus mesas (`payments/dinero.ts`).
  *
  * Logica pura: ni base de datos ni reloj propio, para poder comprobarla sin
  * montar nada. Quien la usa le pasa la fecha y el azar.
@@ -74,19 +75,18 @@ export function caducidadDesde(desde: Date): Date {
   return fin;
 }
 
-export type EstadoDelCodigo = 'VIGENTE' | 'CADUCADO' | 'SIN_PLAN';
+export type EstadoDelCodigo = 'VIGENTE' | 'CADUCADO';
 
 /**
  * Si un codigo admite registros ahora mismo.
  *
- * Deja de valer al caducar y tambien en cuanto su GM deja de ser fundador: el
- * codigo es una de las condiciones del plan, no algo suyo aparte.
+ * Vale igual para cualquier plan: el enlace es de todos los game masters, no
+ * una ventaja de los fundadores.
  */
 export function estadoDelCodigo(
-  gm: { plan: PlanGm; inviteCodeExpiresAt: Date | null },
+  gm: { inviteCodeExpiresAt: Date | null },
   ahora: Date,
 ): EstadoDelCodigo {
-  if (gm.plan !== 'FUNDADOR') return 'SIN_PLAN';
   if (!gm.inviteCodeExpiresAt || gm.inviteCodeExpiresAt <= ahora) return 'CADUCADO';
   return 'VIGENTE';
 }

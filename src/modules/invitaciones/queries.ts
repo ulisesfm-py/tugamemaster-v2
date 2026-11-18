@@ -6,16 +6,15 @@ import { urlBase } from '@/lib/email';
 import { estadoDelCodigo, formatearCodigo } from './politica';
 
 /**
- * El codigo de un fundador y quien se ha registrado con el, para su panel.
+ * El codigo de un game master y quien se ha registrado con el, para su panel.
  *
- * Null si el GM no es fundador o todavia no tiene codigo: entonces no hay
- * nada que ensenarle, y su panel no menciona los codigos.
+ * Null si el usuario no es game master. Si lo es pero aun no ha pedido su
+ * enlace, `codigo` es null y el panel le ofrece crearlo.
  */
 export async function invitacionDeGm(userId: string, ahora = new Date()) {
   const gm = await db.gmProfile.findUnique({
     where: { userId },
     select: {
-      plan: true,
       inviteCode: true,
       inviteCodeExpiresAt: true,
       invitados: {
@@ -25,7 +24,11 @@ export async function invitacionDeGm(userId: string, ahora = new Date()) {
     },
   });
 
-  if (!gm || gm.plan !== 'FUNDADOR' || !gm.inviteCode) return null;
+  if (!gm) return null;
+
+  if (!gm.inviteCode) {
+    return { codigo: null, enlace: null, caducaEl: null, vigente: false, invitados: [] };
+  }
 
   return {
     codigo: formatearCodigo(gm.inviteCode),

@@ -40,7 +40,7 @@ export function AuthForm({
   accion: Accion;
   /** Ausente mientras Discord no este configurado: entonces no se ofrece. */
   accionDiscord?: Accion;
-  /** El codigo de fundador que trae el enlace, para dejarlo ya escrito. */
+  /** El codigo de invitacion que trae el enlace, para dejarlo ya escrito. */
   codigoInicial?: string;
   /**
    * Lo que se sabe del codigo del enlace: de quien es, o por que no vale.

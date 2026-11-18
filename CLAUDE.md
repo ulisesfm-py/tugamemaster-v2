@@ -28,21 +28,23 @@ fidelidad a lo anterior.
   (cobro inmediato con tarjeta, 3DS resuelto en pantalla). El dinero queda
   retenido en el balance de la plataforma. El GM cobra su parte **48 horas
   después de finalizada la partida**, si no hay incidencias reportadas.
-  TuGameMaster retiene una **comisión del 10%** del total cobrado. Los **GMs
+  TuGameMaster retiene una **comisión del 6%** del total cobrado por los
+  jugadores que trae la web, y un **0%** por los que se registraron con el
+  **código de invitación** del GM, que lo tiene cualquier GM. Los **GMs
   fundadores** (los primeros, nombrados a mano por un admin desde
-  `/admin/game-masters`) pagan un 5% por los jugadores que les trae la web y
-  un 0% por los que se registraron con su **código de invitación**. Si un GM
-  deja de ser fundador, sus reservas nuevas pasan al 10%. Es un plan, no un
+  `/admin/game-masters`) pagan un 3% en lugar del 6% por los jugadores de la
+  web. Si un GM deja de ser fundador, sus reservas nuevas de jugadores de la
+  web pasan al 6%; las de sus jugadores con código siguen al 0%. Es un plan, no un
   rol: no cambia lo que el GM puede hacer, y se ve como distintivo en su
   avatar y su nombre.
-- **Código de invitación del fundador**: el emparejamiento jugador–GM se
+- **Código de invitación del GM**: el emparejamiento jugador–GM se
   guarda **en la cuenta del jugador al crearla** (`User.referredByGmId`), nunca
   en el navegador: tiene que valer aunque el enlace se abra en el móvil y la
   cuenta se cree en el PC. El enlace `/r/<código>` solo lleva al registro con
   el código puesto; el campo del formulario es lo que empareja, y se puede
   escribir a mano. **Una cuenta que ya existe no se empareja nunca**, para que
   nadie se ahorre la comisión pasándole el código a un jugador que trajo la
-  web. El código admite registros durante 3 meses (renovables por un admin);
+  web. El código admite registros durante 3 meses (los renueva el propio GM);
   lo que caduca es el código, no el emparejamiento. Reglas en
   `src/modules/invitaciones/politica.ts`.
 - **Partidas privadas**: el GM elige al crearla si es pública (por defecto) o

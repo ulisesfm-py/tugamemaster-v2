@@ -62,12 +62,24 @@ reescribiría la historia contable.
 
 | Plan del GM | Jugador registrado con su código | Resto de jugadores |
 | ----------- | -------------------------------- | ------------------ |
-| Estándar    | (no tiene código)                | 10%                |
-| Fundador    | 0%                               | 5%                 |
+| Estándar    | 0%                               | 6%                 |
+| Fundador    | 0%                               | 3%                 |
 
 «Registrado con su código» es un dato de la cuenta del jugador
 (`User.referredByGmId`), que se fija al crearla. La reserva lo compara con el
-GM de la partida y guarda el resultado en `Booking.origin`.
+GM de la partida y guarda el resultado en `Booking.origin`. El código lo tiene
+**cualquier GM** (lo crea él desde su panel), y el 0% solo vale en las mesas
+del GM que lo trajo: si ese jugador reserva con otro, paga la comisión normal
+de ese otro.
+
+Historia: hasta el 18/11/2026 era 10% el estándar y 5% el fundador, y solo los
+fundadores tenían código. Las reservas de entonces conservan su
+`commissionBps`.
+
+> Las reservas al 0% no dejan ingreso y sí costes de Stripe Connect que no se
+> descuentan al GM (cuota por cuenta activa y por transferencia). Es un coste de
+> captación asumido a sabiendas: ver «Lo que cuesta» en
+> `docs/captacion/oferta-fundador.md`.
 
 El porcentaje **se decide al reservar** y se guarda en `Booking.commissionBps`.
 No puede decidirse al cobrar: el cobro lo confirma un webhook de Stripe, que
