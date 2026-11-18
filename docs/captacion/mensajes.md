@@ -1,5 +1,9 @@
 # Mensajes para captar game masters fundadores
 
+> **En pausa desde el 18/11/2026.** Antes de volver a captar, se hacen las
+> entrevistas de `entrevistas.md` y se decide con ellas (fecha: 2/12/2026). Lo
+> que salga puede cambiar la oferta y estos mensajes.
+
 Borradores para escribir a mano, uno a uno, a game masters que ya dirigen por
 Instagram o Twitch. **Nada se envía solo y nada se automatiza.** Lo que cada
 mensaje afirma sale de `docs/captacion/oferta-fundador.md`; si algo no está
