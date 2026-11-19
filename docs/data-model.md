@@ -22,6 +22,13 @@ User ──1:1── GmProfile ──1:N── Campaign ──1:N── Game
                                                     └──1:1── Review
 ```
 
+Las mesas con fecha flexible van aparte:
+
+```
+GmProfile ──1:N── Convocatoria ──0:1── Game   (la partida que sale al convocar)
+User ──1:N── PreReserva ──N:1── Convocatoria
+```
+
 ## Decisiones y por qué
 
 ### Ser GM no es un campo, es una relación
@@ -90,6 +97,26 @@ caduque no deshace los emparejamientos ya hechos, ni tampoco un cambio de plan.
 `stripeFeeCents` se lee de la `balance_transaction` de Stripe, no se estima,
 porque TuGameMaster no absorbe los costes de Stripe: se descuentan al GM.
 
+### Mesas con fecha flexible: `Convocatoria` y `PreReserva`
+
+Una `Convocatoria` es una mesa sin fecha: la ficha de una partida, un mínimo de
+jugadores (`minPlayers`) y una franja orientativa (`weekdays`, `startMinute`,
+`durationMinutes`, `frequency`, en hora de Madrid y en enteros). La gente se
+apunta con una `PreReserva`, que no cuesta nada ni compromete a nada; quien se
+borra, se borra la fila.
+
+Al llegar al mínimo, el GM fija una fecha: se crea una `Game` normal, su id
+queda en `Convocatoria.gameId` y la mesa pasa a `CONVOCADA`. Hasta
+`priorityUntil` solo pueden reservar esa partida quienes tenían pre-reserva; a
+partir de ahí, cualquiera. **No hay dinero en estas tablas**: se paga con la
+reserva de siempre, ya con fecha.
+
+Van en tablas propias y no como una `Game` con la fecha vacía porque todo el
+flujo del dinero cuelga de `Game.startsAt`. `priorityUntil` y
+`minReachedNoticeAt` se guardan y no se calculan: si cambian los plazos, lo ya
+en marcha no se mueve, y el aviso al GM no se repite. Reglas en
+`src/modules/convocatorias/politica.ts`.
+
 ### `PaymentEvent`: el libro de eventos
 
 Esta tabla es la respuesta directa al fallo de la v1, que guardaba el
@@ -146,7 +173,7 @@ transferencias sin origen y descuadraría la contabilidad. Cuando haga falta
 atender una baja de cuenta, la solución será anonimizar, no borrar.
 
 `Cascade` se usa solo donde el dato no tiene valor por sí mismo: sesiones,
-cuentas OAuth, comentarios, likes y notas de sesión.
+cuentas OAuth, comentarios, likes, notas de sesión y pre-reservas.
 
 ## Trabajar con el esquema
 

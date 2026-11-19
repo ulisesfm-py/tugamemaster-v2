@@ -67,6 +67,7 @@ model User {
   referredBy GmProfile? @relation("Invitados", fields: [referredByGmId], references: [id], onDelete: SetNull)
 
   bookings          Booking[]
+  preReservas       PreReserva[]
   reviewsWritten    Review[]      @relation("ReviewAuthor")
   incidentsReported Incident[]    @relation("IncidentReporter")
   incidentsResolved Incident[]    @relation("IncidentResolver")
@@ -186,8 +187,10 @@ model GmProfile {
   invitados User[]     @relation("Invitados")
   games     Game[]
   campaigns Campaign[]
-  payouts   Payout[]
-  reviews   Review[]   @relation("ReviewTarget")
+
+  convocatorias Convocatoria[]
+  payouts       Payout[]
+  reviews       Review[]       @relation("ReviewTarget")
 
   @@index([payoutsEnabled])
 }
@@ -313,6 +316,9 @@ model Game {
   payout      Payout?
   sessionNote SessionNote?
 
+  /// La mesa de fecha flexible de la que salio, si salio de una.
+  convocatoria Convocatoria?
+
   threadMessages ThreadMessage[]
   threadReads    ThreadRead[]
 
@@ -334,6 +340,111 @@ model SessionNote {
   updatedAt DateTime @updatedAt
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Mesas con fecha flexible
+// ---------------------------------------------------------------------------
+//
+// Una mesa sin fecha que junta pre-reservas gratuitas. Cuando hay bastante
+// gente, el GM fija la fecha y se crea una partida normal (`Game`): desde ahi
+// se reserva y se paga como en cualquier otra. Aqui no hay dinero.
+//
+// Va en su propia tabla y no como una partida con la fecha vacia porque todo
+// el flujo del dinero cuelga de `Game.startsAt` (plazo de cancelacion, pago al
+// GM, recordatorios, resenas): una fecha opcional obligaria a revisarlo todo.
+// Reglas en `src/modules/convocatorias/politica.ts`.
+
+enum EstadoConvocatoria {
+  /// Creada pero no visible.
+  BORRADOR
+  /// Publicada y admitiendo pre-reservas.
+  ABIERTA
+  /// El GM fijo la fecha: ya existe su partida (`gameId`).
+  CONVOCADA
+  /// Retirada por el GM sin llegar a convocarse.
+  CERRADA
+}
+
+enum FrecuenciaConvocatoria {
+  /// Una sola sesion.
+  UNICA
+  SEMANAL
+  QUINCENAL
+}
+
+model Convocatoria {
+  id          String @id @default(cuid())
+  gmId        String
+  title       String
+  slug        String @unique
+  description String
+
+  /// Mismos campos de ficha que `Game`; al convocar se copian a la partida.
+  system     String
+  imageUrl   String?
+  languages  String[]       @default([])
+  experience GameExperience @default(ABIERTA)
+  minAge     Int?
+  tags       String[]       @default([])
+
+  /// Plazas de la partida que saldra. Tambien el tope de pre-reservas.
+  seatsTotal Int
+  /// Con cuantas pre-reservas puede el GM fijar la fecha.
+  minPlayers Int
+
+  /// Precio por asiento de la partida que saldra, en centimos. Aqui no se
+  /// cobra nada: el jugador paga al reservar, ya con fecha.
+  priceCents Int
+  currency   String @default("EUR")
+
+  /// Franja orientativa, en hora de Madrid. Dias ISO (1 = lunes, 7 = domingo);
+  /// la hora en minutos desde medianoche y la duracion en minutos, enteros.
+  weekdays        Int[]
+  startMinute     Int
+  durationMinutes Int
+  frequency       FrecuenciaConvocatoria @default(UNICA)
+
+  status EstadoConvocatoria @default(BORRADOR)
+
+  /// La partida creada al convocar. Nula hasta entonces.
+  gameId String? @unique
+
+  /// Hasta cuando solo pueden reservar quienes se pre-reservaron. Se guarda y
+  /// no se calcula: si cambia el plazo, las ventanas ya abiertas no se mueven.
+  priorityUntil DateTime?
+
+  /// Cuando se aviso al GM de que habia llegado al minimo. Es lo que impide
+  /// repetir el correo si alguien se borra y otro vuelve a completar.
+  minReachedNoticeAt DateTime?
+
+  convenedAt DateTime?
+  closedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  gm          GmProfile    @relation(fields: [gmId], references: [id], onDelete: Restrict)
+  game        Game?        @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  preReservas PreReserva[]
+
+  @@index([status, createdAt])
+  @@index([gmId])
+}
+
+/// Alguien que quiere jugar una mesa de fecha flexible. No compromete a nada
+/// ni cuesta nada: quien se borra, desaparece de la lista.
+model PreReserva {
+  id             String   @id @default(cuid())
+  convocatoriaId String
+  userId         String
+  createdAt      DateTime @default(now())
+
+  convocatoria Convocatoria @relation(fields: [convocatoriaId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Una persona, una pre-reserva por mesa.
+  @@unique([convocatoriaId, userId])
+  @@index([userId])
 }
 
 // ---------------------------------------------------------------------------
