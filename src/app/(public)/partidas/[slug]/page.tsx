@@ -23,6 +23,7 @@ import {
   PORCENTAJE_DEVOLUCION_INCIDENCIA,
 } from '@/modules/bookings/politica';
 import { notaVisible } from '@/modules/campaigns/queries';
+import { enPlazoDePreReservados } from '@/modules/convocatorias/politica';
 import {
   EXPERIENCIA,
   estadoVisible,
@@ -106,6 +107,15 @@ export default async function PartidaPage({ params, searchParams }: Props) {
     { esGm: partida.esMia, reserva: partida.miReserva?.status ?? null },
     { finPartida: partida.endsAt },
   ).ok;
+
+  // Plazo de una partida convocada desde una mesa flexible: hasta que acabe,
+  // solo reservan quienes se pre-reservaron. Lo decide el servidor al
+  // reservar; aqui solo se explica, en vez de ensenar un boton que fallaria.
+  const plazoDePreReservados =
+    partida.convocatoria?.priorityUntil &&
+    enPlazoDePreReservados(partida.convocatoria.priorityUntil, new Date())
+      ? partida.convocatoria.priorityUntil
+      : null;
 
   const tipo = tipoDeMesa(partida);
   const experiencia = EXPERIENCIA[partida.experience];
@@ -285,6 +295,12 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                   )}
                   , y solo pueden apuntarse quienes jugaron aquella.
                 </p>
+              ) : plazoDePreReservados && !partida.tengoPreReserva ? (
+                <p className="text-muted-foreground text-sm">
+                  Esta partida salió de una mesa con fecha flexible. Hasta el{' '}
+                  <Fecha valor={plazoDePreReservados} /> solo pueden reservar quienes se
+                  pre-reservaron; si quedan plazas, se abrirán entonces.
+                </p>
               ) : partida.plazasLibres <= 0 ? (
                 <p className="text-muted-foreground text-sm">
                   No quedan plazas. Si alguien libera la suya, aparecerá aquí.
@@ -305,6 +321,12 @@ export default async function PartidaPage({ params, searchParams }: Props) {
                     />
                   )}
 
+                  {plazoDePreReservados && (
+                    <p className="text-flexible mt-3 text-xs font-medium">
+                      Tienes el sitio guardado hasta el{' '}
+                      <Fecha valor={plazoDePreReservados} />.
+                    </p>
+                  )}
                   <p className="text-muted-foreground mt-3 text-xs">
                     {partida.priceCents === 0 ? (
                       'Esta partida es gratuita.'

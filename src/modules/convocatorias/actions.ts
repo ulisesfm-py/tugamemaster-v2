@@ -11,6 +11,7 @@ import {
   actualizarConvocatoria,
   borrarPreReserva,
   cerrarConvocatoria,
+  convocarMesa,
   crearConvocatoria,
   preReservar,
   publicarConvocatoria,
@@ -157,4 +158,28 @@ export async function borrarPreReservaAction(
   formData: FormData,
 ): Promise<EstadoAccion> {
   return comoJugador(formData, borrarPreReserva);
+}
+
+/** El GM fija la fecha. Si sale bien, se le lleva a la partida ya creada. */
+export async function convocarMesaAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Tienes que iniciar sesión' };
+
+  const id = String(formData.get('convocatoriaId') ?? '');
+  const resultado = await convocarMesa(session.user.id, id, {
+    startsAt: String(formData.get('startsAt') ?? ''),
+  });
+
+  if (!resultado.ok) return { error: resultado.mensaje, enviado: formData };
+
+  refrescar(id);
+  revalidatePath('/partidas');
+  revalidatePath('/');
+  const slug = String(formData.get('slug') ?? '');
+  if (slug) revalidatePath(`/mesas/${slug}`);
+
+  redirect(`/cuenta/partidas/${resultado.gameId}`);
 }

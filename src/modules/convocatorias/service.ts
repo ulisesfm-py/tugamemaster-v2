@@ -4,12 +4,19 @@ import { db } from '@/lib/db';
 import { borrarSiEsNuestra, subirImagen } from '@/lib/imagen';
 import {
   avisarMesaCerrada,
+  avisarMesaConvocada,
   avisarMinimoAlcanzado,
 } from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 
-import { hayQueAvisarDelMinimo, problemasAlEditar, puedePreReservar } from './politica';
-import { convocatoriaSchema, type ConvocatoriaInput } from './schema';
+import {
+  finDelPlazoParaReservar,
+  hayQueAvisarDelMinimo,
+  problemasAlEditar,
+  puedeConvocar,
+  puedePreReservar,
+} from './politica';
+import { convocarSchema, convocatoriaSchema, type ConvocatoriaInput } from './schema';
 
 /**
  * Reglas de negocio de las mesas con fecha flexible, con base de datos.
@@ -366,4 +373,133 @@ export async function subirLaminaDeConvocatoria(
   }
 
   return { ok: true, url: subida.url };
+}
+
+/* ── Convocar ───────────────────────────────────────────────────────────── */
+
+export type ResultadoConvocar =
+  { ok: true; gameId: string; slug: string } | { ok: false; mensaje: string };
+
+/**
+ * Fija la fecha de una mesa flexible: crea su partida y abre el plazo en el
+ * que solo reservan quienes se pre-reservaron.
+ *
+ * La partida nace **publicada** y con la ficha de la mesa: el GM ya la reviso
+ * al publicar la mesa, y quienes se apuntaron esperan poder reservar en
+ * cuanto les llega el correo. A partir de aqui es una partida normal: se
+ * reserva, se cobra, se cancela y se paga al GM como cualquier otra.
+ *
+ * La mesa se bloquea para que dos clics no creen dos partidas.
+ */
+export async function convocarMesa(
+  userId: string,
+  id: string,
+  input: unknown,
+  ahora = new Date(),
+): Promise<ResultadoConvocar> {
+  const parsed = convocarSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, mensaje: primerError(parsed.error) };
+  const { startsAt } = parsed.data;
+
+  const gm = await gmDe(userId);
+  if (!gm) return { ok: false, mensaje: 'Esa mesa no es tuya' };
+
+  if (!gm.payoutsEnabled) {
+    return {
+      ok: false,
+      mensaje: 'Configura primero la cuenta donde quieres recibir los pagos',
+    };
+  }
+
+  const resultado = await db.$transaction(async (tx) => {
+    const filas = await tx.$queryRaw<{ id: string }[]>`
+      SELECT "id" FROM "Convocatoria" WHERE "id" = ${id} FOR UPDATE
+    `;
+    if (!filas[0]) return { ok: false as const, mensaje: 'Esa mesa no existe' };
+
+    const mesa = await tx.convocatoria.findUniqueOrThrow({
+      where: { id },
+      select: {
+        gmId: true,
+        status: true,
+        title: true,
+        description: true,
+        system: true,
+        imageUrl: true,
+        languages: true,
+        experience: true,
+        minAge: true,
+        tags: true,
+        seatsTotal: true,
+        minPlayers: true,
+        priceCents: true,
+        currency: true,
+        durationMinutes: true,
+        _count: { select: { preReservas: true } },
+      },
+    });
+
+    if (mesa.gmId !== gm.id)
+      return { ok: false as const, mensaje: 'Esa mesa no es tuya' };
+
+    const permiso = puedeConvocar({
+      estado: mesa.status,
+      apuntados: mesa._count.preReservas,
+      minimo: mesa.minPlayers,
+      fecha: startsAt,
+      ahora,
+    });
+    if (!permiso.ok) return { ok: false as const, mensaje: permiso.mensaje };
+
+    const slug = await slugDisponible(mesa.title, async (candidato) => {
+      const ocupado = await tx.game.findUnique({
+        where: { slug: candidato },
+        select: { id: true },
+      });
+      return ocupado !== null;
+    });
+
+    const partida = await tx.game.create({
+      data: {
+        gmId: gm.id,
+        slug,
+        title: mesa.title,
+        description: mesa.description,
+        system: mesa.system,
+        imageUrl: mesa.imageUrl,
+        languages: mesa.languages,
+        experience: mesa.experience,
+        minAge: mesa.minAge,
+        tags: mesa.tags,
+        startsAt,
+        endsAt: new Date(startsAt.getTime() + mesa.durationMinutes * 60_000),
+        seatsTotal: mesa.seatsTotal,
+        priceCents: mesa.priceCents,
+        currency: mesa.currency,
+        visibility: 'PUBLICA',
+        status: 'PUBLISHED',
+      },
+      select: { id: true, slug: true },
+    });
+
+    await tx.convocatoria.update({
+      where: { id },
+      data: {
+        status: 'CONVOCADA',
+        gameId: partida.id,
+        convenedAt: ahora,
+        priorityUntil: finDelPlazoParaReservar(ahora),
+      },
+    });
+
+    return { ok: true as const, gameId: partida.id, slug: partida.slug };
+  });
+
+  if (!resultado.ok) return resultado;
+
+  // Fuera de la transaccion: si el correo no sale, la partida existe igual y
+  // el aviso de la campanita sigue diciendoles que reserven.
+  await avisarMesaConvocada(id);
+
+  return resultado;
 }

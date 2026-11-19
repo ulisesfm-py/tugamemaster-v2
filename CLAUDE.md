@@ -55,6 +55,17 @@ fidelidad a lo anterior.
   repartirla. Nunca sale en una página pública; la comprueba el servidor al
   reservar. En una continuación de campaña no se pide, porque ya solo entra
   quien jugó la sesión anterior.
+- **Mesas con fecha flexible** («convocatorias»): el GM publica una mesa sin
+  fecha, con una franja orientativa y un mínimo de jugadores. La gente se
+  **pre-reserva sin pagar nada** (nunca se dice «gratis»: se confundiría con el
+  precio de la partida). Al llegar al mínimo, el GM fija la fecha y se crea una
+  **partida normal**; durante **48 h solo reservan quienes se pre-reservaron**,
+  y después cualquiera. Desde ahí todo es la reserva de siempre: el dinero no
+  pasa por la mesa flexible. Con gente apuntada, el precio no sube y las plazas
+  no bajan. Van en tablas propias (`Convocatoria`, `PreReserva`) y no como una
+  `Game` sin fecha, porque todo el flujo del dinero cuelga de `Game.startsAt`.
+  Las cifras (48 h, 5 días de antelación, 5 pre-reservas por persona) están en
+  `src/modules/convocatorias/politica.ts` para poder ajustarlas.
 - **Cancelaciones y reembolsos**:
   - El jugador puede cancelar **sin coste hasta 48h antes** del inicio:
     reembolso íntegro y liberación inmediata del asiento.

@@ -234,3 +234,44 @@ export async function misPreReservas(userId: string) {
     },
   });
 }
+
+/**
+ * Para el GM, en la gestion de una partida convocada: cuantos de los que se
+ * pre-reservaron han reservado ya, y quienes faltan.
+ *
+ * Null si la partida no sale de una mesa flexible.
+ */
+export async function preReservadosDePartida(gameId: string) {
+  const mesa = await db.convocatoria.findUnique({
+    where: { gameId },
+    select: {
+      slug: true,
+      priorityUntil: true,
+      preReservas: {
+        orderBy: { createdAt: 'asc' },
+        select: { userId: true, user: { select: { name: true, slug: true } } },
+      },
+    },
+  });
+
+  if (!mesa) return null;
+
+  const conReserva = await db.booking.findMany({
+    where: {
+      gameId,
+      userId: { in: mesa.preReservas.map((p) => p.userId) },
+      status: { in: ['PENDING', 'PAID', 'COMPLETED'] },
+    },
+    select: { userId: true },
+  });
+
+  const reservaron = new Set(conReserva.map((b) => b.userId));
+
+  return {
+    slug: mesa.slug,
+    priorityUntil: mesa.priorityUntil,
+    total: mesa.preReservas.length,
+    reservados: reservaron.size,
+    faltan: mesa.preReservas.filter((p) => !reservaron.has(p.userId)).map((p) => p.user),
+  };
+}

@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 
 import { PORCENTAJE_DEVOLUCION, TEXTO_CONDICIONES } from '@/modules/bookings/politica';
+import {
+  DIAS_MINIMOS_DE_ANTELACION,
+  HORAS_PARA_RESERVAR,
+} from '@/modules/convocatorias/politica';
 
 export const metadata: Metadata = {
   title: 'Condiciones de reserva · TuGameMaster',
@@ -34,6 +38,25 @@ export default function CondicionesPage() {
           horas después de que termine la partida, siempre que no haya ninguna incidencia
           abierta. Esa espera es lo que permite atender una reclamación antes de que el
           dinero se haya movido.
+        </p>
+      </section>
+
+      <section className="text-muted-foreground mt-10 flex flex-col gap-3 leading-relaxed">
+        <h2 className="font-heading text-foreground text-xl font-bold">
+          Mesas con fecha flexible
+        </h2>
+        <p>
+          Algunas mesas se publican sin fecha. En ellas no reservas: te pre-reservas.
+          Pre-reservarte no tiene cargo ni te compromete, y puedes borrarte cuando quieras
+          mientras no haya fecha.
+        </p>
+        <p>
+          {`Cuando hay gente suficiente, el game master fija la fecha, con al menos ${DIAS_MINIMOS_DE_ANTELACION} días de antelación, y te avisamos por correo. Durante las ${HORAS_PARA_RESERVAR} horas siguientes, solo quienes se pre-reservaron pueden reservar y pagar su plaza. Si no reservas en ese plazo, pierdes el sitio guardado, y las plazas libres se abren a cualquiera.`}
+        </p>
+        <p>
+          Una vez reservada, la plaza sigue estas mismas condiciones: el precio es el que
+          se anunciaba en la mesa, y las cancelaciones y devoluciones funcionan igual que
+          en cualquier otra partida.
         </p>
       </section>
 

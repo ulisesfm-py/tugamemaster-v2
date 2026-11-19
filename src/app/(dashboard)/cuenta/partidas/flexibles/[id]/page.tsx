@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
+import { ConvocarForm } from '@/components/convocar-form';
 import { ConvocatoriaForm } from '@/components/convocatoria-form';
 import { ImagenForm } from '@/components/imagen-form';
 import { Lamina } from '@/components/lamina';
@@ -19,12 +20,18 @@ import { auth } from '@/lib/auth';
 import { blobEnabled } from '@/lib/env';
 import {
   cerrarConvocatoriaAction,
+  convocarMesaAction,
   publicarConvocatoriaAction,
   retirarConvocatoriaAction,
   actualizarConvocatoriaAction,
   subirLaminaDeConvocatoriaAction,
 } from '@/modules/convocatorias/actions';
-import { alcanzaElMinimo, describirFranja } from '@/modules/convocatorias/politica';
+import {
+  alcanzaElMinimo,
+  describirFranja,
+  HORAS_PARA_RESERVAR,
+  primeraFechaPosible,
+} from '@/modules/convocatorias/politica';
 import { miConvocatoria } from '@/modules/convocatorias/queries';
 
 export const metadata: Metadata = { title: 'Gestionar mesa flexible · TuGameMaster' };
@@ -52,9 +59,21 @@ function Bloque({
 /**
  * La mesa con fecha flexible, vista por su game master.
  *
- * Convocar (fijar la fecha) llega en la fase siguiente; de momento se crea,
- * se edita, se publica, se retira y se cierra.
+ * Se crea, se edita, se publica, se retira, se cierra y, al llegar al
+ * minimo, se convoca: el GM fija la fecha y nace la partida.
  */
+
+/**
+ * Una fecha en el formato de `datetime-local`, redondeada a la hora siguiente.
+ *
+ * Va en la hora del servidor, la misma con la que el servidor leera lo que se
+ * escriba: asi el `min` del campo y la comprobacion no pueden discrepar.
+ */
+function paraCampo(fecha: Date): string {
+  const redondeada = new Date(Math.ceil(fecha.getTime() / 3_600_000) * 3_600_000);
+  const desfase = redondeada.getTimezoneOffset() * 60_000;
+  return new Date(redondeada.getTime() - desfase).toISOString().slice(0, 16);
+}
 export default async function GestionarConvocatoriaPage({ params }: Props) {
   const { id } = await params;
 
@@ -124,9 +143,18 @@ export default async function GestionarConvocatoriaPage({ params }: Props) {
             <>
               <p className="text-foreground font-medium">Ya tienes el mínimo</p>
               <p className="text-muted-foreground mt-1 text-sm">
-                Muy pronto podrás fijar la fecha desde aquí. Mientras, la gente puede
-                seguir apuntándose hasta llenar las {mesa.seatsTotal} plazas.
+                Fija la fecha cuando quieras. Hasta entonces la gente puede seguir
+                apuntándose hasta llenar las {mesa.seatsTotal} plazas.
               </p>
+              <div className="mt-4">
+                <ConvocarForm
+                  accion={convocarMesaAction}
+                  convocatoriaId={mesa.id}
+                  slug={mesa.slug}
+                  fechaMinima={paraCampo(primeraFechaPosible(new Date()))}
+                  horasParaReservar={HORAS_PARA_RESERVAR}
+                />
+              </div>
             </>
           ) : (
             <>

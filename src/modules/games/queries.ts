@@ -135,6 +135,9 @@ export async function detallePartida(slug: string, userId?: string) {
       minAge: true,
       campaign: { select: { title: true, slug: true } },
       previousGame: { select: { title: true, slug: true } },
+      // Si sale de una mesa con fecha flexible: hasta cuando solo reservan los
+      // que se pre-reservaron.
+      convocatoria: { select: { id: true, priorityUntil: true } },
       gm: {
         select: {
           id: true,
@@ -171,6 +174,15 @@ export async function detallePartida(slug: string, userId?: string) {
         })) > 0
       : true;
 
+  // Para una partida que sale de una mesa flexible, si el visitante tenia
+  // pre-reserva: es lo que le deja reservar durante el plazo.
+  const tengoPreReserva =
+    partida.convocatoria && userId
+      ? (await db.preReserva.count({
+          where: { convocatoriaId: partida.convocatoria.id, userId },
+        })) > 0
+      : false;
+
   return {
     ...partida,
     plazasOcupadas,
@@ -178,6 +190,7 @@ export async function detallePartida(slug: string, userId?: string) {
     miReserva,
     esMia: userId !== undefined && partida.gm.userId === userId,
     puedeContinuar,
+    tengoPreReserva,
   };
 }
 

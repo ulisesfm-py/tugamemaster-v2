@@ -23,6 +23,8 @@ import { auth } from '@/lib/auth';
 import { jugadoresDe } from '@/modules/bookings/queries';
 import { guardarNotaAction } from '@/modules/campaigns/actions';
 import { partidaTerminada } from '@/modules/campaigns/politica';
+import { enPlazoDePreReservados } from '@/modules/convocatorias/politica';
+import { preReservadosDePartida } from '@/modules/convocatorias/queries';
 import {
   actualizarPartidaAction,
   cancelarPartidaAction,
@@ -67,7 +69,14 @@ export default async function GestionarPartidaPage({ params }: Props) {
   const partida = await miPartida(session.user.id, gameId);
   if (!partida) notFound();
 
-  const jugadores = (await jugadoresDe(gameId, session.user.id)) ?? [];
+  const [jugadoresLeidos, deMesaFlexible] = await Promise.all([
+    jugadoresDe(gameId, session.user.id),
+    preReservadosDePartida(gameId),
+  ]);
+  const jugadores = jugadoresLeidos ?? [];
+  const plazoAbierto =
+    deMesaFlexible?.priorityUntil != null &&
+    enPlazoDePreReservados(deMesaFlexible.priorityUntil, new Date());
   const editable = partida.status === 'DRAFT' || partida.status === 'PUBLISHED';
 
   // `partidaTerminada` acepta tambien una publicada cuya hora de fin ya paso:
@@ -117,6 +126,38 @@ export default async function GestionarPartidaPage({ params }: Props) {
             {partida.campaign.title}
           </Link>
         </p>
+      )}
+
+      {/* ── Si sale de una mesa con fecha flexible ──────────────── */}
+      {deMesaFlexible && partida.status === 'PUBLISHED' && (
+        <section className="border-flexible/40 bg-card mt-6 rounded-sm border p-5">
+          <p className="text-foreground font-medium">
+            {`${deMesaFlexible.reservados} de ${deMesaFlexible.total} pre-reservados han reservado`}
+          </p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {plazoAbierto && deMesaFlexible.priorityUntil ? (
+              <>
+                Hasta el <Fecha valor={deMesaFlexible.priorityUntil} /> solo pueden
+                reservar ellos. Después, las plazas libres se abren a cualquiera.
+              </>
+            ) : (
+              'Su plazo ya ha terminado: las plazas libres están abiertas a cualquiera.'
+            )}
+          </p>
+          {deMesaFlexible.faltan.length > 0 && (
+            <p className="text-muted-foreground mt-2 text-sm">
+              {'Sin reservar: '}
+              {deMesaFlexible.faltan.map((u, i) => (
+                <span key={u.slug}>
+                  {i > 0 && ', '}
+                  <Link href={`/u/${u.slug}`} className="hover:underline">
+                    {u.name}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          )}
+        </section>
       )}
 
       {/* ── Lo primero: en qué punto está y qué se puede hacer ──── */}

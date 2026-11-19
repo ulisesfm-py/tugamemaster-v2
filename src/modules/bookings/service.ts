@@ -4,6 +4,7 @@ import type { BookingStatus, OrigenReserva } from '@/generated/prisma/enums';
 import { db } from '@/lib/db';
 import { REGLAS, mensajeDeEspera } from '@/modules/limites/politica';
 import { consumirIntento, reiniciar } from '@/modules/limites/service';
+import { puedeReservarConvocada } from '@/modules/convocatorias/politica';
 import { comisionAplicable } from '@/modules/payments/dinero';
 import { abonar, bloquearMonedero, gastarHasta } from '@/modules/wallet/service';
 
@@ -77,6 +78,7 @@ export type ResultadoReserva =
         | 'YA_RESERVADA'
         | 'ES_TU_PARTIDA'
         | 'SOLO_CONTINUACION'
+        | 'SOLO_PRERESERVADOS'
         | 'CONTRASENA'
         | 'DEMASIADOS_INTENTOS';
       mensaje: string;
@@ -222,6 +224,38 @@ export async function reservarAsiento(
       }
 
       await reiniciar(REGLAS.privadaUsuario, jugadorYPartida, tx);
+    }
+
+    // Partida que sale de una mesa con fecha flexible: durante el plazo, solo
+    // reservan quienes se pre-reservaron. Es una regla de quien entra, no de
+    // dinero: el cobro es el de siempre. Ver `convocatorias/politica.ts`.
+    const deMesaFlexible = await tx.convocatoria.findUnique({
+      where: { gameId },
+      select: { id: true, priorityUntil: true },
+    });
+
+    if (deMesaFlexible) {
+      const preReserva = await tx.preReserva.findUnique({
+        where: {
+          convocatoriaId_userId: { convocatoriaId: deMesaFlexible.id, userId },
+        },
+        select: { id: true },
+      });
+
+      const permitido = puedeReservarConvocada({
+        priorityUntil: deMesaFlexible.priorityUntil,
+        tienePreReserva: preReserva !== null,
+        ahora: new Date(),
+      });
+
+      if (!permitido) {
+        return {
+          ok: false as const,
+          error: 'SOLO_PRERESERVADOS' as const,
+          mensaje:
+            'De momento solo pueden reservar quienes se pre-reservaron. Si quedan plazas, se abrirán al terminar su plazo.',
+        };
+      }
     }
 
     const yaReservada = await tx.booking.findUnique({
