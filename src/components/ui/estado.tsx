@@ -61,6 +61,14 @@ export const ESTADO_DE_RESERVA = {
   FAILED: { texto: 'Pago fallido', tono: 'mal' },
 } as const satisfies Record<string, { texto: string; tono: TonoDeEstado }>;
 
+/** Estados de una mesa con fecha flexible. */
+export const ESTADO_DE_CONVOCATORIA = {
+  BORRADOR: { texto: 'Borrador', tono: 'apagado' },
+  ABIERTA: { texto: 'Abierta', tono: 'bien' },
+  CONVOCADA: { texto: 'Convocada', tono: 'destacado' },
+  CERRADA: { texto: 'Cerrada', tono: 'apagado' },
+} as const satisfies Record<string, { texto: string; tono: TonoDeEstado }>;
+
 export const ESTADO_DE_INCIDENCIA = {
   OPEN: { texto: 'En revisión', tono: 'espera' },
   APPROVED: { texto: 'Aprobada', tono: 'bien' },

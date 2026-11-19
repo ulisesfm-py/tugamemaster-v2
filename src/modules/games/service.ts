@@ -3,6 +3,7 @@ import 'server-only';
 import { db } from '@/lib/db';
 import { borrarSiEsNuestra, subirImagen } from '@/lib/imagen';
 import { ESTADOS_PAGADOS, filtroPlazaOcupada } from '@/modules/bookings/service';
+import { imagenEnUso } from '@/modules/convocatorias/service';
 import { avisarPartidaCancelada } from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 import { abonar } from '@/modules/wallet/service';
@@ -194,12 +195,10 @@ export async function subirLamina(
   await db.game.update({ where: { id: gameId }, data: { imageUrl: subida.url } });
 
   // La lamina anterior puede estar compartida: al crear la siguiente sesion de
-  // una campana, hereda la de la anterior. Borrarla sin mirar dejaria sin
-  // imagen a una partida que nadie ha tocado. Tras el update de arriba, este
-  // recuento ya no incluye a esta partida.
-  if (partida.imageUrl) {
-    const enUso = await db.game.count({ where: { imageUrl: partida.imageUrl } });
-    if (enUso === 0) await borrarSiEsNuestra(partida.imageUrl);
+  // una campana hereda la de la anterior, y una partida convocada la de su
+  // mesa flexible. Tras el update de arriba, esta partida ya no cuenta.
+  if (partida.imageUrl && !(await imagenEnUso(partida.imageUrl))) {
+    await borrarSiEsNuestra(partida.imageUrl);
   }
 
   return { ok: true, url: subida.url };

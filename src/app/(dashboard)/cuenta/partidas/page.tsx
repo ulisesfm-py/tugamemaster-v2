@@ -6,12 +6,15 @@ import {
   Aviso,
   EnlaceBoton,
   Estado,
+  ESTADO_DE_CONVOCATORIA,
   ESTADO_DE_PARTIDA,
   Fecha,
   Precio,
   Vacio,
 } from '@/components/ui';
 import { auth } from '@/lib/auth';
+import { describirFranja } from '@/modules/convocatorias/politica';
+import { misConvocatorias } from '@/modules/convocatorias/queries';
 import { estadoVisible, type EstadoDePartida } from '@/modules/games/ficha';
 import { misPartidas } from '@/modules/games/queries';
 import { accesoAlHilo } from '@/modules/threads/politica';
@@ -77,6 +80,45 @@ function Fila({ partida }: { partida: Partida }) {
   );
 }
 
+type Mesa = Awaited<ReturnType<typeof misConvocatorias>>[number];
+
+/** Una mesa con fecha flexible en la lista del game master. */
+function FilaFlexible({ mesa }: { mesa: Mesa }) {
+  const estado = ESTADO_DE_CONVOCATORIA[mesa.status];
+  const apuntados = mesa._count.preReservas;
+
+  return (
+    <li>
+      <Link
+        href={`/cuenta/partidas/flexibles/${mesa.id}`}
+        className="border-border bg-card hover:border-primary focus-visible:ring-ring focus-visible:ring-offset-background block rounded-sm border p-4 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-heading text-foreground font-bold">{mesa.title}</h3>
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              {mesa.system} · {describirFranja(mesa)}
+            </p>
+          </div>
+
+          <Estado tono={estado.tono}>{estado.texto}</Estado>
+        </div>
+
+        <p className="text-muted-foreground mt-3 text-sm">
+          <span className="text-foreground font-medium tabular-nums">
+            <Precio cents={mesa.priceCents} currency={mesa.currency} />
+          </span>{' '}
+          por plaza ·{' '}
+          <span className={apuntados >= mesa.minPlayers ? 'text-success' : undefined}>
+            {apuntados} de {mesa.minPlayers} para jugar
+          </span>{' '}
+          · {mesa.seatsTotal} plazas
+        </p>
+      </Link>
+    </li>
+  );
+}
+
 /** Un bloque de la lista. No se pinta si no tiene nada dentro. */
 function Grupo({ titulo, partidas }: { titulo: string; partidas: Partida[] }) {
   if (partidas.length === 0) return null;
@@ -99,6 +141,8 @@ export default async function MisPartidasPage() {
 
   const datos = await misPartidas(session.user.id);
   if (!datos) redirect('/cuenta/gm');
+
+  const flexibles = await misConvocatorias(session.user.id);
 
   // El estado que se ensena se deduce: una publicada cuya hora ya paso esta
   // jugada, la cierre el cron esta noche o la que viene.
@@ -144,7 +188,7 @@ export default async function MisPartidasPage() {
         </Aviso>
       )}
 
-      {partidas.length === 0 ? (
+      {partidas.length === 0 && flexibles.length === 0 ? (
         <Vacio
           className="mt-8"
           titulo="Todavía no has creado ninguna partida"
@@ -157,6 +201,21 @@ export default async function MisPartidasPage() {
       ) : (
         <>
           <Grupo titulo="Abiertas" partidas={abiertas} />
+          {flexibles.length > 0 && (
+            <section className="mt-8">
+              <h2 className="font-heading text-foreground text-xl font-bold">
+                Con fecha flexible
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Recogiendo pre-reservas hasta que fijes la fecha.
+              </p>
+              <ul className="mt-4 flex flex-col gap-3">
+                {flexibles.map((m) => (
+                  <FilaFlexible key={m.id} mesa={m} />
+                ))}
+              </ul>
+            </section>
+          )}
           <Grupo titulo="Borradores" partidas={borradores} />
           <Grupo titulo="Ya jugadas" partidas={pasadas} />
         </>

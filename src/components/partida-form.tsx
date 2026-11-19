@@ -37,7 +37,7 @@ function Guardar({ texto }: { texto: string }) {
  * funcione sin JavaScript y para que el teclado y los lectores de pantalla las
  * entiendan solos. Lo unico que hace el `peer` es pintar la marcada.
  */
-function Pastilla({
+export function Pastilla({
   name,
   value,
   texto,
@@ -64,70 +64,34 @@ function Pastilla({
   );
 }
 
-/** Fecha en el formato que espera datetime-local, en hora local. */
-function paraInput(fecha: Date): string {
-  const desfase = fecha.getTimezoneOffset() * 60_000;
-  return new Date(fecha.getTime() - desfase).toISOString().slice(0, 16);
-}
-
-export type ValoresDePartida = {
-  id: string;
+/** Lo que se ve de una ficha: comun a una partida y a una mesa flexible. */
+export type FichaInicial = {
   title: string;
   description: string;
   system: string;
-  startsAt: Date;
-  endsAt: Date;
-  seatsTotal: number;
-  priceCents: number;
   languages: string[];
   experience: Experiencia;
   minAge: number | null;
   tags: string[];
-  visibility: 'PUBLICA' | 'PRIVADA';
-  accessPassword: string | null;
 };
 
-export function PartidaForm({
-  accion,
-  textoBoton,
+/**
+ * Los campos de ficha: que se juega y para quien es.
+ *
+ * Los comparten el formulario de partida y el de mesa con fecha flexible, que
+ * se validan con los mismos campos (`games/schema.ts`, `camposDeFicha`). Asi
+ * no pueden distanciarse: lo que se anada aqui aparece en los dos.
+ */
+export function FichaDePartida({
+  escrito,
   valores,
   idiomasPorDefecto = [],
-  campana,
-  fechaFija = false,
 }: {
-  accion: Accion;
-  textoBoton: string;
-  valores?: ValoresDePartida;
-  /**
-   * La partida ya tiene jugadores: la fecha se ensena como texto y no se manda.
-   * Solo tiene sentido al editar. La regla la hace cumplir el servidor; esto
-   * evita que alguien rellene el formulario para recibir un rechazo.
-   */
-  fechaFija?: boolean;
-  /**
-   * Idiomas del game master, para una partida nueva. No se heredan al editar:
-   * ahi mandan los de la mesa, que es justo el dato que se quiso separar.
-   */
+  escrito: ReturnType<typeof loEscrito>;
+  valores?: FichaInicial;
   idiomasPorDefecto?: string[];
-  /**
-   * Campo de campana, solo al continuar una partida.
-   *
-   * Vive aqui y no lo pinta la pagina porque tiene que recuperar lo escrito
-   * igual que los demas, y eso solo puede hacerlo quien conoce el estado de la
-   * accion.
-   */
-  campana?: { ayuda: string; resumen: string };
 }) {
-  const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
-
-  // React vacia un formulario no controlado en cuanto termina su accion, asi
-  // que cada campo toma su valor por defecto de lo que se acababa de enviar:
-  // cuando React vacie, vaciara a lo que la persona habia escrito.
-  const { texto, marcadas } = loEscrito(estado);
-
-  const duracion = valores
-    ? Math.round((valores.endsAt.getTime() - valores.startsAt.getTime()) / 3_600_000)
-    : 4;
+  const { texto, marcadas } = escrito;
 
   const idiomas = marcadas(
     'languages',
@@ -146,16 +110,8 @@ export function PartidaForm({
 
   const etiquetas = marcadas('tags', valores?.tags ?? []);
 
-  // En estado para ensenar el campo de la contrasena solo cuando hace falta.
-  // Arranca de lo enviado si fallo la validacion, o de la ficha si se edita.
-  const [privada, setPrivada] = useState(
-    texto('visibility', valores?.visibility ?? 'PUBLICA') === 'PRIVADA',
-  );
-
   return (
-    <form action={formAction} className="flex flex-col gap-8">
-      {valores && <input type="hidden" name="gameId" value={valores.id} />}
-
+    <>
       <fieldset className="flex flex-col gap-4">
         <legend className="font-heading text-foreground mb-3 text-lg font-bold">
           La partida
@@ -296,6 +252,91 @@ export function PartidaForm({
           todo no dice nada.
         </p>
       </fieldset>
+    </>
+  );
+}
+
+/** Fecha en el formato que espera datetime-local, en hora local. */
+function paraInput(fecha: Date): string {
+  const desfase = fecha.getTimezoneOffset() * 60_000;
+  return new Date(fecha.getTime() - desfase).toISOString().slice(0, 16);
+}
+
+export type ValoresDePartida = {
+  id: string;
+  title: string;
+  description: string;
+  system: string;
+  startsAt: Date;
+  endsAt: Date;
+  seatsTotal: number;
+  priceCents: number;
+  languages: string[];
+  experience: Experiencia;
+  minAge: number | null;
+  tags: string[];
+  visibility: 'PUBLICA' | 'PRIVADA';
+  accessPassword: string | null;
+};
+
+export function PartidaForm({
+  accion,
+  textoBoton,
+  valores,
+  idiomasPorDefecto = [],
+  campana,
+  fechaFija = false,
+}: {
+  accion: Accion;
+  textoBoton: string;
+  valores?: ValoresDePartida;
+  /**
+   * La partida ya tiene jugadores: la fecha se ensena como texto y no se manda.
+   * Solo tiene sentido al editar. La regla la hace cumplir el servidor; esto
+   * evita que alguien rellene el formulario para recibir un rechazo.
+   */
+  fechaFija?: boolean;
+  /**
+   * Idiomas del game master, para una partida nueva. No se heredan al editar:
+   * ahi mandan los de la mesa, que es justo el dato que se quiso separar.
+   */
+  idiomasPorDefecto?: string[];
+  /**
+   * Campo de campana, solo al continuar una partida.
+   *
+   * Vive aqui y no lo pinta la pagina porque tiene que recuperar lo escrito
+   * igual que los demas, y eso solo puede hacerlo quien conoce el estado de la
+   * accion.
+   */
+  campana?: { ayuda: string; resumen: string };
+}) {
+  const [estado, formAction] = useActionState<EstadoAccion, FormData>(accion, null);
+
+  // React vacia un formulario no controlado en cuanto termina su accion, asi
+  // que cada campo toma su valor por defecto de lo que se acababa de enviar:
+  // cuando React vacie, vaciara a lo que la persona habia escrito.
+  const escrito = loEscrito(estado);
+  const { texto } = escrito;
+
+  const duracion = valores
+    ? Math.round((valores.endsAt.getTime() - valores.startsAt.getTime()) / 3_600_000)
+    : 4;
+
+  // En estado para ensenar el campo de la contrasena solo cuando hace falta.
+  // Arranca de lo enviado si fallo la validacion, o de la ficha si se edita.
+  const [privada, setPrivada] = useState(
+    texto('visibility', valores?.visibility ?? 'PUBLICA') === 'PRIVADA',
+  );
+
+  return (
+    <form action={formAction} className="flex flex-col gap-8">
+      {valores && <input type="hidden" name="gameId" value={valores.id} />}
+
+      <FichaDePartida
+        escrito={escrito}
+        valores={valores}
+        idiomasPorDefecto={idiomasPorDefecto}
+      />
 
       <fieldset className="flex flex-col gap-4">
         <legend className="font-heading text-foreground mb-3 text-lg font-bold">

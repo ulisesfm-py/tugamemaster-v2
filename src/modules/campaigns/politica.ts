@@ -31,6 +31,29 @@ export function partidaTerminada(
   return fin.getTime() <= ahora.getTime();
 }
 
+/** Cuanto tiempo sale una partida jugada en la lista de «Continuar campaña». */
+export const DIAS_PARA_CONTINUAR_DESDE_LA_LISTA = 60;
+
+/**
+ * Si una partida sale en la lista de «Continuar campaña».
+ *
+ * Jugada, sin continuacion todavia, y terminada hace menos de 60 dias. Pasado
+ * ese tiempo se sigue pudiendo continuar desde la propia partida: la lista
+ * solo deja fuera lo viejo para que no crezca sin fin.
+ */
+export function continuableDesdeLaLista(
+  partida: { status: GameStatus; endsAt: Date; tieneContinuacion: boolean },
+  ahora: Date = new Date(),
+): boolean {
+  if (partida.tieneContinuacion) return false;
+  if (!partidaTerminada(partida.status, partida.endsAt, ahora)) return false;
+
+  return (
+    ahora.getTime() - partida.endsAt.getTime() <
+    DIAS_PARA_CONTINUAR_DESDE_LA_LISTA * 86_400_000
+  );
+}
+
 /**
  * Sufijo "- Sesion 3" al final de un titulo, en cualquiera de sus formas.
  *

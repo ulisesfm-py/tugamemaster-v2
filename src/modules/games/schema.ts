@@ -22,7 +22,7 @@ export const CONTRASENA_MAXIMA = 40;
 
 export const VISIBILIDADES = ['PUBLICA', 'PRIVADA'] as const;
 
-const precioEnEuros = z
+export const precioEnEuros = z
   .string()
   .trim()
   .min(1, 'Indica el precio por plaza')
@@ -35,65 +35,77 @@ const precioEnEuros = z
   // descuadres al sumar importes.
   .transform((euros) => Math.round(euros * 100));
 
+/**
+ * Los campos de ficha que comparten una partida y una mesa de fecha flexible:
+ * que se juega y para quien es. Se escriben una vez para que las dos validen
+ * igual.
+ */
+export const camposDeFicha = {
+  title: z
+    .string()
+    .trim()
+    .min(5, 'El título debe tener al menos 5 caracteres')
+    .max(120, 'El título es demasiado largo'),
+  description: z
+    .string()
+    .trim()
+    .min(30, 'Cuenta algo más: al menos 30 caracteres')
+    .max(5000, 'La descripción es demasiado larga'),
+  system: z
+    .string()
+    .trim()
+    .min(2, 'Indica el sistema de juego')
+    .max(60, 'El nombre del sistema es demasiado largo'),
+  // Vocabulario cerrado: ver `ficha.ts`. Lo que no este en la lista se
+  // rechaza en vez de guardarse, porque llega de un formulario y cualquiera
+  // puede mandar lo que quiera.
+  languages: z
+    .array(z.string())
+    .min(1, 'Elige al menos un idioma')
+    .max(4, 'Como mucho cuatro idiomas')
+    .refine((ids) => ids.every(esIdioma), 'Ese idioma no está en la lista'),
+  // Con mensaje propio: el de serie sale en ingles y enumera las constantes
+  // del modelo, que no significan nada para quien publica una partida.
+  experience: z.enum(EXPERIENCIAS, {
+    message: 'Elige qué experiencia se le presupone a la mesa',
+  }),
+  tags: z
+    .array(z.string())
+    .max(MAXIMO_ETIQUETAS, `Como mucho ${MAXIMO_ETIQUETAS} etiquetas`)
+    .refine((ids) => ids.every(esEtiqueta), 'Esa etiqueta no está en la lista')
+    .refine((ids) => new Set(ids).size === ids.length, 'Hay una etiqueta repetida'),
+  // Vacio significa «sin minimo», no cero: la edad es opcional y un
+  // formulario manda cadena vacia, no ausencia. Se normaliza antes de
+  // validar para que el mensaje de error hable de edades y no de uniones.
+  minAge: z.preprocess(
+    (v) => (v === '' || v === null || v === undefined ? null : v),
+    z.coerce
+      .number()
+      .int('La edad mínima tiene que ser un número entero')
+      .min(6, 'Una edad mínima por debajo de 6 años no dice nada')
+      .max(99, 'Esa edad mínima parece un error')
+      .nullable(),
+  ),
+};
+
+/** Plazas de una mesa. Las mismas para una partida y una mesa flexible. */
+export const plazas = z.coerce
+  .number()
+  .int('El número de plazas debe ser entero')
+  .min(1, 'Tiene que haber al menos 1 plaza')
+  .max(12, 'Como mucho 12 plazas');
+
 export const partidaSchema = z
   .object({
-    title: z
-      .string()
-      .trim()
-      .min(5, 'El título debe tener al menos 5 caracteres')
-      .max(120, 'El título es demasiado largo'),
-    description: z
-      .string()
-      .trim()
-      .min(30, 'Cuenta algo más: al menos 30 caracteres')
-      .max(5000, 'La descripción es demasiado larga'),
-    system: z
-      .string()
-      .trim()
-      .min(2, 'Indica el sistema de juego')
-      .max(60, 'El nombre del sistema es demasiado largo'),
+    ...camposDeFicha,
     startsAt: z.coerce.date({ message: 'Fecha de inicio inválida' }),
     durationHours: z.coerce
       .number()
       .min(1, 'La partida debe durar al menos 1 hora')
       .max(12, 'Como mucho 12 horas'),
-    seatsTotal: z.coerce
-      .number()
-      .int('El número de plazas debe ser entero')
-      .min(1, 'Tiene que haber al menos 1 plaza')
-      .max(12, 'Como mucho 12 plazas'),
+    seatsTotal: plazas,
     priceCents: precioEnEuros,
 
-    // Vocabulario cerrado: ver `ficha.ts`. Lo que no este en la lista se
-    // rechaza en vez de guardarse, porque llega de un formulario y cualquiera
-    // puede mandar lo que quiera.
-    languages: z
-      .array(z.string())
-      .min(1, 'Elige al menos un idioma')
-      .max(4, 'Como mucho cuatro idiomas')
-      .refine((ids) => ids.every(esIdioma), 'Ese idioma no está en la lista'),
-    // Con mensaje propio: el de serie sale en ingles y enumera las constantes
-    // del modelo, que no significan nada para quien publica una partida.
-    experience: z.enum(EXPERIENCIAS, {
-      message: 'Elige qué experiencia se le presupone a la mesa',
-    }),
-    tags: z
-      .array(z.string())
-      .max(MAXIMO_ETIQUETAS, `Como mucho ${MAXIMO_ETIQUETAS} etiquetas`)
-      .refine((ids) => ids.every(esEtiqueta), 'Esa etiqueta no está en la lista')
-      .refine((ids) => new Set(ids).size === ids.length, 'Hay una etiqueta repetida'),
-    // Vacio significa «sin minimo», no cero: la edad es opcional y un
-    // formulario manda cadena vacia, no ausencia. Se normaliza antes de
-    // validar para que el mensaje de error hable de edades y no de uniones.
-    minAge: z.preprocess(
-      (v) => (v === '' || v === null || v === undefined ? null : v),
-      z.coerce
-        .number()
-        .int('La edad mínima tiene que ser un número entero')
-        .min(6, 'Una edad mínima por debajo de 6 años no dice nada')
-        .max(99, 'Esa edad mínima parece un error')
-        .nullable(),
-    ),
     visibility: z.enum(VISIBILIDADES, {
       message: 'Elige si la partida es pública o privada',
     }),

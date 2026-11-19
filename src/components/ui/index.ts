@@ -14,6 +14,7 @@ export {
   ESTADO_DE_INCIDENCIA,
   ESTADO_DE_PAGO,
   ESTADO_DE_PARTIDA,
+  ESTADO_DE_CONVOCATORIA,
   ESTADO_DE_RESERVA,
   type TonoDeEstado,
 } from './estado';
