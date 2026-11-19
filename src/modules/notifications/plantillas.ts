@@ -1,3 +1,4 @@
+import { fechaYHora, soloFecha } from '@/lib/hora';
 import {
   COMISION_ENLACE,
   COMISION_ESTANDAR,
@@ -34,13 +35,13 @@ function escapar(texto: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** Fecha larga en espanol, en la zona horaria de la plataforma. */
+/**
+ * Fecha larga en espanol, en hora peninsular y con la zona escrita. La misma
+ * que ensena la web (`lib/hora.ts`): antes la web iba en UTC y el correo en
+ * Madrid, y no coincidian.
+ */
 export function fechaLarga(fecha: Date): string {
-  return new Intl.DateTimeFormat('es-ES', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-    timeZone: 'Europe/Madrid',
-  }).format(fecha);
+  return fechaYHora(fecha, 'larga');
 }
 
 type Maqueta = {
@@ -351,10 +352,7 @@ export function fundadorNombrado(datos: {
   urlPanel: string;
   urlCondiciones: string;
 }): Plantilla {
-  const caduca = new Intl.DateTimeFormat('es-ES', {
-    dateStyle: 'long',
-    timeZone: 'Europe/Madrid',
-  }).format(datos.caducaEl);
+  const caduca = soloFecha(datos.caducaEl);
 
   return {
     asunto: 'Ya eres game master fundador de TuGameMaster',

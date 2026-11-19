@@ -1,4 +1,5 @@
 import { REVISION_TEXTOS_LEGALES } from '@/lib/titular';
+import { soloFecha } from '@/lib/hora';
 
 /**
  * El molde de las paginas de texto: condiciones, privacidad, aviso legal y
@@ -23,9 +24,7 @@ export function PaginaLegal({
         <p className="text-muted-foreground mt-1 text-sm">
           Última revisión:{' '}
           <time dateTime={REVISION_TEXTOS_LEGALES.toISOString().slice(0, 10)}>
-            {new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' }).format(
-              REVISION_TEXTOS_LEGALES,
-            )}
+            {soloFecha(REVISION_TEXTOS_LEGALES)}
           </time>
         </p>
       )}

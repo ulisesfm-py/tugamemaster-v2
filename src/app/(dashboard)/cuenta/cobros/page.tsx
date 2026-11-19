@@ -22,6 +22,7 @@ import {
 import { invitacionDeGm } from '@/modules/invitaciones/queries';
 import { ingresosDeGm } from '@/modules/payments/ingresos';
 import { ESTADO_DEL_DINERO, HORAS_DE_RETENCION } from '@/modules/payments/libro';
+import { formateadorPeninsular } from '@/lib/hora';
 
 export const metadata: Metadata = { title: 'Mis ingresos · TuGameMaster' };
 
@@ -56,7 +57,7 @@ function Cifra({
   );
 }
 
-const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+const FECHA_CORTA = formateadorPeninsular({ dateStyle: 'long' });
 
 /** Lo que se dice del estado de una reserva que no llego a cobrarse. */
 const RESERVA_SIN_COBRO = {

@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
 import { loEscrito, type EstadoAccion } from '@/lib/acciones';
+import { NOMBRE_DE_LA_ZONA } from '@/lib/hora';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
@@ -50,7 +51,7 @@ export function ConvocarForm({
       <Campo
         id="startsAt"
         etiqueta="Cuándo se juega"
-        ayuda={`Se crea la partida y avisamos a quienes se pre-reservaron. Durante ${horasParaReservar} horas solo ellos pueden reservar; después, cualquiera.`}
+        ayuda={`En ${NOMBRE_DE_LA_ZONA}. Se crea la partida y avisamos a quienes se pre-reservaron. Durante ${horasParaReservar} horas solo ellos pueden reservar; después, cualquiera.`}
       >
         <input
           id="startsAt"

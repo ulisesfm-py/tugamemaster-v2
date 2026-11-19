@@ -316,6 +316,14 @@ record; se usan _separate charges and transfers_, nunca destination charges.
   duplicado.
 - **Validación**: todo input externo (formulario, API, webhook) se valida con
   Zod en el servidor, aunque ya se haya validado en el cliente.
+- **Fechas y horas**: la plataforma va en **hora peninsular** (Europe/Madrid)
+  y todo pasa por `src/lib/hora.ts`. Lo que se escribe en un campo de fecha
+  (que no lleva zona) se lee con `desdeHoraPeninsular` (en Zod,
+  `fechaPeninsular`), nunca con `z.coerce.date`; lo que se ensena lleva la zona
+  escrita (`<Fecha>`, `fechaYHora`). Prohibido `new Intl.DateTimeFormat` o
+  `toLocale…` sin pasar por ahí: el servidor de Vercel va en UTC y cada
+  navegador en su zona. Pasó: las partidas se guardaron una hora tarde y la web
+  y los correos daban horas distintas (corregido el 19/11/2026).
 - **Concurrencia**: la reserva de asientos se resuelve dentro de una
   transacción con bloqueo de la fila de la partida, más un constraint único
   `(gameId, userId)`.

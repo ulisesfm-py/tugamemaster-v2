@@ -18,6 +18,7 @@ import {
 } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { blobEnabled } from '@/lib/env';
+import { paraCampoDeFecha } from '@/lib/hora';
 import {
   cerrarConvocatoriaAction,
   convocarMesaAction,
@@ -64,15 +65,11 @@ function Bloque({
  */
 
 /**
- * Una fecha en el formato de `datetime-local`, redondeada a la hora siguiente.
- *
- * Va en la hora del servidor, la misma con la que el servidor leera lo que se
- * escriba: asi el `min` del campo y la comprobacion no pueden discrepar.
+ * Una fecha en el formato de `datetime-local`, redondeada a la hora siguiente
+ * y en hora peninsular, que es como el servidor leera lo que se escriba.
  */
 function paraCampo(fecha: Date): string {
-  const redondeada = new Date(Math.ceil(fecha.getTime() / 3_600_000) * 3_600_000);
-  const desfase = redondeada.getTimezoneOffset() * 60_000;
-  return new Date(redondeada.getTime() - desfase).toISOString().slice(0, 16);
+  return paraCampoDeFecha(new Date(Math.ceil(fecha.getTime() / 3_600_000) * 3_600_000));
 }
 export default async function GestionarConvocatoriaPage({ params }: Props) {
   const { id } = await params;

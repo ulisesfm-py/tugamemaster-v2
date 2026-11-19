@@ -1,3 +1,4 @@
+import { NOMBRE_DE_LA_ZONA } from '@/lib/hora';
 import type {
   EstadoConvocatoria,
   FrecuenciaConvocatoria,
@@ -328,8 +329,8 @@ export function describirDias(weekdays: number[]): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
-/** "Sábados, de 10:00 a 13:00 · cada dos semanas". */
+/** "Sábados, de 10:00 a 13:00 (hora peninsular) · cada dos semanas". */
 export function describirFranja(franja: Franja): string {
   const fin = franja.startMinute + franja.durationMinutes;
-  return `${describirDias(franja.weekdays)}, de ${hora(franja.startMinute)} a ${hora(fin)} · ${FRECUENCIA[franja.frequency]}`;
+  return `${describirDias(franja.weekdays)}, de ${hora(franja.startMinute)} a ${hora(fin)} (${NOMBRE_DE_LA_ZONA}) · ${FRECUENCIA[franja.frequency]}`;
 }

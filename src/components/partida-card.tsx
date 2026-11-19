@@ -10,6 +10,7 @@ import type {
 import { describirDias, hora } from '@/modules/convocatorias/politica';
 import { etiquetasDe, PLAZAS_POCAS, type Experiencia } from '@/modules/games/ficha';
 import { cn } from '@/lib/utils';
+import { NOMBRE_DE_LA_ZONA } from '@/lib/hora';
 
 /**
  * Las tarjetas de mesa: partida con fecha fija, mesa con fecha flexible y
@@ -303,7 +304,7 @@ export function PartidaCard({
         imageUrl: partida.imageUrl,
         experience: partida.experience,
         tags: partida.tags,
-        cuando: <Fecha valor={partida.startsAt} />,
+        cuando: <Fecha valor={partida.startsAt} corta />,
         insignia: plazas(partida.seatsTotal - ocupadas, partida.seatsTotal),
         ocupadas,
         total: partida.seatsTotal,
@@ -376,7 +377,7 @@ export function MesaFlexibleCard({
         tags: mesa.tags,
         // La version corta de la franja: la larga, con la frecuencia, esta en
         // la pagina de la mesa.
-        cuando: `${describirDias(mesa.weekdays)} · ${hora(mesa.startMinute)}–${hora(fin)}`,
+        cuando: `${describirDias(mesa.weekdays)} · ${hora(mesa.startMinute)}–${hora(fin)} (${NOMBRE_DE_LA_ZONA})`,
         insignia: faltan(apuntados, mesa.minPlayers, mesa.seatsTotal),
         ocupadas: apuntados,
         total: mesa.seatsTotal,

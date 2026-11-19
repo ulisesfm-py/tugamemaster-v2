@@ -13,6 +13,7 @@ import {
 } from '@/modules/threads/actions';
 import { MENSAJE_MAXIMO, MOTIVO_DENUNCIA_MAXIMO } from '@/modules/threads/politica';
 import type { MensajeDelHilo } from '@/modules/threads/queries';
+import { formateadorPeninsular, NOMBRE_DE_LA_ZONA } from '@/lib/hora';
 
 /**
  * El hilo de una partida.
@@ -22,7 +23,10 @@ import type { MensajeDelHilo } from '@/modules/threads/queries';
  * resueltos del servidor; no hay sondeo ni conexion abierta.
  */
 
-const FECHA = new Intl.DateTimeFormat('es-ES', {
+// En hora peninsular aunque esto se pinte en el navegador: si no, cada cual
+// veria la hora de su zona y dos personas de la misma mesa leerian horas
+// distintas para el mismo mensaje.
+const FECHA = formateadorPeninsular({
   day: 'numeric',
   month: 'short',
   hour: '2-digit',
@@ -155,11 +159,15 @@ function Mensaje({ mensaje, slug }: { mensaje: MensajeDelHilo; slug: string }) {
             {mensaje.mio ? 'Tú' : mensaje.autor.name}
           </span>
           {mensaje.autor.fundador && <Fundador className="self-center" />}
+          {/* En cada mensaje la zona iria repetida veinte veces: va en el
+              globo al pasar por encima y para quien escucha la pagina. */}
           <time
             dateTime={mensaje.escritoEn.toISOString()}
+            title={NOMBRE_DE_LA_ZONA}
             className="text-muted-foreground text-xs"
           >
             {FECHA.format(mensaje.escritoEn)}
+            <span className="sr-only"> ({NOMBRE_DE_LA_ZONA})</span>
           </time>
         </p>
 

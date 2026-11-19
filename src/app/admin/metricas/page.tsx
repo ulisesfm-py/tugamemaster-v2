@@ -12,6 +12,7 @@ import {
 } from '@/modules/metricas/politica';
 import { metricasDeLaWeb } from '@/modules/metricas/queries';
 import { formatearImporte } from '@/modules/payments/dinero';
+import { fechaYHora } from '@/lib/hora';
 
 export const metadata: Metadata = { title: 'Métricas · Admin' };
 
@@ -24,11 +25,7 @@ export const metadata: Metadata = { title: 'Métricas · Admin' };
  * se empiezan se terminan.
  */
 
-const FECHA_HORA = new Intl.DateTimeFormat('es-ES', {
-  dateStyle: 'long',
-  timeStyle: 'short',
-  timeZone: 'Europe/Madrid',
-});
+const FECHA_HORA = { format: (fecha: Date) => fechaYHora(fecha) };
 
 function Seccion({
   titulo,

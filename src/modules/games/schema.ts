@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { desdeHoraPeninsular } from '@/lib/hora';
+
 import { EXPERIENCIAS, MAXIMO_ETIQUETAS, esEtiqueta, esIdioma } from './ficha';
 
 /**
@@ -88,6 +90,24 @@ export const camposDeFicha = {
   ),
 };
 
+/**
+ * Una fecha escrita en un formulario, leida como **hora peninsular**.
+ *
+ * El campo `datetime-local` no lleva zona. Con `z.coerce.date` se leia en la
+ * del servidor (UTC en Vercel) y la partida quedaba una o dos horas despues de
+ * lo escrito. Ver `lib/hora.ts`.
+ */
+export function fechaPeninsular(mensaje: string) {
+  return z.union([z.date(), z.string()]).transform((valor, ctx) => {
+    const fecha = valor instanceof Date ? valor : desdeHoraPeninsular(valor);
+    if (!fecha || Number.isNaN(fecha.getTime())) {
+      ctx.addIssue({ code: 'custom', message: mensaje });
+      return z.NEVER;
+    }
+    return fecha;
+  });
+}
+
 /** Plazas de una mesa. Las mismas para una partida y una mesa flexible. */
 export const plazas = z.coerce
   .number()
@@ -98,7 +118,7 @@ export const plazas = z.coerce
 export const partidaSchema = z
   .object({
     ...camposDeFicha,
-    startsAt: z.coerce.date({ message: 'Fecha de inicio inválida' }),
+    startsAt: fechaPeninsular('Fecha de inicio inválida'),
     durationHours: z.coerce
       .number()
       .min(1, 'La partida debe durar al menos 1 hora')

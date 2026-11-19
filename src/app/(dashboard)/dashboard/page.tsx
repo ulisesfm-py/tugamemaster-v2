@@ -17,10 +17,11 @@ import { formatearImporte } from '@/modules/payments/dinero';
 import { resumenDeGm } from '@/modules/payments/ingresos';
 import { salirAction } from '@/modules/users/actions';
 import { saldoDe } from '@/modules/wallet/service';
+import { formateadorPeninsular } from '@/lib/hora';
 
 export const metadata: Metadata = { title: 'Mi cuenta · TuGameMaster' };
 
-const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+const FECHA_CORTA = formateadorPeninsular({ dateStyle: 'long' });
 
 /** Un enlace del bloque de accesos. */
 function Acceso({ href, texto }: { href: string; texto: string }) {

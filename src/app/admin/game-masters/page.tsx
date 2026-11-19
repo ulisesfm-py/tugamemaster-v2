@@ -15,10 +15,11 @@ import { nuevoCodigoAction, renovarCodigoAction } from '@/modules/invitaciones/a
 import { estadoDelCodigo, formatearCodigo } from '@/modules/invitaciones/politica';
 import { cambiarPlanGmAction } from '@/modules/profiles/actions';
 import { gmsParaAdmin } from '@/modules/profiles/queries';
+import { formateadorPeninsular } from '@/lib/hora';
 
 export const metadata: Metadata = { title: 'Game masters · Admin' };
 
-const FECHA_CORTA = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+const FECHA_CORTA = formateadorPeninsular({ dateStyle: 'long' });
 
 /**
  * Los game masters y su plan.

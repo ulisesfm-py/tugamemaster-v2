@@ -304,7 +304,7 @@ describe('la franja', () => {
 
   it('describe la franja entera', () => {
     expect(describirFranja({ ...valida, frequency: 'QUINCENAL' })).toBe(
-      'Sábados, de 10:00 a 13:00 · cada dos semanas',
+      'Sábados, de 10:00 a 13:00 (hora peninsular) · cada dos semanas',
     );
     expect(
       describirFranja({
@@ -313,6 +313,6 @@ describe('la franja', () => {
         durationMinutes: 240,
         frequency: 'UNICA',
       }),
-    ).toBe('Viernes, de 22:00 a 02:00 · una sola sesión');
+    ).toBe('Viernes, de 22:00 a 02:00 (hora peninsular) · una sola sesión');
   });
 });

@@ -1,4 +1,5 @@
 import type Stripe from 'stripe';
+import { soloFecha } from '@/lib/hora';
 
 /**
  * Los parametros de la sesion de Stripe Checkout de una reserva.
@@ -38,7 +39,7 @@ export type DatosDeSesion = {
 export function parametrosDeSesion(
   d: DatosDeSesion,
 ): Stripe.Checkout.SessionCreateParams {
-  const fecha = d.empieza.toLocaleDateString('es-ES', { dateStyle: 'long' });
+  const fecha = soloFecha(d.empieza);
 
   return {
     mode: 'payment',

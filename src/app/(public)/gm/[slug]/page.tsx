@@ -7,6 +7,7 @@ import { Avatar, Estrellas, Etiqueta, Fecha, Fundador, Vacio } from '@/component
 import { nombreDeIdioma } from '@/modules/games/ficha';
 import { mesasFlexiblesAbiertas } from '@/modules/convocatorias/queries';
 import { perfilPublicoGm } from '@/modules/profiles/queries';
+import { formateadorPeninsular } from '@/lib/hora';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -54,9 +55,7 @@ function Cifra({
 
 /** «septiembre de 2026», para la antigüedad. */
 function mesYAno(fecha: Date): string {
-  return new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(
-    fecha,
-  );
+  return formateadorPeninsular({ month: 'long', year: 'numeric' }).format(fecha);
 }
 
 export default async function GmPage({ params }: Props) {

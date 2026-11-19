@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { camposDeFicha, plazas, precioEnEuros } from '@/modules/games/schema';
+import {
+  camposDeFicha,
+  fechaPeninsular,
+  plazas,
+  precioEnEuros,
+} from '@/modules/games/schema';
 
 import {
   DURACION_MAXIMA_MINUTOS,
@@ -84,5 +89,5 @@ export function datosDeConvocatoria(formData: FormData) {
 
 /** La fecha que fija el GM al convocar. La antelacion la comprueba la politica. */
 export const convocarSchema = z.object({
-  startsAt: z.coerce.date({ message: 'Indica la fecha y la hora de la partida' }),
+  startsAt: fechaPeninsular('Indica la fecha y la hora de la partida'),
 });

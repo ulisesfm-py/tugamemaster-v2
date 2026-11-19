@@ -11,14 +11,15 @@ import {
   tituloDeContinuacion,
 } from '@/modules/campaigns/politica';
 import { miPartida } from '@/modules/games/queries';
+import { mismaHoraDentroDe } from '@/lib/hora';
 
 export const metadata: Metadata = { title: 'Siguiente sesión · TuGameMaster' };
 
 type Props = { params: Promise<{ gameId: string }> };
 
-/** Misma hora que la sesion anterior, una semana despues. */
+/** Misma hora de reloj que la sesion anterior, una semana despues. */
 function dentroDeUnaSemana(fecha: Date): Date {
-  return new Date(fecha.getTime() + 7 * 86_400_000);
+  return mismaHoraDentroDe(fecha, 7);
 }
 
 export default async function ContinuacionPage({ params }: Props) {

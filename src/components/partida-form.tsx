@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import { Aviso, Button, Campo, CLASE_CONTROL, Fecha } from '@/components/ui';
 import { loEscrito, type EstadoAccion } from '@/lib/acciones';
+import { NOMBRE_DE_LA_ZONA, paraCampoDeFecha } from '@/lib/hora';
 import {
   ETIQUETAS,
   EXPERIENCIA,
@@ -256,12 +257,6 @@ export function FichaDePartida({
   );
 }
 
-/** Fecha en el formato que espera datetime-local, en hora local. */
-function paraInput(fecha: Date): string {
-  const desfase = fecha.getTimezoneOffset() * 60_000;
-  return new Date(fecha.getTime() - desfase).toISOString().slice(0, 16);
-}
-
 export type ValoresDePartida = {
   id: string;
   title: string;
@@ -359,14 +354,18 @@ export function PartidaForm({
               </p>
             </div>
           ) : (
-            <Campo id="startsAt" etiqueta="Empieza">
+            <Campo
+              id="startsAt"
+              etiqueta="Empieza"
+              ayuda={`En ${NOMBRE_DE_LA_ZONA}, aunque estés en otra zona.`}
+            >
               <input
                 id="startsAt"
                 name="startsAt"
                 type="datetime-local"
                 defaultValue={texto(
                   'startsAt',
-                  valores ? paraInput(valores.startsAt) : '',
+                  valores ? paraCampoDeFecha(valores.startsAt) : '',
                 )}
                 required
                 className={CLASE_CONTROL}

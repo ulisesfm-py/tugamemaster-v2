@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 import { FichaDePartida, Pastilla, type FichaInicial } from '@/components/partida-form';
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
 import { loEscrito, type EstadoAccion } from '@/lib/acciones';
+import { NOMBRE_DE_LA_ZONA } from '@/lib/hora';
 import { hora } from '@/modules/convocatorias/politica';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
@@ -110,7 +111,11 @@ export function ConvocatoriaForm({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Campo id="startTime" etiqueta="Hora de inicio" ayuda="En hora de España.">
+          <Campo
+            id="startTime"
+            etiqueta="Hora de inicio"
+            ayuda={`En ${NOMBRE_DE_LA_ZONA}, aunque estés en otra zona.`}
+          >
             <input
               id="startTime"
               name="startTime"

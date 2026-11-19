@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { fechaYHora } from '@/lib/hora';
 
 /**
  * Piezas visuales compartidas. Todas son componentes de servidor: no llevan
@@ -164,14 +165,17 @@ export function Precio({ cents, currency }: { cents: number; currency: string })
   );
 }
 
-/** Fecha larga en espanol. */
-export function Fecha({ valor }: { valor: Date }) {
+/**
+ * Fecha y hora en espanol, en hora peninsular y con la zona escrita.
+ *
+ * Es la unica forma de ensenar una hora en la web: lleva siempre «(hora
+ * peninsular)» para que quien esta en Canarias o fuera de España no tenga que
+ * adivinar de que reloj hablamos. `corta` para las tarjetas. Ver `lib/hora.ts`.
+ */
+export function Fecha({ valor, corta = false }: { valor: Date; corta?: boolean }) {
   return (
     <time dateTime={valor.toISOString()}>
-      {new Intl.DateTimeFormat('es-ES', {
-        dateStyle: 'long',
-        timeStyle: 'short',
-      }).format(valor)}
+      {fechaYHora(valor, corta ? 'corta' : 'normal')}
     </time>
   );
 }
