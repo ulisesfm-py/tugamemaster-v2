@@ -44,6 +44,12 @@ Empezando por lo que más tarda, que es la verificación de Stripe.
    marketplace_. Completa el **perfil de la plataforma** y la **marca** (nombre,
    icono, color `#c9973f`): es lo que ven los GMs en el alta.
 3. Las claves `live` (`sk_live_…`, `pk_live_…`) solo se copian a Vercel.
+4. _Saldos_ → _Gestionar las transferencias_: calendario de transferencias a la
+   cuenta bancaria en **manual**. Con un calendario automático, Stripe manda al
+   banco todo el saldo disponible, incluido lo que se debe a los GMs, y la
+   transferencia al GM de 48 horas después puede fallar por falta de saldo
+   (ver «El saldo de la plataforma» en `payments.md`). La comisión se pasa al
+   banco a mano.
 
 Las cuentas Express **no se crean desde el panel**: las crea la web, una por
 GM, cuando pulsa «Configurar cobros» en `/cuenta/cobros`. El panel de Connect
@@ -213,6 +219,8 @@ Antes de anunciar nada:
 - [ ] 48 horas después del final de esa partida, la transferencia al GM aparece
       en Stripe y en `/cuenta/cobros`.
 - [ ] Una petición a `/api/webhooks/stripe` sin firma devuelve 400.
+- [x] El calendario de transferencias de la plataforma está en manual
+      (comprobado por Ulises el 18/11/2026).
 
 ## Abrir la web a los buscadores
 

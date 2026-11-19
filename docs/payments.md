@@ -27,6 +27,24 @@ ventana de retención es el producto, no un detalle técnico.
 Consecuencia para las cuentas conectadas: solo necesitan la capacidad
 `transfers`. No aceptan pagos con tarjeta; eso lo hace la plataforma.
 
+### El saldo de la plataforma
+
+El saldo de Stripe es **una sola bolsa**: Stripe no distingue qué parte es de
+los GMs y qué parte es comisión. Las transferencias a los GMs salen de esa
+bolsa (`payouts.ts` no usa `source_transaction`), así que **el calendario de
+transferencias de la plataforma al banco va en manual**. Con uno automático,
+Stripe se llevaría al banco el dinero retenido de partidas aún no jugadas, y la
+transferencia al GM fallaría por saldo insuficiente; Stripe no la reintenta.
+Comprobado en manual el 18/11/2026. La comisión se pasa al banco a mano.
+
+`source_transaction` no lo resolvería solo: las reservas pagadas con saldo del
+monedero no tienen un cobro al que atarse.
+
+**Añadir fondos al saldo** (_top-ups_) no está disponible: en la UE es una beta
+privada y exige el perfil de plataforma de Connect aprobado. Un saldo negativo
+pasajero (una devolución antes de que el cobro esté disponible) se compensa
+solo con los cobros entrantes.
+
 ## Secuencia
 
 | Momento                       | Qué pasa                                                             |
