@@ -10,6 +10,9 @@ import {
 import {
   fundadorNombrado,
   incidenciaResuelta,
+  mesaCerrada,
+  mesaConvocada,
+  minimoAlcanzado,
   nuevaReserva,
   pagoEnviado,
   partidaCancelada,
@@ -358,5 +361,73 @@ describe('pideResena', () => {
 
   it('manda las quejas serias a la via de las incidencias, no a la resena', () => {
     expect(correo.texto).toContain('incidencia');
+  });
+});
+
+describe('mesas con fecha flexible', () => {
+  const minimo = minimoAlcanzado({
+    gm: 'Laura Vega',
+    mesa: 'Noches de Madrid',
+    apuntados: 4,
+    minimo: 4,
+    plazas: 6,
+    url: 'https://tugamemaster.com/cuenta/partidas/flexibles/abc',
+  });
+
+  const cerrada = mesaCerrada({
+    jugador: 'Ana Soto',
+    mesa: 'Noches de Madrid',
+    gm: 'Laura Vega',
+    url: 'https://tugamemaster.com/partidas',
+  });
+
+  const convocada = mesaConvocada({
+    jugador: 'Ana Soto',
+    mesa: 'Noches de Madrid',
+    gm: 'Laura Vega',
+    inicio: INICIO,
+    plazoHasta: new Date('2026-06-28T18:00:00Z'),
+    precio: '12,00 €',
+    url: 'https://tugamemaster.com/partidas/noches-de-madrid',
+  });
+
+  it('traen asunto, texto y html', () => {
+    for (const plantilla of [minimo, cerrada, convocada]) {
+      expect(plantilla.asunto.length).toBeGreaterThan(0);
+      expect(plantilla.texto.length).toBeGreaterThan(0);
+      expect(plantilla.html).toContain('<html');
+    }
+  });
+
+  it('al GM le dice que puede fijar la fecha y que aun caben mas', () => {
+    expect(minimo.texto).toContain('Fijar la fecha');
+    expect(minimo.texto).toContain('6 plazas');
+  });
+
+  it('al jugador le da las dos fechas por separado: la partida y el plazo', () => {
+    expect(convocada.texto).toContain('Cuándo: ');
+    expect(convocada.texto).toContain('Reserva antes de: ');
+    expect(convocada.texto).toContain('12,00 €');
+  });
+
+  it('una mesa cerrada recuerda que no habia nada que pagar', () => {
+    expect(cerrada.texto).toContain('no tenía ningún cargo');
+  });
+
+  it('ninguna dice «gratis»: se confundiria con el precio de la partida', () => {
+    for (const plantilla of [minimo, cerrada, convocada]) {
+      expect(plantilla.texto.toLowerCase()).not.toContain('gratis');
+    }
+  });
+
+  it('escapa lo que escriben las personas', () => {
+    const mala = mesaCerrada({
+      jugador: '<b>Ana</b>',
+      mesa: '<script>x</script>',
+      gm: 'Laura',
+      url: 'https://tugamemaster.com/partidas',
+    });
+    expect(mala.html).not.toContain('<script>x</script>');
+    expect(mala.html).not.toContain('<b>Ana</b>');
   });
 });

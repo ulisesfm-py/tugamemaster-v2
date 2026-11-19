@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { PartidaCard } from '@/components/partida-card';
+import { MesaFlexibleCard, PartidaCard } from '@/components/partida-card';
 import { Avatar, Estrellas, Etiqueta, Fecha, Fundador, Vacio } from '@/components/ui';
 import { nombreDeIdioma } from '@/modules/games/ficha';
+import { mesasFlexiblesAbiertas } from '@/modules/convocatorias/queries';
 import { perfilPublicoGm } from '@/modules/profiles/queries';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -74,6 +75,8 @@ export default async function GmPage({ params }: Props) {
     campanas,
     historial,
   } = perfil;
+
+  const flexibles = await mesasFlexiblesAbiertas({ gmId: gm.id });
 
   const hayDeclarado = gm.yearsExperience !== null || gm.systems.length > 0;
 
@@ -223,7 +226,7 @@ export default async function GmPage({ params }: Props) {
           Próximas partidas
         </h2>
 
-        {proximasPartidas.length === 0 ? (
+        {proximasPartidas.length === 0 && flexibles.length === 0 ? (
           <Vacio className="mt-4" titulo="No tiene mesas abiertas ahora mismo">
             Cuando publique una, aparecerá aquí.
           </Vacio>
@@ -231,6 +234,9 @@ export default async function GmPage({ params }: Props) {
           <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {proximasPartidas.map((p) => (
               <PartidaCard key={p.id} partida={p} />
+            ))}
+            {flexibles.map((m) => (
+              <MesaFlexibleCard key={m.id} mesa={m} />
             ))}
           </ul>
         )}

@@ -39,6 +39,8 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-accent-foreground: var(--accent-foreground);
+  --color-flexible: var(--flexible);
+  --color-campana: var(--campana);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -88,6 +90,13 @@
   /* Laton: el apoyo calido, para reputacion y detalles */
   --accent: #c9973f;
   --accent-foreground: #17120e;
+
+  /* Los tipos de mesa. Solo distinguen tarjetas: la etiqueta, la franja de
+     color y un tinte leve del fondo. Fuera de ahi no se usan, para que no
+     acaben significando otra cosa. Frios a proposito: el ascua y el laton ya
+     ocupan los calidos, y un cobre se confundia con el laton. */
+  --flexible: #93a8b3; /* pizarra: fecha flexible */
+  --campana: #a68dc6; /* ciruela: sesion de campana */
 
   /* Estados. Son semanticos y no comparten tono con el acento:
      si "peligro" y "reservar" se parecen, uno de los dos miente. */

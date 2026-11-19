@@ -402,3 +402,88 @@ export function pideResena(datos: {
     }),
   };
 }
+
+/* ── Mesas con fecha flexible ───────────────────────────────────────────── */
+
+/**
+ * Al game master: su mesa flexible ha llegado al minimo y ya puede fijar la
+ * fecha. Sale una sola vez por mesa (`Convocatoria.minReachedNoticeAt`).
+ */
+export function minimoAlcanzado(datos: {
+  gm: string;
+  mesa: string;
+  apuntados: number;
+  minimo: number;
+  plazas: number;
+  url: string;
+}): Plantilla {
+  return {
+    asunto: `Ya puedes fijar la fecha de ${datos.mesa}`,
+    ...maquetar({
+      titulo: 'Tu mesa ya tiene el mínimo',
+      parrafos: [
+        `Hola ${datos.gm}, tu mesa con fecha flexible ha llegado a ${datos.apuntados} pre-reservas, y el mínimo eran ${datos.minimo}.`,
+        'Cuando quieras, fija la fecha desde la gestión de la mesa. Quienes se apuntaron tendrán un plazo para reservar y pagar su plaza antes de que se abra a cualquiera.',
+        datos.apuntados < datos.plazas
+          ? `Mientras tanto se puede seguir apuntando gente hasta llenar las ${datos.plazas} plazas.`
+          : 'Ya están todas las plazas pre-reservadas.',
+      ],
+      boton: { texto: 'Fijar la fecha', url: datos.url },
+    }),
+  };
+}
+
+/** A quien se habia pre-reservado: el game master ha cerrado la mesa. */
+export function mesaCerrada(datos: {
+  jugador: string;
+  mesa: string;
+  gm: string;
+  url: string;
+}): Plantilla {
+  return {
+    asunto: `${datos.mesa} no se va a jugar`,
+    ...maquetar({
+      titulo: 'La mesa se ha cerrado',
+      parrafos: [
+        `Hola ${datos.jugador}, ${datos.gm} ha cerrado la mesa «${datos.mesa}» sin llegar a fijar una fecha.`,
+        'No tienes que hacer nada: la pre-reserva no tenía ningún cargo.',
+      ],
+      boton: { texto: 'Buscar otra mesa', url: datos.url },
+    }),
+  };
+}
+
+/**
+ * A quien se habia pre-reservado: ya hay fecha y tiene un plazo para reservar.
+ *
+ * Lo importante va en los datos y no en un parrafo: la fecha de la partida y
+ * hasta cuando le guardan el sitio, que son dos fechas distintas y es facil
+ * confundirlas.
+ */
+export function mesaConvocada(datos: {
+  jugador: string;
+  mesa: string;
+  gm: string;
+  inicio: Date;
+  plazoHasta: Date;
+  precio: string;
+  url: string;
+}): Plantilla {
+  return {
+    asunto: `${datos.mesa} ya tiene fecha: reserva tu plaza`,
+    ...maquetar({
+      titulo: 'Ya hay fecha',
+      parrafos: [
+        `Hola ${datos.jugador}, ${datos.gm} ha fijado la fecha de «${datos.mesa}», donde tenías una pre-reserva.`,
+        'Hasta la fecha límite de abajo, solo pueden reservar quienes se pre-reservaron. Si te encaja, reserva y paga tu plaza. Si no, no hace falta que hagas nada: después se abrirá a cualquiera.',
+      ],
+      datos: [
+        ['Partida', datos.mesa],
+        ['Cuándo', fechaLarga(datos.inicio)],
+        ['Reserva antes de', fechaLarga(datos.plazoHasta)],
+        ['Precio', datos.precio],
+      ],
+      boton: { texto: 'Reservar mi plaza', url: datos.url },
+    }),
+  };
+}

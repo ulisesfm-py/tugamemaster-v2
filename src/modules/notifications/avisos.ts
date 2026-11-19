@@ -211,6 +211,77 @@ async function avisosDeGm(userId: string, ahora: Date): Promise<Aviso[]> {
 }
 
 /**
+ * Las mesas con fecha flexible.
+ *
+ * Al GM: una mesa abierta que ya tiene el minimo, para que fije la fecha. Al
+ * jugador: una mesa convocada en la que tiene el sitio guardado y aun no ha
+ * reservado. Las dos dejan de ser ciertas solas —al convocar, al reservar, al
+ * vencer el plazo— y por eso se calculan y no se guardan.
+ */
+async function avisosDeMesasFlexibles(userId: string, ahora: Date): Promise<Aviso[]> {
+  const [abiertas, guardadas] = await Promise.all([
+    db.convocatoria.findMany({
+      where: { gm: { userId }, status: 'ABIERTA' },
+      select: {
+        id: true,
+        title: true,
+        minPlayers: true,
+        _count: { select: { preReservas: true } },
+      },
+    }),
+
+    db.preReserva.findMany({
+      where: {
+        userId,
+        convocatoria: { status: 'CONVOCADA', priorityUntil: { gt: ahora } },
+      },
+      take: 5,
+      select: {
+        convocatoria: {
+          select: {
+            title: true,
+            game: {
+              select: {
+                slug: true,
+                bookings: {
+                  where: { userId, status: { in: ['PENDING', 'PAID'] } },
+                  select: { id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const avisos: Aviso[] = [];
+
+  for (const m of abiertas) {
+    if (m._count.preReservas < m.minPlayers) continue;
+    avisos.push({
+      id: `gm-flexible:${m.id}`,
+      texto: `${m.title} ya tiene el mínimo: fija la fecha`,
+      href: `/cuenta/partidas/flexibles/${m.id}`,
+      tono: 'accion',
+    });
+  }
+
+  for (const { convocatoria } of guardadas) {
+    const partida = convocatoria.game;
+    if (!partida || partida.bookings.length > 0) continue;
+    avisos.push({
+      id: `flexible-plaza:${partida.slug}`,
+      texto: `${convocatoria.title} ya tiene fecha: reserva tu plaza`,
+      href: `/partidas/${partida.slug}`,
+      tono: 'accion',
+    });
+  }
+
+  return avisos;
+}
+
+/**
  * Mensajes sin leer en los hilos de mesa.
  *
  * No distingue entre jugar y dirigir porque el hilo tampoco: en una mesa se
@@ -238,14 +309,17 @@ async function avisosDeHilos(userId: string, ahora: Date): Promise<Aviso[]> {
  * que es mas util que obligarle a elegir con que sombrero mira.
  */
 export async function avisosDe(userId: string, ahora = new Date()): Promise<Aviso[]> {
-  const [jugador, gm, hilos] = await Promise.all([
+  const [jugador, gm, hilos, flexibles] = await Promise.all([
     avisosDeJugador(userId, ahora),
     avisosDeGm(userId, ahora),
     avisosDeHilos(userId, ahora),
+    avisosDeMesasFlexibles(userId, ahora),
   ]);
 
   // Las alertas primero: son las que cuestan dinero si se ignoran.
   const peso = { alerta: 0, accion: 1, aviso: 2 };
 
-  return [...gm, ...jugador, ...hilos].sort((a, b) => peso[a.tono] - peso[b.tono]);
+  return [...gm, ...jugador, ...flexibles, ...hilos].sort(
+    (a, b) => peso[a.tono] - peso[b.tono],
+  );
 }

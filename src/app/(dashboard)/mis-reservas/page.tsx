@@ -15,6 +15,9 @@ import {
 } from '@/components/ui';
 import { auth } from '@/lib/auth';
 import { cancelarReservaAction } from '@/modules/bookings/actions';
+import { borrarPreReservaAction } from '@/modules/convocatorias/actions';
+import { describirFranja } from '@/modules/convocatorias/politica';
+import { misPreReservas } from '@/modules/convocatorias/queries';
 import { HORAS_CANCELACION_CON_DEVOLUCION } from '@/modules/bookings/politica';
 import { misReservas } from '@/modules/bookings/queries';
 import { reportarIncidenciaAction } from '@/modules/incidents/actions';
@@ -77,10 +80,11 @@ export default async function MisReservasPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const [{ proximas, pasadas }, incidencias, resenas] = await Promise.all([
+  const [{ proximas, pasadas }, incidencias, resenas, preReservas] = await Promise.all([
     misReservas(session.user.id),
     misIncidencias(session.user.id),
     misResenas(session.user.id),
+    misPreReservas(session.user.id),
   ]);
 
   const porReserva = new Map(incidencias.map((i) => [i.bookingId, i]));
@@ -193,6 +197,54 @@ export default async function MisReservasPage() {
           </ul>
         )}
       </section>
+
+      {/* Las pre-reservas van aparte: no tienen fecha ni se han pagado, y
+          mezclarlas con las reservas haria pensar que lo estan. */}
+      {preReservas.length > 0 && (
+        <section className="mt-12">
+          <h2 className="font-heading text-foreground text-xl font-bold">Pre-reservas</h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Mesas con fecha flexible a las que te has apuntado. Te escribiremos cuando
+            haya fecha, y entonces decides si reservas y pagas.
+          </p>
+          <ul className="mt-4 flex flex-col gap-4">
+            {preReservas.map((p) => (
+              <li key={p.id} className="border-border bg-card rounded-sm border p-5">
+                <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/mesas/${p.convocatoria.slug}`}
+                      className="font-heading text-foreground font-bold hover:underline"
+                    >
+                      {p.convocatoria.title}
+                    </Link>
+                    <p className="text-muted-foreground mt-0.5 text-sm">
+                      {p.convocatoria.system} · {describirFranja(p.convocatoria)}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {p.convocatoria._count.preReservas} de {p.convocatoria.minPlayers}{' '}
+                      para poder jugar
+                    </p>
+                  </div>
+                  <Estado tono="apagado">Sin fecha</Estado>
+                </div>
+                <div className="mt-4">
+                  <ReservarBoton
+                    accion={borrarPreReservaAction}
+                    texto="Borrar mi pre-reserva"
+                    destructivo
+                    tamano="sm"
+                    campos={{
+                      convocatoriaId: p.convocatoriaId,
+                      slug: p.convocatoria.slug,
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {pasadas.length > 0 && (
         <section className="mt-12">

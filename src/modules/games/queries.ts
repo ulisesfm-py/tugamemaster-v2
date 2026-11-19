@@ -39,6 +39,10 @@ export function seleccionTarjeta() {
     // Solo la visibilidad: la contrasena no sale nunca en una consulta
     // publica. La lee la reserva, en el servidor, y la gestion del GM.
     visibility: true,
+    // Para distinguir en la tarjeta una sesion de campana: solo la reservan
+    // quienes jugaron la anterior.
+    previousGameId: true,
+    sessionNumber: true,
     gm: {
       select: {
         id: true,

@@ -6,6 +6,8 @@ import {
   DIAS_PARA_CONTINUAR_DESDE_LA_LISTA,
 } from '@/modules/campaigns/politica';
 
+import { DIAS_EN_EL_LISTADO } from './politica';
+
 /**
  * Lecturas de las mesas con fecha flexible para el panel del GM.
  */
@@ -110,4 +112,125 @@ export async function sesionesParaContinuar(userId: string, ahora = new Date()) 
   return partidas.filter((p) =>
     continuableDesdeLaLista({ ...p, tieneContinuacion: false }, ahora),
   );
+}
+
+/** Lo que necesita la tarjeta de una mesa flexible. */
+function seleccionTarjetaFlexible() {
+  return {
+    id: true,
+    title: true,
+    slug: true,
+    system: true,
+    imageUrl: true,
+    experience: true,
+    tags: true,
+    weekdays: true,
+    startMinute: true,
+    durationMinutes: true,
+    frequency: true,
+    seatsTotal: true,
+    minPlayers: true,
+    priceCents: true,
+    currency: true,
+    gm: {
+      select: {
+        id: true,
+        plan: true,
+        user: { select: { name: true, slug: true, image: true } },
+      },
+    },
+    _count: { select: { preReservas: true } },
+  } as const;
+}
+
+/**
+ * Las mesas flexibles abiertas, para el listado y la portada.
+ *
+ * Las mas recientes primero: no tienen fecha por la que ordenar. Las que
+ * llevan mas de `DIAS_EN_EL_LISTADO` sin convocarse no salen.
+ */
+export async function mesasFlexiblesAbiertas(
+  filtro: { gmId?: string; limite?: number } = {},
+  ahora = new Date(),
+) {
+  const desde = new Date(ahora.getTime() - DIAS_EN_EL_LISTADO * 86_400_000);
+
+  return db.convocatoria.findMany({
+    where: {
+      status: 'ABIERTA',
+      createdAt: { gte: desde },
+      ...(filtro.gmId ? { gmId: filtro.gmId } : {}),
+    },
+    orderBy: { createdAt: 'desc' },
+    take: filtro.limite ?? 30,
+    select: seleccionTarjetaFlexible(),
+  });
+}
+
+/**
+ * Una mesa flexible para su pagina publica.
+ *
+ * Un borrador o una cerrada solo la ve su game master; para el resto no
+ * existe. Una convocada devuelve el slug de su partida, a donde se redirige.
+ */
+export async function detalleMesaFlexible(slug: string, userId?: string) {
+  const mesa = await db.convocatoria.findUnique({
+    where: { slug },
+    select: {
+      ...seleccionTarjetaFlexible(),
+      description: true,
+      languages: true,
+      minAge: true,
+      status: true,
+      game: { select: { slug: true } },
+      gm: {
+        select: {
+          id: true,
+          plan: true,
+          userId: true,
+          headline: true,
+          languages: true,
+          user: { select: { name: true, slug: true, image: true } },
+        },
+      },
+    },
+  });
+
+  if (!mesa) return null;
+
+  const miPreReserva = userId
+    ? await db.preReserva.findUnique({
+        where: { convocatoriaId_userId: { convocatoriaId: mesa.id, userId } },
+        select: { id: true, createdAt: true },
+      })
+    : null;
+
+  return { ...mesa, esMia: mesa.gm.userId === userId, miPreReserva };
+}
+
+/** Las pre-reservas de un jugador en mesas aun sin convocar, para su panel. */
+export async function misPreReservas(userId: string) {
+  return db.preReserva.findMany({
+    where: { userId, convocatoria: { status: 'ABIERTA' } },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      createdAt: true,
+      convocatoriaId: true,
+      convocatoria: {
+        select: {
+          title: true,
+          slug: true,
+          system: true,
+          minPlayers: true,
+          seatsTotal: true,
+          weekdays: true,
+          startMinute: true,
+          durationMinutes: true,
+          frequency: true,
+          _count: { select: { preReservas: true } },
+        },
+      },
+    },
+  });
 }

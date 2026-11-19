@@ -5,9 +5,14 @@ import { enviarCorreo, urlBase } from '@/lib/email';
 import { TEXTO_CONDICIONES } from '@/modules/bookings/politica';
 import { formatearCodigo } from '@/modules/invitaciones/politica';
 
+import { formatearImporte } from '@/modules/payments/dinero';
+
 import {
   fundadorNombrado,
   incidenciaResuelta,
+  mesaCerrada,
+  mesaConvocada,
+  minimoAlcanzado,
   nuevaReserva,
   pagoEnviado,
   partidaCancelada,
@@ -257,4 +262,103 @@ export async function avisarPagoEnviado(payoutId: string): Promise<void> {
       }),
     });
   });
+}
+
+/* ── Mesas con fecha flexible ───────────────────────────────────────────── */
+
+/** Al game master: su mesa flexible ha llegado al minimo. */
+export async function avisarMinimoAlcanzado(convocatoriaId: string): Promise<void> {
+  await sinRomper('minimo alcanzado', async () => {
+    const mesa = await db.convocatoria.findUnique({
+      where: { id: convocatoriaId },
+      select: {
+        id: true,
+        title: true,
+        minPlayers: true,
+        seatsTotal: true,
+        gm: { select: { user: { select: { name: true, email: true } } } },
+        _count: { select: { preReservas: true } },
+      },
+    });
+
+    if (!mesa) return;
+
+    await enviarCorreo({
+      para: mesa.gm.user.email,
+      ...minimoAlcanzado({
+        gm: mesa.gm.user.name,
+        mesa: mesa.title,
+        apuntados: mesa._count.preReservas,
+        minimo: mesa.minPlayers,
+        plazas: mesa.seatsTotal,
+        url: `${urlBase()}/cuenta/partidas/flexibles/${mesa.id}`,
+      }),
+    });
+  });
+}
+
+/** A cada pre-reservado: el game master ha cerrado la mesa sin convocarla. */
+export async function avisarMesaCerrada(convocatoriaId: string): Promise<void> {
+  const mesa = await db.convocatoria.findUnique({
+    where: { id: convocatoriaId },
+    select: {
+      title: true,
+      gm: { select: { user: { select: { name: true } } } },
+      preReservas: { select: { user: { select: { name: true, email: true } } } },
+    },
+  });
+
+  if (!mesa) return;
+
+  for (const { user } of mesa.preReservas) {
+    await sinRomper('mesa cerrada', () =>
+      enviarCorreo({
+        para: user.email,
+        ...mesaCerrada({
+          jugador: user.name,
+          mesa: mesa.title,
+          gm: mesa.gm.user.name,
+          url: `${urlBase()}/partidas`,
+        }),
+      }),
+    );
+  }
+}
+
+/** A cada pre-reservado: ya hay fecha y un plazo para reservar. */
+export async function avisarMesaConvocada(convocatoriaId: string): Promise<void> {
+  const mesa = await db.convocatoria.findUnique({
+    where: { id: convocatoriaId },
+    select: {
+      title: true,
+      priorityUntil: true,
+      gm: { select: { user: { select: { name: true } } } },
+      game: { select: { slug: true, startsAt: true, priceCents: true, currency: true } },
+      preReservas: { select: { user: { select: { name: true, email: true } } } },
+    },
+  });
+
+  if (!mesa?.game || !mesa.priorityUntil) return;
+
+  const { game, priorityUntil } = mesa;
+
+  for (const { user } of mesa.preReservas) {
+    await sinRomper('mesa convocada', () =>
+      enviarCorreo({
+        para: user.email,
+        ...mesaConvocada({
+          jugador: user.name,
+          mesa: mesa.title,
+          gm: mesa.gm.user.name,
+          inicio: game.startsAt,
+          plazoHasta: priorityUntil,
+          precio:
+            game.priceCents === 0
+              ? 'Gratis'
+              : formatearImporte(game.priceCents, game.currency),
+          url: `${urlBase()}/partidas/${game.slug}`,
+        }),
+      }),
+    );
+  }
 }

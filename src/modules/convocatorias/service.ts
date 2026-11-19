@@ -2,9 +2,13 @@ import 'server-only';
 
 import { db } from '@/lib/db';
 import { borrarSiEsNuestra, subirImagen } from '@/lib/imagen';
+import {
+  avisarMesaCerrada,
+  avisarMinimoAlcanzado,
+} from '@/modules/notifications/service';
 import { slugDisponible } from '@/modules/users/slug';
 
-import { problemasAlEditar } from './politica';
+import { hayQueAvisarDelMinimo, problemasAlEditar, puedePreReservar } from './politica';
 import { convocatoriaSchema, type ConvocatoriaInput } from './schema';
 
 /**
@@ -212,6 +216,117 @@ export async function cerrarConvocatoria(
     where: { id },
     data: { status: 'CERRADA', closedAt: ahora },
   });
+
+  // Fuera de la escritura, como todo correo: si no sale, la mesa sigue
+  // cerrada. Las pre-reservas se conservan para saber a quien avisar.
+  if (mesa._count.preReservas > 0) await avisarMesaCerrada(id);
+
+  return { ok: true };
+}
+
+/* ── Pre-reservas ───────────────────────────────────────────────────────── */
+
+/**
+ * Apunta a alguien a una mesa flexible. No cuesta nada ni compromete a nada.
+ *
+ * Va en una transaccion que bloquea la fila de la mesa, igual que reservar
+ * una plaza: dos personas pulsando a la vez sobre la ultima plaza no pueden
+ * entrar las dos. La restriccion unica `(convocatoriaId, userId)` es la red
+ * contra el doble clic.
+ */
+export async function preReservar(userId: string, id: string): Promise<ResultadoSimple> {
+  const resultado = await db.$transaction(async (tx) => {
+    const filas = await tx.$queryRaw<{ id: string }[]>`
+      SELECT "id" FROM "Convocatoria" WHERE "id" = ${id} FOR UPDATE
+    `;
+    if (!filas[0]) return { ok: false as const, mensaje: 'Esa mesa no existe' };
+
+    const mesa = await tx.convocatoria.findUniqueOrThrow({
+      where: { id },
+      select: {
+        status: true,
+        seatsTotal: true,
+        minPlayers: true,
+        minReachedNoticeAt: true,
+        gm: { select: { userId: true } },
+        _count: { select: { preReservas: true } },
+      },
+    });
+
+    const [yaApuntado, activas] = await Promise.all([
+      tx.preReserva.findUnique({
+        where: { convocatoriaId_userId: { convocatoriaId: id, userId } },
+        select: { id: true },
+      }),
+      tx.preReserva.count({
+        where: {
+          userId,
+          convocatoria: { status: 'ABIERTA' },
+          NOT: { convocatoriaId: id },
+        },
+      }),
+    ]);
+
+    const permiso = puedePreReservar({
+      estado: mesa.status,
+      plazas: mesa.seatsTotal,
+      apuntados: mesa._count.preReservas,
+      yaApuntado: yaApuntado !== null,
+      esSuGm: mesa.gm.userId === userId,
+      activasDelJugador: activas,
+    });
+
+    if (!permiso.ok) return { ok: false as const, mensaje: permiso.mensaje };
+
+    await tx.preReserva.create({ data: { convocatoriaId: id, userId } });
+
+    // La marca se escribe aqui, dentro de la transaccion: asi dos pre-reservas
+    // simultaneas que completan el minimo no mandan dos correos.
+    const avisar = hayQueAvisarDelMinimo({
+      estado: mesa.status,
+      apuntados: mesa._count.preReservas + 1,
+      minimo: mesa.minPlayers,
+      avisadoEn: mesa.minReachedNoticeAt,
+    });
+
+    if (avisar) {
+      await tx.convocatoria.update({
+        where: { id },
+        data: { minReachedNoticeAt: new Date() },
+      });
+    }
+
+    return { ok: true as const, avisar };
+  });
+
+  if (!resultado.ok) return resultado;
+
+  if (resultado.avisar) await avisarMinimoAlcanzado(id);
+  return { ok: true };
+}
+
+/**
+ * Borra la pre-reserva de alguien. Mientras la mesa no se haya convocado, se
+ * puede hacer siempre: no hay nada que devolver.
+ */
+export async function borrarPreReserva(
+  userId: string,
+  id: string,
+): Promise<ResultadoSimple> {
+  const mesa = await db.convocatoria.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+
+  if (!mesa) return { ok: false, mensaje: 'Esa mesa no existe' };
+
+  // Convocada, la pre-reserva es lo que da derecho al plazo para reservar;
+  // quien no quiera jugar simplemente no reserva.
+  if (mesa.status !== 'ABIERTA') {
+    return { ok: false, mensaje: 'Esta mesa ya no admite cambios en las pre-reservas' };
+  }
+
+  await db.preReserva.deleteMany({ where: { convocatoriaId: id, userId } });
   return { ok: true };
 }
 

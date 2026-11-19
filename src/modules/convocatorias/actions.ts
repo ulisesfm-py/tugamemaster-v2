@@ -9,8 +9,10 @@ import { auth } from '@/lib/auth';
 import { datosDeConvocatoria } from './schema';
 import {
   actualizarConvocatoria,
+  borrarPreReserva,
   cerrarConvocatoria,
   crearConvocatoria,
+  preReservar,
   publicarConvocatoria,
   retirarConvocatoria,
   subirLaminaDeConvocatoria,
@@ -117,4 +119,42 @@ export async function subirLaminaDeConvocatoriaAction(
     console.error('Fallo al subir la lamina de la mesa flexible:', error);
     return { error: 'No se ha podido guardar la imagen. Inténtalo de nuevo.' };
   }
+}
+
+/* ── Lo que hace el jugador ─────────────────────────────────────────────── */
+
+/** Pre-reservar o borrarse, desde la pagina publica de la mesa. */
+async function comoJugador(
+  formData: FormData,
+  operacion: (userId: string, id: string) => Promise<{ ok: boolean; mensaje?: string }>,
+): Promise<EstadoAccion> {
+  const session = await auth();
+  if (!session?.user) return { error: 'Inicia sesión para pre-reservar' };
+
+  const id = String(formData.get('convocatoriaId') ?? '');
+  const resultado = await operacion(session.user.id, id);
+  if (!resultado.ok) return { error: resultado.mensaje ?? 'No se pudo completar' };
+
+  const slug = String(formData.get('slug') ?? '');
+  if (slug) revalidatePath(`/mesas/${slug}`);
+  revalidatePath('/partidas');
+  revalidatePath('/');
+  revalidatePath('/mis-reservas');
+  refrescar(id);
+
+  return { ok: true };
+}
+
+export async function preReservarAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  return comoJugador(formData, preReservar);
+}
+
+export async function borrarPreReservaAction(
+  _previo: EstadoAccion,
+  formData: FormData,
+): Promise<EstadoAccion> {
+  return comoJugador(formData, borrarPreReserva);
 }

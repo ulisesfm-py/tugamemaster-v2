@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { PartidaCard } from '@/components/partida-card';
+import { MesaFlexibleCard, PartidaCard } from '@/components/partida-card';
 import { Button, Cargando, CLASE_CONTROL, EnlaceBoton, Vacio } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { ETIQUETAS } from '@/modules/games/ficha';
+import { mesasFlexiblesAbiertas } from '@/modules/convocatorias/queries';
 import { listarPartidas, sistemasDisponibles } from '@/modules/games/queries';
 import { filtrosSchema, type Filtros } from '@/modules/games/schema';
 
@@ -106,9 +107,15 @@ function textoVacio(filtros: Filtros): string {
  * dentro de la pagina, el efecto se queda en esta pagina, que nunca da 404.
  */
 async function Mesas({ filtros }: { filtros: Filtros }) {
-  const partidas = await listarPartidas(filtros);
-  const etiquetaPuesta = ETIQUETAS.find((e) => e.id === filtros.etiqueta);
   const hayFiltro = Object.keys(filtros).length > 0;
+  // Las mesas flexibles van aparte y solo sin filtros: no tienen fecha, asi
+  // que «esta semana» o «este mes» no les aplican, y mezclarlas haria que el
+  // recuento de arriba dijera una cosa y la lista otra.
+  const [partidas, flexibles] = await Promise.all([
+    listarPartidas(filtros),
+    hayFiltro ? Promise.resolve([]) : mesasFlexiblesAbiertas(),
+  ]);
+  const etiquetaPuesta = ETIQUETAS.find((e) => e.id === filtros.etiqueta);
 
   return (
     <>
@@ -139,6 +146,23 @@ async function Mesas({ filtros }: { filtros: Filtros }) {
             <PartidaCard key={p.id} partida={p} />
           ))}
         </ul>
+      )}
+
+      {flexibles.length > 0 && (
+        <section className="mt-12">
+          <h2 className="font-heading text-foreground text-xl font-bold">
+            Con fecha flexible
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Aún sin día: se juegan en cuanto se apunte bastante gente. Pre-reservar no
+            tiene cargo; se paga al reservar, cuando ya hay fecha.
+          </p>
+          <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {flexibles.map((m) => (
+              <MesaFlexibleCard key={m.id} mesa={m} />
+            ))}
+          </ul>
+        </section>
       )}
     </>
   );

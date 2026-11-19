@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { GuiasDePortada } from '@/components/blog/guias-de-portada';
 import { FilaDeslizable } from '@/components/fila-deslizable';
-import { PartidaCard } from '@/components/partida-card';
+import { MesaFlexibleCard, PartidaCard } from '@/components/partida-card';
 import { PORTADA } from '@/lib/marca';
 import { Avatar, EnlaceBoton, Estrellas, Vacio } from '@/components/ui';
 import {
@@ -12,6 +12,7 @@ import {
   porcentaje,
 } from '@/modules/payments/dinero';
 import { listarPosts } from '@/modules/blog/queries';
+import { mesasFlexiblesAbiertas } from '@/modules/convocatorias/queries';
 import { listarPartidas } from '@/modules/games/queries';
 import { directorioDeGms } from '@/modules/profiles/queries';
 import {
@@ -51,10 +52,11 @@ const COMO_FUNCIONA = [
 ];
 
 export default async function Portada() {
-  const [partidas, gms, articulos] = await Promise.all([
+  const [partidas, gms, articulos, flexibles] = await Promise.all([
     listarPartidas({}),
     directorioDeGms(4),
     listarPosts(3),
+    mesasFlexiblesAbiertas({ limite: 4 }),
   ]);
 
   const abiertas = partidas
@@ -135,7 +137,7 @@ export default async function Portada() {
           </Link>
         </div>
 
-        {abiertas.length === 0 ? (
+        {abiertas.length === 0 && flexibles.length === 0 ? (
           <Vacio
             className="mt-6"
             titulo="No hay ninguna mesa abierta ahora mismo"
@@ -157,6 +159,15 @@ export default async function Portada() {
               <PartidaCard
                 key={p.id}
                 partida={p}
+                className="w-[17rem] shrink-0 snap-start sm:w-[19rem]"
+              />
+            ))}
+            {/* Las de fecha flexible, detras: no tienen fecha por la que
+                ordenarse entre las demas, y la tarjeta ya dice lo que son. */}
+            {flexibles.map((m) => (
+              <MesaFlexibleCard
+                key={m.id}
+                mesa={m}
                 className="w-[17rem] shrink-0 snap-start sm:w-[19rem]"
               />
             ))}
