@@ -29,3 +29,31 @@ describe('limites de subida', () => {
     );
   });
 });
+
+describe('carpetas de imágenes', () => {
+  /**
+   * Cada carpeta donde se sube una imagen tiene que estar permitida en
+   * `images.remotePatterns`, o `next/image` contesta 400 y la imagen no sale.
+   * Paso con `mesas/` el 20/11/2026: las laminas se subian bien y no se veian.
+   */
+  it('todas las carpetas donde se sube algo están permitidas en next.config.ts', () => {
+    const config = readFileSync('next.config.ts', 'utf8');
+    const permitidas = [...config.matchAll(/pathname: '\/([a-z-]+)\/\*\*'/g)].map(
+      (m) => m[1],
+    );
+
+    const fuentes = [
+      'src/modules/blog/service.ts',
+      'src/modules/convocatorias/service.ts',
+      'src/modules/games/service.ts',
+      'src/modules/profiles/avatar.ts',
+    ].map((f) => readFileSync(f, 'utf8'));
+
+    const usadas = fuentes.flatMap((codigo) =>
+      [...codigo.matchAll(/subirImagen\(`([a-z-]+)\//g)].map((m) => m[1]),
+    );
+
+    expect(usadas.length).toBeGreaterThanOrEqual(4);
+    for (const carpeta of usadas) expect(permitidas).toContain(carpeta);
+  });
+});

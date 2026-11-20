@@ -51,6 +51,14 @@ const nextConfig: NextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
         pathname: '/partidas/**',
       },
+      {
+        // Laminas de las mesas con fecha flexible. Al convocar, la partida
+        // hereda la de su mesa, asi que esta carpeta tambien la sirven las
+        // tarjetas de partidas normales.
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        pathname: '/mesas/**',
+      },
     ],
   },
 };
