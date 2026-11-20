@@ -220,6 +220,11 @@ record; se usan _separate charges and transfers_, nunca destination charges.
 - **Ninguna transferencia a un GM sale sin comprobar** que la partida terminó
   hace más de 48h y que no existe ninguna incidencia abierta ni solicitud de
   reembolso pendiente sobre esa reserva.
+- **Antes de transferir se pregunta a Stripe** si ya hay una transferencia para
+  esa partida (`transfer_group`), y solo se transfiere con saldo disponible. La
+  clave de idempotencia cambia solo tras un rechazo claro de Stripe, nunca tras
+  un fallo incierto. Reglas y por qué en `src/modules/payments/transferencias.ts`
+  y `docs/payments.md`.
 - Stripe solo se invoca desde `src/modules/payments`. Ningún otro módulo
   importa el SDK de Stripe.
 - La reputación de un GM (estrellas, número de partidas) se deriva

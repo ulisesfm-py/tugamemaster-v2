@@ -338,15 +338,25 @@ export default async function CobrosPage({ searchParams }: Props) {
                   </div>
 
                   <p className="text-muted-foreground px-4 pb-3 text-xs">
-                    {estado.explicacion}
+                    {/* Un pago pendiente con motivo es uno que espera a que
+                        Stripe libere el dinero: se dice eso, y no «sale en la
+                        próxima ejecución», que no seria verdad. */}
+                    {partida.payout?.status === 'PENDING' &&
+                    partida.payout.blockedReason ? (
+                      <>{partida.payout.blockedReason}.</>
+                    ) : (
+                      <>
+                        {estado.explicacion}
+                        {partida.payout?.blockedReason && (
+                          <> Motivo: {partida.payout.blockedReason}.</>
+                        )}
+                      </>
+                    )}
                     {partida.payout?.status === 'PAID' && partida.payout.paidAt && (
                       <>
                         {' '}
                         Salió el <Fecha valor={partida.payout.paidAt} />.
                       </>
-                    )}
-                    {partida.payout?.blockedReason && (
-                      <> Motivo: {partida.payout.blockedReason}.</>
                     )}
                   </p>
 

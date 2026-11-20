@@ -233,20 +233,44 @@ tareas en orden:
 Cerrar va primero porque las demás dependen de ello: pagar exige la partida
 cerrada, y pedir reseña exige la reserva en `COMPLETED`.
 
-Un pago bloqueado **se puede reintentar**: una incidencia se resuelve y una
-cuenta sin verificar acaba verificándose, así que la consulta vuelve a recoger
-las partidas cuyo `Payout` quedó en `BLOCKED` o `FAILED`.
+Un pago sin terminar **se reintenta cada noche**: una incidencia se resuelve,
+una cuenta acaba verificándose y Stripe acaba liberando el dinero. La consulta
+recoge las partidas cuyo `Payout` está en `PENDING`, `BLOCKED` o `FAILED`.
 
-### La clave de idempotencia lleva el importe
+### Cómo se evita pagar dos veces y cómo se reintenta de verdad
 
-`payout:<gameId>:<total>`. Si un intento falló y después cambia lo que hay que
-transferir, es una operación distinta y necesita clave nueva — Stripe rechaza
-reutilizar una clave con otros parámetros.
+Reglas en `src/modules/payments/transferencias.ts`, con pruebas que simulan
+cada caso (`tests/unit/pagar-gms.test.ts`). Se añadió el 20/11/2026, tras ver
+en producción que un reintento no llegaba a reintentarse.
 
-Que una partida se pague una sola vez lo garantiza el `Payout` con `gameId`
-único: la consulta excluye las que ya están `PAID`. La clave es la segunda red,
-para que un reintento con el mismo importe devuelva la transferencia original
-en lugar de crear otra.
+1. **Antes de transferir se pregunta a Stripe** si ya existe una
+   transferencia para la partida (`transfers.list` por `transfer_group`, que
+   es el id de la partida). Si existe por el importe justo, se apunta como
+   pagada y no se crea otra. Si existe y no cuadra (otro importe, revertida,
+   más de una), la partida queda `BLOCKED` para que la revise una persona. Si
+   no se puede preguntar a Stripe, esa noche no se transfiere.
+2. **Solo se transfiere con dinero disponible.** Stripe tarda días en liberar
+   un cobro (en una cuenta nueva, la primera vez de 7 a 14), y el pago al GM
+   puede tocar antes. Sin saldo suficiente, el `Payout` queda en `PENDING`
+   con el motivo, y el GM lee «esperando a que Stripe libere el dinero» en
+   vez de un fallo. El saldo se consulta una vez por ejecución y se va
+   descontando lo que se paga.
+3. **La clave de idempotencia cambia solo tras un rechazo claro.**
+   `payout:<gameId>:<total>` el primer intento y `…:r<n>` tras el rechazo
+   número n (`Payout.rejectedAttempts`). Stripe guarda la respuesta de cada
+   clave al menos 24 horas y la devuelve tal cual: el 20/11/2026 el reintento
+   devolvió el mismo `balance_insufficient`, con el mismo `req_`, que la noche
+   anterior. Un rechazo (`StripeInvalidRequestError`,
+   `StripePermissionError`) no movió dinero, así que estrenar clave es seguro.
+   Un fallo incierto (corte de conexión, error interno de Stripe, límite de
+   peticiones) **mantiene la clave**: si la transferencia llegó a crearse, la
+   misma clave la devuelve, y además el paso 1 la encuentra.
+4. **Lo que falla después de transferir no es un fallo de la transferencia.**
+   Si no se puede apuntar el pago en la base, el `Payout` se queda en
+   `PENDING` y el paso 1 lo apunta al día siguiente.
+
+La clave lleva el importe porque, si cambia lo que hay que transferir, es otra
+operación: Stripe rechaza reutilizar una clave con otros parámetros.
 
 ## El monedero (fase 7a, implementado)
 

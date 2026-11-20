@@ -621,8 +621,15 @@ model Payout {
   status           PayoutStatus @default(PENDING)
   stripeTransferId String?      @unique
 
-  /// Motivo por el que quedo bloqueada, si status = BLOCKED.
+  /// Motivo por el que quedo bloqueada (BLOCKED), fallo (FAILED) o espera
+  /// (PENDING, por ejemplo hasta que Stripe libere el dinero de los cobros).
   blockedReason String?
+
+  /// Cuantas veces ha rechazado Stripe la transferencia. Forma parte de la
+  /// clave de idempotencia: cada rechazo claro estrena clave, porque Stripe
+  /// devuelve la respuesta guardada de una clave durante al menos 24 horas.
+  /// Ver `src/modules/payments/transferencias.ts`.
+  rejectedAttempts Int @default(0)
 
   scheduledFor DateTime
   paidAt       DateTime?
