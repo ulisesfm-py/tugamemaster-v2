@@ -1,8 +1,6 @@
 -- Mesas con fecha flexible: una mesa sin fecha que junta pre-reservas
 -- gratuitas hasta que el GM la convoca. Solo crea tablas y tipos nuevos: no
 -- toca ninguna existente, asi que el codigo anterior sigue funcionando.
-◇ injected env (16) from .env.local // tip: ⌘ override existing { override: true }
-◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
 -- CreateEnum
 CREATE TYPE "EstadoConvocatoria" AS ENUM ('BORRADOR', 'ABIERTA', 'CONVOCADA', 'CERRADA');
 
