@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { ETIQUETAS, MAXIMO_ETIQUETAS } from '@/modules/games/ficha';
-import { datosDelFormulario, filtrosSchema, partidaSchema } from '@/modules/games/schema';
+import {
+  datosDelFormulario,
+  filtrosSchema,
+  hayFiltro,
+  partidaSchema,
+} from '@/modules/games/schema';
 
 /** Una fecha suficientemente lejana para pasar la antelacion minima. */
 function dentroDeDias(n: number): string {
@@ -119,6 +124,38 @@ describe('filtrosSchema', () => {
 
   it('rechaza un precio maximo negativo', () => {
     expect(filtrosSchema.safeParse({ maxPrecio: '-3' }).success).toBe(false);
+  });
+});
+
+describe('hayFiltro', () => {
+  // Lo que manda la pagina de partidas sin nada en la URL: las casillas llegan
+  // siempre, a false. Antes esto contaba como filtro y escondia las mesas con
+  // fecha flexible del listado.
+  const sinNada = {
+    q: undefined,
+    system: undefined,
+    maxPrecio: undefined,
+    experiencia: undefined,
+    etiqueta: undefined,
+    cuando: undefined,
+    soloLibres: false,
+    ultimasPlazas: false,
+  };
+
+  it('no ve filtro cuando las casillas llegan sin marcar', () => {
+    expect(hayFiltro(filtrosSchema.parse(sinNada))).toBe(false);
+  });
+
+  it('ve filtro con una casilla marcada', () => {
+    expect(hayFiltro(filtrosSchema.parse({ ...sinNada, soloLibres: true }))).toBe(true);
+  });
+
+  it('ve filtro con un texto de busqueda', () => {
+    expect(hayFiltro(filtrosSchema.parse({ ...sinNada, q: 'faro' }))).toBe(true);
+  });
+
+  it('cuenta «sin coste» (precio maximo 0) como filtro', () => {
+    expect(hayFiltro(filtrosSchema.parse({ ...sinNada, maxPrecio: '0' }))).toBe(true);
   });
 });
 

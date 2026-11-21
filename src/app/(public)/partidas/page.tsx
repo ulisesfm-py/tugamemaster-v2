@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { ETIQUETAS } from '@/modules/games/ficha';
 import { mesasFlexiblesAbiertas } from '@/modules/convocatorias/queries';
 import { listarPartidas, sistemasDisponibles } from '@/modules/games/queries';
-import { filtrosSchema, type Filtros } from '@/modules/games/schema';
+import { filtrosSchema, hayFiltro, type Filtros } from '@/modules/games/schema';
 
 export const metadata: Metadata = {
   title: 'Partidas · TuGameMaster',
@@ -107,13 +107,13 @@ function textoVacio(filtros: Filtros): string {
  * dentro de la pagina, el efecto se queda en esta pagina, que nunca da 404.
  */
 async function Mesas({ filtros }: { filtros: Filtros }) {
-  const hayFiltro = Object.keys(filtros).length > 0;
+  const filtrando = hayFiltro(filtros);
   // Las mesas flexibles van aparte y solo sin filtros: no tienen fecha, asi
   // que «esta semana» o «este mes» no les aplican, y mezclarlas haria que el
   // recuento de arriba dijera una cosa y la lista otra.
   const [partidas, flexibles] = await Promise.all([
     listarPartidas(filtros),
-    hayFiltro ? Promise.resolve([]) : mesasFlexiblesAbiertas(),
+    filtrando ? Promise.resolve([]) : mesasFlexiblesAbiertas(),
   ]);
   const etiquetaPuesta = ETIQUETAS.find((e) => e.id === filtros.etiqueta);
 
@@ -130,7 +130,7 @@ async function Mesas({ filtros }: { filtros: Filtros }) {
           className="mt-4"
           titulo={textoVacio(filtros)}
           accion={
-            hayFiltro ? (
+            filtrando ? (
               <EnlaceBoton href="/partidas" variante="perfil">
                 Ver todas
               </EnlaceBoton>
@@ -203,7 +203,7 @@ export default async function PartidasPage({ searchParams }: Props) {
     ),
   );
 
-  const hayFiltro = [...actuales.keys()].length > 0;
+  const hayParametros = [...actuales.keys()].length > 0;
 
   return (
     <main className="max-w-sitio mx-auto px-4 py-10">
@@ -216,7 +216,7 @@ export default async function PartidasPage({ searchParams }: Props) {
 
       <nav aria-label="Atajos" className="-mx-4 mt-6 overflow-x-auto px-4">
         <div className="flex gap-2 pb-1">
-          <Chip href="/partidas" activo={!hayFiltro}>
+          <Chip href="/partidas" activo={!hayParametros}>
             Todas
           </Chip>
 

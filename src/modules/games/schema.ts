@@ -207,3 +207,16 @@ export const filtrosSchema = z.object({
 });
 
 export type Filtros = z.infer<typeof filtrosSchema>;
+
+/**
+ * True si alguno de los filtros restringe de verdad el listado.
+ *
+ * No basta con contar claves: la pagina siempre manda `soloLibres` y
+ * `ultimasPlazas`, aunque sea a `false`, y contarlas hacia creer que siempre
+ * habia un filtro puesto. Asi el listado escondia las mesas con fecha
+ * flexible, que solo se ensenan sin filtros. Un precio maximo de 0 («sin
+ * coste») si es un filtro.
+ */
+export function hayFiltro(filtros: Filtros): boolean {
+  return Object.values(filtros).some((valor) => valor !== undefined && valor !== false);
+}
