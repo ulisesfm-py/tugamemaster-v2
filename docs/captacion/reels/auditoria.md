@@ -370,7 +370,7 @@ seas tú, **una de GM de demostración**.
 | Pantalla                                     | Para qué reel           | Qué hace falta                                        |
 | -------------------------------------------- | ----------------------- | ----------------------------------------------------- |
 | Registro con código `/r/<código>`            | Crear cuenta            | Una cuenta nueva (empareja para siempre: ojo)         |
-| Alta de cobros en Stripe (desde cero)        | Alta de cobros          | Un GM sin cuenta de Stripe                            |
+| Alta de cobros en Stripe (desde cero)        | Alta de cobros          | **Vista el 22/11** hasta «Revisar y enviar» (§ 6)     |
 | Reservar: contraseña de privada, Stripe, 3DS | Reservar                | Jugador de demo y una reserva real (o una mesa a 0 €) |
 | Pre-reservar y la sección «Pre-reservas»     | Pre-reservar            | Jugador de demo y una mesa flexible                   |
 | Mis reservas con plaza, liberar plaza        | Mis reservas / cancelar | Una reserva del jugador de demo                       |
@@ -400,7 +400,8 @@ pero conviene saberlo.
 - **El GM cobra «a partir de 48 horas»** después de terminar, si no hay
   incidencias. Nunca «a las 48 h» ni «en tu cuenta».
 - **Pre-reservar no tiene cargo**; nunca «gratis».
-- **«Te avisamos por correo» solo si Resend está activo** (punto 6).
+- **Antes de prometer un aviso, mirar `docs/notificaciones.md`**: qué va por
+  correo, qué solo a la campana y qué no se avisa.
 - **El hilo no es un chat** ni manda correos: los avisos van a la campana.
 - Nada de capturas con datos de otras personas (hilos, jugadores, ingresos
   reales): todo con cuentas de demostración.
@@ -414,3 +415,151 @@ pero conviene saberlo.
 5. Punto 7 (guía del blog): una frase.
 
 El resto se puede hacer después de los primeros reels sin que ninguno mienta.
+
+---
+
+## 6. Segunda vuelta: de cuenta nueva a game master (22/11/2026)
+
+Con una cuenta creada para la ocasión («Decano de Springfield»): registro,
+entrada, panel de jugador, perfil de GM y alta en Stripe hasta «Revisar y
+enviar», **sin enviarla**. Ulises la dejó a medias a propósito para no tener
+otra cuenta de Stripe a su nombre. Las pantallas de Stripe salen de sus
+capturas. La cuenta a medias **no aparece en `/gm`**: un GM sin cobros no sale en
+el directorio público.
+
+> La cuenta se creó por error en el servidor local (`localhost:3000`), que usa
+> la base de producción y claves de Stripe **de prueba**. Desde ahí se siguió en
+> tugamemaster.com. **Nunca hacer el alta de cobros desde local**: guardaría en
+> un usuario de producción una cuenta de Stripe de prueba.
+
+**El hilo del reel: 1 Perfil · 2 Cobros · 3 Primera partida** (acordado con
+Ulises).
+
+### Hallazgos, de más a menos importante
+
+**A. Al volver de Stripe sin terminar, la web dice dos cosas a la vez.** Arriba,
+«Alta empezada, sin terminar». Justo debajo, «Stripe todavía está revisando tus
+datos. Puede tardar un rato… Pulsa «Comprobar estado» más tarde». El segundo
+mensaje sale siempre que la dirección lleva `?vuelta=1`
+(`cuenta/cobros/page.tsx`), haya terminado el formulario o no. Quien lo ha
+dejado a medias lee que Stripe lo está revisando y espera, y no vuelve nunca.
+_Propuesta:_ enseñar «revisando» solo si Stripe ya tiene los datos enviados
+(`details_submitted`), y si no, «Te faltan datos en Stripe: Continuar con el
+alta».
+
+**B. Stripe pregunta por «Datos de la empresa» y por una web, y la salida
+fácil es incorrecta.** Pide «Tu sitio web» o, si no hay, una «descripción del
+producto». La descripción va con una advertencia: al elegirla, confirmas que
+**no** usas web, app, redes sociales ni perfil en línea para vender. Un GM que
+vende en TuGameMaster, y seguramente en Instagram, sí los usa. Con la
+descripción estaría afirmando algo falso. Y «empresa» asusta a quien no es
+autónomo.
+_Para el reel:_ «Aunque ponga empresa, es tu actividad como game master. En la
+web, pon la dirección de tu perfil de game master en TuGameMaster». Por eso el
+perfil va antes que los cobros.
+_Para la web:_ al crear la cuenta de Stripe (`connect.ts`), mandar ya
+`business_profile.url` con la dirección de su perfil público
+(`/gm/<slug>`), y con eso Stripe no lo pregunta. También se le puede pasar la
+descripción y el sector. Es un cambio pequeño en la zona de pagos: se explica
+antes de tocarlo.
+
+**C. Stripe vuelve a pedir el correo y luego un código por SMS.** La web ya le
+pasa el correo, pero Stripe lo pide para crear el acceso del GM a su panel de
+Stripe. Después manda un SMS; si no llega, hay «Crea tu cuenta de otra
+manera» → código por correo. _Para el reel:_ «Usa el mismo correo; te llegará
+un código al móvil (o al correo)».
+
+**D. La marca de TuGameMaster en Stripe está sin poner.** Arriba sale
+«TuGameMaster» con un **icono genérico verde**, no la llama, y el botón es el
+morado de Stripe. En un reel se nota el salto. _Propuesta:_ en el panel de
+Stripe, Ajustes → Marca (o la de Connect), subir el emblema y poner el naranja
+`#e2622a`. Sin código.
+
+**E. El texto del mandato SEPA puede asustar.** Al dar el IBAN, Stripe hace
+aceptar que puede «enviar fondos desde y hacia esta cuenta» por adeudo SEPA.
+Es el texto estándar de Stripe, pero un GM lee que le pueden cobrar. _Para el
+reel o la guía:_ una línea que lo explique, sin prometer nada que no podamos
+cumplir. **[confirmar]** en qué casos haría Stripe un adeudo a un GM (saldo
+negativo de su cuenta, p. ej.) antes de escribir la frase.
+
+**F. Al guardar el perfil de GM, el siguiente paso queda escondido.** Te quedas
+en el mismo formulario, el «Guardado.» sale abajo, y «Configurar cobros»
+aparece arriba como botón secundario (con borde y sin color). Es lo único que
+hay que hacer en ese momento. _Propuesta:_ al guardar el primer perfil, llevar
+a cobros, o al menos poner «Configurar cobros» como botón principal.
+
+**G. «Configurar cobros» lleva a «Mis ingresos».** El alta vive dentro de la
+página de ingresos, con las cuatro cifras a 0,00 €, el enlace de invitación y
+una explicación con porcentajes. En el momento del alta sobra todo lo que hay
+debajo del botón. _Propuesta:_ mientras no haya cuenta verificada, enseñar solo
+el alta (y quizá el enlace de invitación).
+
+**H. El perfil de GM no tiene foto.** Se sube en «Mi perfil» (`/cuenta`), en otra
+pantalla. Quien solo rellena «Empezar a dirigir» se queda con el círculo vacío.
+_Propuesta:_ la foto también aquí, o un enlace «Añade una foto».
+
+**I. Idiomas en códigos de dos letras** (ya en el punto 12). Ulises lo confirma:
+el catalán se abrevia «cat», no «ca». Casillas con el nombre, como en el
+formulario de partida.
+
+**J. «Cómo diriges» sin ejemplo.** Es lo que más lee el jugador. _Propuesta:_
+un ejemplo con dónde se juega (Discord, Roll20, en persona), cuánto dura una
+sesión y qué hay que traer.
+
+**K. El panel del jugador nuevo empieza por «Mi saldo 0,00 €».** Sin «primeros
+pasos». Lo útil para alguien que acaba de llegar es «Busca tu primera mesa» (que
+está, pero debajo) y, si quiere dirigir, «Empezar a dirigir».
+
+**L. Registro: mostrar la contraseña.** Ulises está de acuerdo en añadir el
+botón para ver la contraseña. El ejemplo del código (`K7M2-QX9A`) **se queda**.
+
+**M. El nombre es público y forma la dirección del perfil**
+(`/u/decano-de-springfield`). El registro no lo dice. Ulises lo da por bueno tal
+como está.
+
+### Paso 3: la primera partida (con la cuenta de Ulises)
+
+Se creó «La cripta bajo el molino» en **borrador**, privada, con los datos de
+`datos-demo.md`. Sin publicar.
+
+**N. El borrador no enlaza a su vista previa.** La gestión dice «Repásala
+entera y publícala cuando esté lista», pero el único enlace de la página es
+«← Mis partidas». La vista previa existe: `/partidas/<slug>` le enseña al GM su
+borrador con el aviso «Esto es un borrador. Solo tú puedes verlo» (y a los
+demás les da 404). Solo que no hay forma de llegar a ella. Con la partida ya
+publicada sí sale «Verla como la ven los jugadores». _Propuesta:_ ese mismo
+enlace también en borrador. Es lo que convierte «repásala» en algo que se puede
+hacer.
+
+**O. La lámina por defecto es un rectángulo con «D&D 5e».** La propia web lo
+dice («Cumple, pero no llama»). En el listado, al lado de las partidas con
+ilustración, se ve vacía. _Para el reel:_ subir lámina antes de grabar, y que el
+reel de crear partida enseñe ese paso.
+
+**P. La gestión mide 4.500 px en el móvil.** Arriba están el estado y
+«Publicar», la contraseña, los jugadores y la lámina, y debajo el formulario de
+edición completo, siempre abierto. Para el reel se graba solo la parte de
+arriba. _Para la web:_ el formulario plegado tras «Editar».
+
+**Q. Un borrador solo se puede «Cancelar partida», «para siempre».** Para una
+mesa que nunca se publicó, «cancelar» suena a algo grave. No le cuesta nada al
+GM (las canceladas sin gente no cuentan en su perfil), pero el texto no lo
+dice. _Propuesta:_ en borrador, «Descartar borrador», con la aclaración de que
+no deja rastro.
+
+**Lo bueno:** al crear, la web lleva directo a la gestión, con «Borrador ·
+Todavía no la ve nadie · Publicar» arriba del todo; la contraseña de la privada
+se ve y se copia con un botón; y «Nadie puede reservar mientras siga en
+borrador» quita cualquier miedo. Es la pantalla del final del reel «1 Perfil ·
+2 Cobros · 3 Primera partida».
+
+### Lo que funciona y sirve para el reel
+
+- El registro: cuatro campos, el código opcional y Discord. Lleva directo al
+  panel.
+- «Esto no basta para publicar», en «Empezar a dirigir»: es justo la frase que
+  necesita un GM nuevo.
+- «Aún no puedes cobrar… TuGameMaster no llega a ver tus datos».
+- La campana avisa «Configura tu cuenta de cobro para poder publicar» en
+  cuanto hay perfil de GM.
+- Stripe en español, con el país ya puesto, y acepta un IBAN de Revolut.
