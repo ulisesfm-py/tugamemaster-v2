@@ -571,3 +571,22 @@ borrador» quita cualquier miedo. Es la pantalla del final del reel «1 Perfil �
 - La campana avisa «Configura tu cuenta de cobro para poder publicar» en
   cuanto hay perfil de GM.
 - Stripe en español, con el país ya puesto, y acepta un IBAN de Revolut.
+
+## 7. Al guionizar los reels 2 y 3 (22/11/2026)
+
+**S. Una partida a 0 € exige los cobros dados de alta para publicarse.**
+`publicarPartida` pide `payoutsEnabled` siempre. Quien solo quiere organizar a
+su grupo sin cobrar tiene que pasar por Stripe con su IBAN. _Propuesta:_ dejar
+publicar sin cobros cuando el precio es 0, e impedir subir el precio de esa
+partida mientras no haya cobros. Detalle en `03-tu-grupo-aqui.md`, decisión 1.
+
+**T. Las partidas a 0 € dan reseña y suman en la reputación.** Sus reservas
+quedan `PAID`, y `puedeValorar` y `reputacionGm` no miran el importe. Con el
+reel 3 animando a jugar gratis con amigos, los amigos podrían poner estrellas.
+Choca con «únicamente valora quien pagó su plaza aquí». _Propuesta:_ que las
+reservas a 0 € no valoren ni cuenten. Detalle en `03-tu-grupo-aqui.md`,
+decisión 2.
+
+**U. Una mesa flexible no puede ser privada.** Para grabar el reel 2 no hace
+falta (se graba el formulario sin crear nada), pero un GM que quiera usar la
+flexible con su grupo no puede. Solo apuntarlo; no urge.

@@ -70,3 +70,5 @@ next-env.d.ts
 
 # tarjetas de Instagram generadas (se regeneran con scripts/captacion/tarjetas-instagram.mjs)
 /docs/captacion/instagram/tarjetas/
+# piezas de los reels generadas (se regeneran con scripts/captacion/tarjetas-reels.mjs)
+/docs/captacion/reels/tarjetas/

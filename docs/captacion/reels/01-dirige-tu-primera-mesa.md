@@ -38,9 +38,8 @@ vienen después, cuando haya mesas abiertas.
 - [ ] Nada de «Mis ingresos» por debajo de las cuatro cifras: ahí salen
       porcentajes.
 
-**Cómo grabar:** con la grabación de pantalla del propio móvil, en
-tugamemaster.com, con la sesión de Ulises. Un clip por escena; el montaje, en
-el editor que uses para Instagram. Las partes de escribir se aceleran ×2–×4.
+**Cómo grabar y montar:** paso a paso en [`grabar-y-montar.md`](grabar-y-montar.md).
+Aquí, solo lo propio de este reel.
 
 ## Escenas
 
@@ -60,8 +59,97 @@ el editor que uses para Instagram. Las partes de escribir se aceleran ×2–×4.
 **En la escena 7, no pulses «Crear borrador».** Corta antes y pasa a la
 escena 9 con la partida que ya existe. Así no se crea otra partida igual.
 
-**Si pones voz:** es el mismo texto de la columna, dicho con naturalidad. No
-añadas nada que no esté ahí.
+## Piezas
+
+En `docs/captacion/reels/tarjetas/01-dirige-tu-primera-mesa/`, generadas con
+`node scripts/captacion/tarjetas-reels.mjs 1`:
+
+| Escena  | Archivo                 | Clase                         |
+| ------- | ----------------------- | ----------------------------- |
+| Portada | `00-portada.png`        | Portada al publicar           |
+| 1       | `escena-01-rotulo.png`  | Rótulo sobre la grabación     |
+| 2       | `escena-02-tarjeta.png` | Tarjeta (3 s)                 |
+| 3       | `escena-03-rotulo.png`  | Rótulo sobre la grabación     |
+| 4       | `escena-04-rotulo.png`  | Rótulo sobre la grabación     |
+| 5       | `escena-05-tarjeta.png` | Tarjeta (5 s)                 |
+| 6       | `escena-06-tarjeta.png` | Tarjeta (5 s)                 |
+| 7       | `escena-07-rotulo.png`  | Rótulo sobre la grabación     |
+| 8       | `escena-08-rotulo.png`  | Rótulo sobre la grabación     |
+| 9       | `escena-09-rotulo.png`  | Rótulo sobre la grabación     |
+| 10      | `escena-10-tarjeta.png` | Tarjeta (4 s), con el emblema |
+
+## Qué grabar, plano a plano
+
+Seis clips grabados (escenas 1, 3, 4, 7, 8 y 9); el resto son tarjetas. Todo con
+la sesión de Ulises en `tugamemaster.com`. **No grabes el menú de la cuenta**: en
+tu sesión enseña «Administración». Por eso cada clip empieza con la página ya
+abierta.
+
+**Clip 1 — Portada de la web (queda en 3 s).**
+Abre `tugamemaster.com` con la página ya cargada y arriba del todo. Espera 2 s.
+Desplaza hacia abajo **muy despacio**, con un solo gesto largo, hasta que se vean
+las primeras tarjetas de partida. Para y espera 2 s.
+_Montaje:_ ×1,5 si hace falta; el rótulo 1 encima.
+
+**Clip 3 — Perfil de game master (queda en 8 s).**
+Antes de grabar, abre `tugamemaster.com/cuenta/gm` (o «Mi panel» › «Perfil de game master»). Empieza a grabar con la página ya cargada y espera 2 s arriba.
+Desplaza hasta el **titular** y para 1 s; sigue hasta **«Cómo diriges»** y para 1 s;
+sigue hasta los **idiomas** y **marca una casilla y desmárcala** (que vean que se
+tocan). **No pulses «Guardar».**
+_Montaje:_ ×2; el rótulo 3 encima. Si el titular y «Cómo diriges» se leen, mejor
+que vaya más lento ahí y más rápido en los desplazamientos.
+
+**Clip 4 — Cobros (queda en 3 s).**
+Antes de grabar, abre `tugamemaster.com/cuenta/cobros` (en el menú se llama «Mis ingresos»). Que se vea **solo el recuadro de arriba** con el
+estado («Cuenta verificada» en tu caso). **No bajes hasta «Mis ingresos»**: ahí
+salen porcentajes y cifras. No toques nada.
+_Montaje:_ ×1; el rótulo 4 encima. Si se ve algo de «Mis ingresos» en la parte
+de abajo, amplía el clip hasta que quede fuera.
+
+**Clip 7 — Nueva partida (queda en 9 s).**
+Antes de grabar, abre «Mis partidas» y empieza a grabar ahí. Toca **«Nueva partida»**. Para 1 s en las **tres tarjetas**
+(Fecha fija, Fecha flexible, Continuar campaña). Toca **«Fecha fija»**. Rellena
+**título, sistema, fecha, plazas y precio** con lo de la partida 1 de
+`datos-demo.md` (no hace falta rellenar todo: con esos cinco basta para que se
+entienda). **Para la grabación sin pulsar «Crear borrador».**
+_Montaje:_ ×3–×4 en lo escrito; el rótulo 7 encima.
+
+**Clip 8 — Privada (queda en 4 s).**
+En la misma página (puedes seguir del clip 7 sin salir), desplaza hasta **«Quién
+puede reservar»**, para 1 s y toca **«Privada»**: aparece el campo de la
+contraseña. Para 1 s. **No escribas una contraseña real tuya**; si escribes algo,
+que sea una inventada para la toma. **No pulses «Crear borrador».**
+_Montaje:_ ×1,5; el rótulo 8 encima.
+
+**Clip 9 — La partida en borrador (queda en 4 s).**
+Antes de grabar, abre **«La cripta bajo el molino»** desde «Mis partidas». Que se vea arriba la
+lámina, el aviso de **borrador** («Todavía no la ve nadie») y el botón
+**«Publicar»**. **No lo pulses.**
+_Montaje:_ ×1; el rótulo 9 encima. Un zoom suave hacia «Publicar» queda bien aquí.
+
+**Las tarjetas (escenas 2, 5, 6 y 10):** no se graban; se ponen como imagen con
+la duración de la tabla de arriba.
+
+**Duración total:** unos 45–48 s. Si pasa de 50, recorta el clip 3, que es el
+más largo.
+
+## Voz (opcional)
+
+Si la pones, es este texto, dicho con naturalidad y sin añadir nada. Cada línea
+es una escena:
+
+> 1 · Así diriges tu primera mesa en TuGameMaster.
+> 2 · Son tres pasos, y nada se publica hasta que tú quieras.
+> 3 · Uno: tu perfil de game master. Cuenta cómo diriges: es lo que lee quien
+> decide si se sienta contigo.
+> 4 · Dos: dónde cobrar. Lo gestiona Stripe, no nosotros.
+> 5 · Stripe te pedirá tus datos, tu IBAN y una web.
+> 6 · En la web, pon tu perfil de TuGameMaster. Por eso el perfil va primero.
+> 7 · Tres: tu primera partida. Fecha, plazas y precio.
+> 8 · ¿Es tu grupo de siempre? Hazla privada, con contraseña.
+> 9 · Nace como borrador, y la publicas cuando esté lista.
+> 10 · El jugador paga al reservar, y tú cobras a partir de 48 horas después de
+> jugar. El enlace, en la bio.
 
 ## Texto de la publicación
 
