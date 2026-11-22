@@ -547,6 +547,14 @@ GM (las canceladas sin gente no cuentan en su perfil), pero el texto no lo
 dice. _Propuesta:_ en borrador, «Descartar borrador», con la aclaración de que
 no deja rastro.
 
+**R. Publicar sin cobros verificados da un mensaje de desarrollo.** Un GM
+puede crear borradores sin haber terminado Stripe, pero al pulsar «Publicar»
+lee: «Configura primero la cuenta donde quieres recibir los pagos. Ese paso
+llegara con la integracion de cobros.» La segunda frase es de cuando no había
+cobros, y va sin tildes (`games/service.ts`, `publicarPartida`). _Propuesta:_
+«Antes de publicar, termina el alta de cobros» con un enlace a
+`/cuenta/cobros`. Una línea.
+
 **Lo bueno:** al crear, la web lleva directo a la gestión, con «Borrador ·
 Todavía no la ve nadie · Publicar» arriba del todo; la contraseña de la privada
 se ve y se copia con un botón; y «Nadie puede reservar mientras siga en
