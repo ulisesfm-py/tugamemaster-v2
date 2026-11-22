@@ -54,7 +54,8 @@ export async function guardarPerfilGmAction(
   const resultado = await guardarPerfilGm(session.user.id, {
     headline: String(formData.get('headline') ?? ''),
     about: String(formData.get('about') ?? ''),
-    languages: listaDesdeTexto(formData.get('languages')),
+    // Casillas: viaja una entrada por idioma marcado, ninguna si no hay.
+    languages: formData.getAll('languages').map(String),
     yearsExperience: String(formData.get('yearsExperience') ?? ''),
     systems: listaDesdeTexto(formData.get('systems')),
   });

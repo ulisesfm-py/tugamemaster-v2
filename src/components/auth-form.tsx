@@ -16,6 +16,43 @@ import type { EstadoFormulario } from '@/modules/users/actions';
 
 type Accion = (estado: EstadoFormulario, formData: FormData) => Promise<EstadoFormulario>;
 
+/**
+ * La contrasena, con un boton para verla.
+ *
+ * Con un minimo de 10 caracteres y el teclado del movil, escribirla a ciegas
+ * es donde mas se equivoca la gente, y aqui no hay forma de recuperarla.
+ * El boton es `type="button"` para que pulsarlo no envie el formulario, y
+ * `aria-pressed` le dice a un lector de pantalla en que estado esta.
+ */
+function CampoContrasena({ autoComplete }: { autoComplete: string }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative">
+      <input
+        id="password"
+        name="password"
+        type={visible ? 'text' : 'password'}
+        autoComplete={autoComplete}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        required
+        className={`${CLASE_CONTROL} pr-20`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-pressed={visible}
+        aria-controls="password"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 rounded-sm px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {visible ? 'Ocultar' : 'Ver'}
+      </button>
+    </div>
+  );
+}
+
 function BotonEnviar({ children }: { children: string }) {
   // useFormStatus lee el estado del formulario padre: mientras la accion de
   // servidor esta en vuelo, el boton se bloquea y evita un envio doble.
@@ -128,13 +165,8 @@ export function AuthForm({
           etiqueta="Contraseña"
           ayuda={esRegistro ? `Al menos ${minimoPassword} caracteres.` : undefined}
         >
-          <input
-            id="password"
-            name="password"
-            type="password"
+          <CampoContrasena
             autoComplete={esRegistro ? 'new-password' : 'current-password'}
-            required
-            className={CLASE_CONTROL}
           />
         </Campo>
 

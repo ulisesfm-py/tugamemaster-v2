@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { esIdioma, IDIOMAS } from '@/modules/games/ficha';
+
 /**
  * Validacion de los perfiles de usuario y de game master.
  */
@@ -48,11 +50,16 @@ export const perfilGmSchema = z.object({
     .max(2000, 'La descripción no puede pasar de 2000 caracteres')
     .optional()
     .transform((v) => v || null),
+  // Casillas del mismo vocabulario que el idioma de una partida (`IDIOMAS`).
+  // Llega de un formulario: se valida igual aunque la pantalla no deje
+  // escribir otra cosa.
   languages: z
-    .array(z.string().trim().length(2, 'Usa códigos de dos letras: es, en, fr'))
-    .min(1, 'Indica al menos un idioma')
-    .max(8, 'Como mucho 8 idiomas')
-    .transform((lista) => [...new Set(lista.map((l) => l.toLowerCase()))]),
+    .array(
+      z.string().trim().toLowerCase().refine(esIdioma, 'Ese idioma no está en la lista'),
+    )
+    .min(1, 'Elige al menos un idioma')
+    .max(IDIOMAS.length, 'Demasiados idiomas')
+    .transform((lista) => [...new Set(lista)]),
 
   // Datos declarados: nadie los comprueba. Se guardan igual, pero la web los
   // ensena separados de la reputacion, que si sale de reservas pagadas.

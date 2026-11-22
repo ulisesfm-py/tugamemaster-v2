@@ -80,10 +80,19 @@ describe('perfilGmSchema', () => {
     expect(perfilGmSchema.safeParse({ ...base, languages: [] }).success).toBe(false);
   });
 
-  it('rechaza idiomas que no sean de dos letras', () => {
+  it('rechaza idiomas que no estan en la lista', () => {
     expect(perfilGmSchema.safeParse({ ...base, languages: ['espanol'] }).success).toBe(
       false,
     );
+    // «cat» es como se abrevia el catalan, pero el codigo de la lista es «ca».
+    expect(perfilGmSchema.safeParse({ ...base, languages: ['cat'] }).success).toBe(false);
+    // De dos letras, pero no es un idioma de la lista.
+    expect(perfilGmSchema.safeParse({ ...base, languages: ['de'] }).success).toBe(false);
+  });
+
+  it('acepta los idiomas de la lista, los mismos que los de una partida', () => {
+    const parsed = perfilGmSchema.parse({ ...base, languages: ['es', 'ca', 'eu'] });
+    expect(parsed.languages).toEqual(['es', 'ca', 'eu']);
   });
 
   it('exige un titular con sustancia', () => {

@@ -3,8 +3,10 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { Pastilla } from '@/components/partida-form';
 import { Aviso, Button, Campo, CLASE_CONTROL } from '@/components/ui';
 import { loEscrito, type EstadoAccion } from '@/lib/acciones';
+import { IDIOMAS } from '@/modules/games/ficha';
 
 type Accion = (estado: EstadoAccion, formData: FormData) => Promise<EstadoAccion>;
 
@@ -125,7 +127,8 @@ export function PerfilGmForm({
 
   // React vacia el formulario al terminar la accion: cada campo toma su valor
   // por defecto de lo enviado para no perder lo escrito cuando algo falla.
-  const { texto } = loEscrito(estado);
+  const { texto, marcadas } = loEscrito(estado);
+  const idiomas = marcadas('languages', valores?.languages ?? ['es']);
 
   return (
     <form action={formAction} className="flex flex-col gap-8">
@@ -166,19 +169,25 @@ export function PerfilGmForm({
           />
         </Campo>
 
-        <Campo
-          id="languages"
-          etiqueta="Idiomas"
-          ayuda="Códigos de dos letras separados por comas: es, en, fr"
-        >
-          <input
-            id="languages"
-            name="languages"
-            defaultValue={texto('languages', valores?.languages.join(', ') ?? 'es')}
-            required
-            className={CLASE_CONTROL}
-          />
-        </Campo>
+        {/* Las mismas casillas que el idioma de una partida: nadie tiene por
+            que saber que el catalan es «ca» y no «cat». */}
+        <div className="flex flex-col gap-2">
+          <span className="text-foreground text-sm font-medium">Idiomas</span>
+          <div className="flex flex-wrap gap-2">
+            {IDIOMAS.map((i) => (
+              <Pastilla
+                key={i.codigo}
+                name="languages"
+                value={i.codigo}
+                texto={i.texto}
+                defecto={idiomas.includes(i.codigo)}
+              />
+            ))}
+          </div>
+          <p className="text-muted-foreground text-xs">
+            En los que diriges. Cada partida dice luego el suyo.
+          </p>
+        </div>
       </fieldset>
 
       {/* De aqui para abajo, lo que cuenta el GM de si mismo. Su perfil lo
