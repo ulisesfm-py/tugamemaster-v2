@@ -26,6 +26,9 @@ Reglas para inventar datos:
 
 ## Partida 1 — fecha fija, privada
 
+**Estado (22/11/2026): creada en borrador**, sin lámina y sin publicar
+(`/partidas/la-cripta-bajo-el-molino`).
+
 Para los reels de **crear partida (fecha fija)**, **partida privada** y, después,
 **reservar**.
 
