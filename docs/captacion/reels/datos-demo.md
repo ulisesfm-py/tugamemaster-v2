@@ -23,6 +23,7 @@ Reglas para inventar datos:
 | --------------------- | ---------------------------------------- | ------------------------------------------------------------ |
 | Ulises (GM)           | Crear y gestionar mesas                  | Cobros verificados                                           |
 | Decano de Springfield | Jugador: reservar, pre-reservar, reseñar | Perfil de GM a medias, sin alta de Stripe (no sale en `/gm`) |
+| Máster de Valdeniebla | Reel 1: registrarse y pasar a GM         | Por crear mientras se graba; GM sin cobros                   |
 
 ## Partida 1 — fecha fija, privada
 
@@ -106,3 +107,26 @@ formulario sin crear nada, porque una mesa flexible no puede ser privada.
 
 **Lámina:** otra ilustración propia, distinta de la de la partida 1, para que en
 el listado no parezcan la misma mesa.
+
+## Cuenta nueva para el reel 1
+
+**Estado: por crear, mientras se graba** (escenas 3 a 9 del reel 1), en una
+ventana privada. Se queda como game master **sin cobros**: no sale en el
+directorio y no inicia ningún alta de Stripe.
+
+| Campo                 | Valor                                                                     |
+| --------------------- | ------------------------------------------------------------------------- |
+| Nombre                | Máster de Valdeniebla                                                     |
+| Email                 | un alias tuyo que no te importe enseñar (por ejemplo, `tu.correo+reel@…`) |
+| Contraseña            | una nueva, que no uses en otro sitio                                      |
+| Código de game master | vacío                                                                     |
+| Titular               | Misterio y aventura para mesas que empiezan                               |
+| Idiomas               | Español                                                                   |
+| Sistemas que dominas  | D&D 5e                                                                    |
+| Años dirigiendo       | vacío                                                                     |
+
+**Cómo diriges:**
+
+> Partidas de una tarde, con más conversación que combate. Explico las reglas
+> sobre la marcha y llevo los personajes hechos, así que puedes venir sin haber
+> jugado nunca.
